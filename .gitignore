@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment files (secrets are in Cloudflare Dashboard)
+.env
+.env.*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Wrangler local dev
+.wrangler/
+.dev.vars
+
+# Build artifacts
+dist/
+
+# Deprecated (kept in repo for reference, but not deployed)
+# _deprecated/ is intentionally tracked in git
