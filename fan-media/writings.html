@@ -10,6 +10,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Showdown.js for Markdown to HTML conversion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <!-- DOMPurify for XSS prevention on user-submitted content -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <!-- Google Fonts for custom typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,10 +146,14 @@
                         const card = document.createElement('a');
                         card.href = '#';
                         card.className = 'group block p-6 bg-gray-50 rounded-lg shadow-md hover:shadow-lg transition-shadow';
+                        // Sanitize user-submitted data before injecting into DOM to prevent XSS
+                        const safeTitle = DOMPurify.sanitize(writing.title);
+                        const safeAuthor = DOMPurify.sanitize(writing.author);
+                        const safePreview = DOMPurify.sanitize(writing.content.substring(0, 150));
                         card.innerHTML = `
-                            <h3 class="font-bold text-xl text-gray-800 group-hover:text-blue-600">${writing.title}</h3>
-                            <p class="text-sm text-gray-500 mt-1">by ${writing.author}</p>
-                            <p class="mt-4 text-sm text-gray-600 italic">"${writing.content.substring(0, 150)}..."</p>
+                            <h3 class="font-bold text-xl text-gray-800 group-hover:text-blue-600">${safeTitle}</h3>
+                            <p class="text-sm text-gray-500 mt-1">by ${safeAuthor}</p>
+                            <p class="mt-4 text-sm text-gray-600 italic">"${safePreview}..."</p>
                         `;
                         card.addEventListener('click', (e) => {
                             e.preventDefault();
@@ -165,12 +171,16 @@
 
             const showModal = (writing) => {
                 const converter = new showdown.Converter();
-                const htmlContent = converter.makeHtml(writing.content);
+                const rawHtml = converter.makeHtml(writing.content);
+                // Sanitize the Markdown-generated HTML to strip any injected <script> or event handlers
+                const safeHtmlContent = DOMPurify.sanitize(rawHtml);
+                const safeTitle = DOMPurify.sanitize(writing.title);
+                const safeAuthor = DOMPurify.sanitize(writing.author);
 
                 modalBody.innerHTML = `
-                    <h1 class="text-3xl font-bold mb-2">${writing.title}</h1>
-                    <p class="text-sm text-gray-500 mb-6">By ${writing.author} on ${new Date(writing.timestamp).toLocaleDateString()}</p>
-                    <div class="prose max-w-none">${htmlContent}</div>
+                    <h1 class="text-3xl font-bold mb-2">${safeTitle}</h1>
+                    <p class="text-sm text-gray-500 mb-6">By ${safeAuthor} on ${new Date(writing.timestamp).toLocaleDateString()}</p>
+                    <div class="prose max-w-none">${safeHtmlContent}</div>
                 `;
                 
                 modal.classList.remove('hidden');

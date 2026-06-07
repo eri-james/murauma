@@ -31,6 +31,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- DOMPurify for XSS prevention on user-submitted content -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <style>
         /* --- Custom CSS for unique styling beyond Tailwind --- */
 
@@ -691,10 +693,14 @@
                                             break;
                                     }
 
+                                    // Sanitize user-submitted stream data before injecting into DOM
+                                    const safeStreamUrl = DOMPurify.sanitize(stream.stream_url, { ALLOWED_URI_REGEXP: /^https?:/ });
+                                    const safeStreamTitle = DOMPurify.sanitize(stream.title);
+                                    const safeStreamAuthor = DOMPurify.sanitize(stream.author);
                                     const streamCard = `
-                                        <a href="${stream.stream_url}" target="_blank" rel="noopener noreferrer" class="${linkClass}">
+                                        <a href="${safeStreamUrl}" target="_blank" rel="noopener noreferrer" class="${linkClass}">
                                             <div class="relative">
-                                                <img src="${thumbnailUrl}" alt="Stream Thumbnail for ${stream.title}" class="w-full h-auto object-cover" onerror="this.onerror=null;this.src='https://placehold.co/480x360/1a1a1a/ffffff?text=Stream+Offline';">
+                                                <img src="${thumbnailUrl}" alt="Stream Thumbnail for ${safeStreamTitle}" class="w-full h-auto object-cover" onerror="this.onerror=null;this.src='https://placehold.co/480x360/1a1a1a/ffffff?text=Stream+Offline';">
                                                 ${statusBadge}
                                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white opacity-0 group-hover:opacity-80 transition-opacity duration-300" viewBox="0 0 20 20" fill="currentColor">
@@ -703,8 +709,8 @@
                                                 </div>
                                             </div>
                                             <div class="p-4 bg-gray-50">
-                                                <h3 class="font-bold text-lg text-gray-800">${stream.title}</h3>
-                                                <p class="text-sm text-gray-600 mt-1">${stream.author}</p>
+                                                <h3 class="font-bold text-lg text-gray-800">${safeStreamTitle}</h3>
+                                                <p class="text-sm text-gray-600 mt-1">${safeStreamAuthor}</p>
                                             </div>
                                         </a>
                                     `;
@@ -794,12 +800,16 @@
                     paginatedMembers.forEach(member => {
                         const card = document.createElement('div');
                         card.className = 'group cursor-pointer';
+                        // Sanitize user-submitted data before injecting into DOM to prevent XSS
+                        const safeName = DOMPurify.sanitize(member['Display Name']);
+                        const safePicUrl = DOMPurify.sanitize(member['Profile Picture URL'], { ALLOWED_URI_REGEXP: /^https?:/ });
+                        const safeTrainerId = DOMPurify.sanitize(member['Trainer ID']);
                         card.innerHTML = `
                             <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:-translate-y-1 transition-transform duration-300">
-                                <img src="${member['Profile Picture URL']}" alt="${member['Display Name']}" class="w-full h-40 object-cover">
+                                <img src="${safePicUrl}" alt="${safeName}" class="w-full h-40 object-cover">
                                 <div class="p-3 text-center">
-                                    <h3 class="font-bold text-md text-gray-800">${member['Display Name']}</h3>
-                                    <p class="text-xs text-gray-500">${member['Trainer ID']}</p>
+                                    <h3 class="font-bold text-md text-gray-800">${safeName}</h3>
+                                    <p class="text-xs text-gray-500">${safeTrainerId}</p>
                                 </div>
                             </div>
                         `;
@@ -839,13 +849,18 @@
                 });
 
                 const showMemberModal = (member) => {
+                    // Sanitize all user-submitted data before injecting into DOM to prevent XSS
+                    const safePicUrl = DOMPurify.sanitize(member['Profile Picture URL'], { ALLOWED_URI_REGEXP: /^https?:/ });
+                    const safeName = DOMPurify.sanitize(member['Display Name']);
+                    const safeFavUma = DOMPurify.sanitize(member['Favorite Umamusume']);
+                    const safeBio = DOMPurify.sanitize(member.Bio);
                     memberModalContent.innerHTML = `
-                        <img src="${member['Profile Picture URL']}" alt="${member['Display Name']}" class="w-full md:w-1/3 h-auto object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none">
+                        <img src="${safePicUrl}" alt="${safeName}" class="w-full md:w-1/3 h-auto object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none">
                         <div class="p-6 flex flex-col justify-between">
                             <div>
-                                <h2 class="text-2xl font-bold text-gray-900">${member['Display Name']}</h2>
-                                <p class="text-sm text-gray-500 mb-4">Favorite: ${member['Favorite Umamusume']}</p>
-                                <p class="text-gray-700">${member.Bio}</p>
+                                <h2 class="text-2xl font-bold text-gray-900">${safeName}</h2>
+                                <p class="text-sm text-gray-500 mb-4">Favorite: ${safeFavUma}</p>
+                                <p class="text-gray-700">${safeBio}</p>
                             </div>
                             <button id="close-member-modal" class="mt-4 self-end bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700">Close</button>
                         </div>
