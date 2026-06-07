@@ -1,11 +1,11 @@
 /**
  * POST /api/register — Member Registration
  * 
- * Validates form data, verifies hCaptcha, uploads profile picture to R2,
- * and saves the member record to D1 with "pending" status.
+ * Validates form data, verifies hCaptcha, stores profile picture as base64
+ * in D1, and saves the member record with "pending" status.
  * 
  * Request body (JSON):
- *   { formType, memberName, trainerID, favoriteUma, bio, profilePicture, fileName, mimeType, hCaptchaToken }
+ *   { memberName, trainerID, favoriteUma, bio, profilePicture, fileName, mimeType, hCaptchaToken }
  */
 import {
   errorResponse,
@@ -23,7 +23,6 @@ import {
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = env.DB;
-  const bucket = env.BUCKET;
 
   try {
     // --- Parse request body ---
@@ -63,8 +62,8 @@ export async function onRequestPost(context) {
       return errorResponse('This Trainer ID is already registered.');
     }
 
-    // --- Validate and Upload Profile Picture to R2 ---
-    if (!data.profilePicture || !data.fileName || !data.mimeType) {
+    // --- Validate Profile Picture ---
+    if (!data.profilePicture || !data.mimeType) {
       return errorResponse('Profile picture is required.');
     }
 
@@ -72,35 +71,23 @@ export async function onRequestPost(context) {
       return errorResponse('Invalid image format. Allowed: PNG, JPEG, GIF, WebP.');
     }
 
-    // Decode base64 data
-    let imageBytes;
+    // Extract base64 data (strip data URL prefix if present)
+    let base64Data;
     try {
-      const base64Data = data.profilePicture.includes(',')
-        ? data.profilePicture.split(',')[1]  // Strip data URL prefix
+      base64Data = data.profilePicture.includes(',')
+        ? data.profilePicture.split(',')[1]
         : data.profilePicture;
-      imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+      // Validate that it's real base64 by decoding
+      const decoded = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+      if (decoded.length > MAX_IMAGE_SIZE_BYTES) {
+        return errorResponse('Image file too large. Maximum size is 5MB.');
+      }
     } catch {
       return errorResponse('Invalid image data.');
     }
 
-    if (imageBytes.length > MAX_IMAGE_SIZE_BYTES) {
-      return errorResponse('Image file too large. Maximum size is 5MB.');
-    }
-
-    // Generate R2 key: profiles/{trainer_id}.{extension}
-    const ext = data.mimeType.split('/')[1] || 'png';
-    const r2Key = `profiles/${trainerResult.value}.${ext}`;
-
-    try {
-      await bucket.put(r2Key, imageBytes, {
-        httpMetadata: { contentType: data.mimeType },
-      });
-    } catch (uploadError) {
-      console.error('R2 upload error:', uploadError.message);
-      return errorResponse('Failed to upload profile picture. Please try again.');
-    }
-
-    // --- Save Member to D1 ---
+    // --- Save Member to D1 (including profile picture as base64) ---
     const sanitizedName = sanitizeText(nameResult.value);
     const sanitizedFavUma = sanitizeText(favUmaResult.value);
     const sanitizedBio = sanitizeText(bioResult.value);
@@ -108,15 +95,13 @@ export async function onRequestPost(context) {
     try {
       await db
         .prepare(
-          `INSERT INTO members (name, trainer_id, favorite_uma, bio, profile_picture_key, status)
-           VALUES (?, ?, ?, ?, ?, 'pending')`
+          `INSERT INTO members (name, trainer_id, favorite_uma, bio, profile_picture_data, profile_picture_mime, status)
+           VALUES (?, ?, ?, ?, ?, ?, 'pending')`
         )
-        .bind(sanitizedName, trainerResult.value, sanitizedFavUma, sanitizedBio, r2Key)
+        .bind(sanitizedName, trainerResult.value, sanitizedFavUma, sanitizedBio, base64Data, data.mimeType)
         .run();
     } catch (dbError) {
       console.error('D1 insert error:', dbError.message);
-      // Clean up the uploaded image if DB write fails
-      await bucket.delete(r2Key);
       return errorResponse('Failed to save registration. Please try again.');
     }
 

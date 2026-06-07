@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS members (
     trainer_id TEXT NOT NULL UNIQUE CHECK(length(trainer_id) = 12),
     favorite_uma TEXT NOT NULL CHECK(length(favorite_uma) <= 50 AND length(favorite_uma) > 0),
     bio TEXT NOT NULL CHECK(length(bio) <= 500 AND length(bio) > 0),
-    profile_picture_key TEXT NOT NULL,  -- R2 object key, e.g. "profiles/900478090080.jpg"
+    profile_picture_data TEXT NOT NULL,  -- Base64-encoded image data
+    profile_picture_mime TEXT NOT NULL DEFAULT 'image/jpeg',  -- MIME type, e.g. image/png
     status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

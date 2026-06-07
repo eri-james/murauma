@@ -1,46 +1,46 @@
 /**
- * GET /api/avatar/[key] — Serve Profile Pictures from R2
+ * GET /api/avatar/[trainerId] — Serve Profile Pictures from D1
  * 
- * This endpoint serves profile pictures stored in R2.
- * The URL pattern is: /api/avatar/profiles/{trainer_id}.{ext}
+ * This endpoint serves profile pictures stored as base64 in the D1 members table.
+ * The URL pattern is: /api/avatar/{trainer_id}
  * 
- * Using a Worker endpoint (instead of R2 public URL) gives us:
- * 1. No need to enable R2.dev public access
- * 2. Ability to add caching headers
- * 3. Ability to restrict access to only /profiles/ prefix
+ * Example: /api/avatar/900478090080 → returns the member's profile picture as a JPEG/PNG/etc.
  */
 export async function onRequestGet(context) {
   const { env, params } = context;
-  const bucket = env.BUCKET;
+  const db = env.DB;
 
-  // params.key comes from the [key] in the file path
-  // e.g. /api/avatar/profiles/900478090080.png → key = "profiles/900478090080.png"
-  const key = params.key;
+  // params comes from [[key]] in the file path
+  // e.g. /api/avatar/900478090080 → key = ["900478090080"]
+  const keyParts = params.key;
+  const trainerId = Array.isArray(keyParts) ? keyParts[0] : keyParts;
 
-  // Security: only allow fetching from the profiles/ prefix
-  if (!key || !key.startsWith('profiles/')) {
+  // Validate trainer ID format (must be 12 digits)
+  if (!trainerId || !/^\d{12}$/.test(trainerId)) {
     return new Response('Not found', { status: 404 });
   }
 
   try {
-    const object = await bucket.get(key);
+    const member = await db
+      .prepare('SELECT profile_picture_data, profile_picture_mime FROM members WHERE trainer_id = ?')
+      .bind(trainerId)
+      .first();
 
-    if (!object) {
+    if (!member || !member.profile_picture_data) {
       return new Response('Not found', { status: 404 });
     }
 
+    // Decode base64 to binary
+    const binary = Uint8Array.from(atob(member.profile_picture_data), c => c.charCodeAt(0));
+
     const headers = new Headers();
+    headers.set('Content-Type', member.profile_picture_mime || 'image/jpeg');
     headers.set('Cache-Control', 'public, max-age=86400'); // Cache for 24h
-    headers.set('ETag', object.httpETag);
 
-    // Use the stored content type, or default
-    const contentType = object.httpMetadata?.contentType || 'application/octet-stream';
-    headers.set('Content-Type', contentType);
-
-    return new Response(object.body, { headers });
+    return new Response(binary, { headers });
 
   } catch (error) {
-    console.error('R2 fetch error:', error.message);
+    console.error('Avatar fetch error:', error.message);
     return new Response('Internal error', { status: 500 });
   }
 }

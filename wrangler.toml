@@ -20,16 +20,6 @@ database_name = "murauma-db"
 database_id = "4919fadc-6878-4b79-a885-853f388bb31c"
 
 # ============================================================
-# R2 BUCKET (profile picture uploads)
-# ============================================================
-# After running `npx wrangler r2 bucket create murauma-assets`, 
-# the bucket becomes available via context.env.BUCKET.
-
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "murauma-assets"
-
-# ============================================================
 # SECRETS (set via CLI, never stored in repo)
 # ============================================================
 # hCaptcha secret key:
