@@ -1,0 +1,188 @@
+/* Basic Reset */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif; /* Common Web 1.0 font */
+    line-height: 1.6;
+    color: #333; /* Dark gray text */
+}
+
+/* Theme Colors */
+/* Beige: #F5F5DC */
+/* Light Beige: #FAFAD2 (Linen) or #F8F8FF (GhostWhite) - using #F8F8FF for a slightly lighter background */
+/* Brown (Dark): #5A4D40 */
+/* White: #FFFFFF */
+
+/* Website Background - Light Beige with Grid */
+body {
+    background-color: #F8F8FF; /* Light beige background */
+    /* Create the white line grid using multiple background-images */
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+    /* Set the size of the grid cells - adjust 20px to change density */
+    background-size: 20px 20px;
+    background-repeat: repeat;
+}
+
+
+/* Main Content Wrapper */
+.container {
+    max-width: 960px; /* Typical fixed width for retro sites */
+    margin: 20px auto; /* Center the container with space top/bottom */
+    /* No background here, let the body grid show through */
+}
+
+/* Container Base Styling */
+.header-container,
+.main-content, /* Apply padding/margin to the main content block */
+.left-container,
+.center-container,
+.right-container,
+.footer-container {
+    background-color: #FFFFFF; /* White background for containers */
+    border-radius: 5px; /* Slightly rounded corners */
+    padding: 15px; /* Internal spacing */
+    margin-bottom: 20px; /* Space between containers */
+    box-shadow: 5px 5px 0px #5A4D40; /* Dark non-blurred brown shadow */
+    border: 1px solid #ddd; /* Subtle border for definition */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Header Specifics */
+.header-container {
+    padding: 0; /* Remove padding, image fills it */
+    /* Center content if image is smaller than container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Hide anything that might spill out */
+}
+
+.header-container img {
+    display: block; /* Remove extra space below image */
+    max-width: 100%; /* Ensure image doesn't overflow container */
+    height: auto; /* Maintain aspect ratio */
+    /* If you want the image to stretch to fit exactly, remove height: auto; and add height: 100%; but this can distort */
+}
+
+
+/* Main Content Area (Flexbox for 3 columns) */
+.main-content {
+    display: flex; /* Use flexbox for layout */
+    gap: 20px; /* Space between columns */
+    padding: 0; /* Remove padding as child containers have it */
+    margin-bottom: 20px; /* Space below the main block */
+    box-shadow: none; /* Remove shadow/border from the flex parent, let children have it */
+    border: none;
+    background-color: transparent; /* Allow body background to show between columns */
+}
+
+/* Individual Column Styling */
+.left-container,
+.right-container {
+    flex: 0 0 200px; /* Fixed width 200px, no growing or shrinking */
+    /* Padding, margin-bottom, shadow, border handled by base container style */
+}
+
+.center-container {
+    flex-grow: 1; /* Allow center column to take up remaining space */
+    /* Padding, margin-bottom, shadow, border handled by base container style */
+    /* Need min-height for the iframe to have a base size if content is short */
+     min-height: 400px; /* Adjust as needed */
+     display: flex; /* Use flex to make iframe fill the container */
+}
+
+/* Styling for the Navigation List in the Left Column */
+.left-container .navigation-list {
+    list-style: none; /* Remove bullets */
+    padding: 0; /* Remove default padding */
+    margin: 0 0 15px 0; /* Add some space below the list */
+}
+
+.left-container .navigation-list li {
+    margin-bottom: 5px; /* Space between list items */
+}
+
+.left-container .navigation-list a {
+    display: block; /* Make the whole area clickable */
+    padding: 5px 10px; /* Add padding around text */
+    background-color: #EEEEEE; /* Light gray background for links */
+    border: 1px solid #CCCCCC; /* Subtle border */
+    text-decoration: none; /* Remove default underline here */
+    color: #0000FF; /* Classic blue link color */
+    border-radius: 3px;
+    box-shadow: 2px 2px 0px #AAAAAA; /* Lighter shadow for individual links */
+}
+
+.left-container .navigation-list a:hover {
+    background-color: #DDDDDD;
+    color: #FF0000; /* Classic red hover */
+    box-shadow: 1px 1px 0px #AAAAAA; /* Smaller shadow on hover */
+    position: relative; /* Allows slight movement */
+    top: 1px;
+    left: 1px;
+}
+
+.left-container .navigation-list a:active {
+     box-shadow: none; /* Remove shadow on click */
+     top: 2px;
+     left: 2px;
+}
+
+
+/* Styling for the Iframe in the Center Column */
+.center-container iframe {
+    display: block; /* Remove extra space below iframe */
+    width: 100%; /* Make iframe fill its parent's width */
+    height: 100%; /* Make iframe fill its parent's height */
+    border: none; /* Remove default iframe border */
+    /* Optional: Add scrollbar styling if you need custom looks, but default is usually fine for retro */
+    /* overflow: auto; Keep default scrollbars */
+}
+
+
+/* Ensure images inside containers fit */
+/* This rule is slightly modified to specifically target non-header/non-button images */
+.left-container img:not([alt*="Button"]),
+.center-container img,
+.right-container img:not([alt*="Button"]) {
+    max-width: 100%;
+    height: auto;
+    display: block; /* Prevent extra space below images */
+}
+
+/* Specific styling for button-like images */
+.right-container img[alt*="Button"] {
+    display: inline-block; /* Allows them to sit side-by-side */
+    vertical-align: middle; /* Align them nicely */
+    margin: 0 5px; /* Space between buttons */
+}
+
+
+/* Footer Specifics */
+.footer-container {
+    text-align: center;
+    padding: 10px; /* Shorter height */
+    font-size: 0.9em;
+    color: #5A4D40; /* Brown text */
+}
+
+.footer-container p {
+    margin: 5px 0;
+}
+
+.footer-container a {
+    color: #5A4D40; /* Brown links in footer */
+    text-decoration: underline;
+}
+
+.footer-container a:hover {
+    color: #FF0000;
+}
+
+/* Basic Link Styling - Applied outside specific containers if needed */
+/* (Already mostly handled by specific container rules now) */
+/* a { color: #0000FF; text-decoration: underline; } */
+/* a:visited { color: #800080; } */
+/* a:hover { color: #FF0000; } */

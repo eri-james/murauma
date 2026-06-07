@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malayan Umamusume Racing Association (MURA)</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="The official community hub for Malayan Umamusume Racing Association (MURA), a group for Umamusume: Pretty Derby players in Malaysia and Singapore. Join us for weekly races, game guides, and more!">
+    <meta name="keywords" content="Umamusume, Pretty Derby, MURA, Malayan Umamusume Racing Association, Malaysia, Singapore, Game Guides, Anime, Cygames">
+    <meta name="author" content="MURA Community">
+
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Malayan Umamusume Racing Association (MURA)">
+    <meta property="og:description" content="The community hub for Umamusume players in Malaysia and Singapore. Join us for weekly races, guides, and more!">
+    <meta property="og:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
+    <meta property="og:url" content="https://your-website-url.com"> <!-- Replace with your actual website URL -->
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Malayan Umamusume Racing Association (MURA)">
+    <meta name="twitter:description" content="The community hub for Umamusume players in Malaysia and Singapore. Join us for weekly races, guides, and more!">
+    <meta name="twitter:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
+
+    <!-- Favicon Link -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for custom typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- Custom CSS for unique styling beyond Tailwind --- */
+
+        /* Sets the base font and the new fixed background for the entire page */
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        /* Creates the skewed, banner-like header style for section titles */
+        .header-skew {
+            position: relative;
+            background-color: #3B82F6; /* Blue-500 (Default) */
+            color: white;
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            display: inline-block;
+            font-weight: 900;
+            font-size: 1.5rem;
+            /* clip-path creates the custom polygon shape */
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            margin-left: -1rem; /* Negative margin to make it bleed off the container edge slightly */
+        }
+
+        /* A green variation of the skewed header */
+        .header-skew-green {
+            background-color: #10B981; /* Emerald-500 */
+             clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
+             margin-left: 0;
+             padding-left: 1.5rem;
+        }
+        
+        /* A pink variation of the skewed header */
+        .header-skew-pink {
+            background-color: #EC4899; /* Pink-500 */
+        }
+
+        /* An orange variation of the skewed header */
+        .header-skew-orange {
+            background-color: #F97316; /* Orange-500 */
+            clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
+            margin-left: 0;
+            padding-left: 1.5rem;
+        }
+        
+        /* A yellow variation of the skewed header */
+        .header-skew-yellow {
+            background-color: #F59E0B; /* Amber-500 */
+        }
+        
+        /* A red variation of the skewed header */
+        .header-skew-red {
+            background-color: #EF4444; /* Red-500 */
+        }
+
+        /* A purple variation of the skewed header */
+        .header-skew-purple {
+            background-color: #8B5CF6; /* Violet-500 */
+        }
+
+        /* Adds a colored left border to news items for visual separation */
+        .news-item {
+            border-left: 4px solid #F59E0B; /* Amber-500 */
+        }
+
+        /* Adds hover effects to the content cards in the Community Hub */
+        .content-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px); /* Lifts the card up slightly on hover */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hides the default browser scrollbar for our custom carousel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none; /* For Chrome, Safari, and Opera */
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* For IE and Edge */
+            scrollbar-width: none;  /* For Firefox */
+        }
+        
+        /* --- Styles for the fade-in-on-scroll animation --- */
+        
+        /* Initial state of the sections: hidden and slightly moved down */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(2rem);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        /* The state when the section becomes visible: fully opaque and in its original position */
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Styles for page transitions --- */
+        .page-view {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .is-hiding {
+            opacity: 0;
+        }
+        
+        /* --- Styles for Member Modal --- */
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Logo / Site Title -->
+            <a href="#" id="logo-link" class="px-4 py-3 hover:bg-blue-800 transition-colors">
+                <div class="flex flex-col items-start leading-tight">
+                    <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
+                    <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
+                </div>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <nav id="main-nav" class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
+                <a href="#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>News</span>
+                </a>
+                <a href="#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>About</span>
+                </a>
+                <a href="#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>Events</span>
+                </a>
+                <a href="#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>Community</span>
+                </a>
+            </nav>
+            
+            <!-- Join Us Button -->
+            <a href="register.html" class="hidden md:flex bg-gray-900 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-black self-stretch transition-colors">
+                <span>Join Us</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                </svg>
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden px-4">
+                 <button id="mobile-menu-button" class="text-white focus:outline-none">
+                    <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-800">
+            <a href="#news" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">News</a>
+            <a href="#about" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">About</a>
+            <a href="#events" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Events</a>
+            <a href="#community" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Community</a>
+            <a href="register.html" class="block text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black transition-colors">Join Us</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Home Page View -->
+        <div id="page-home" class="page-view">
+            <!-- Video Banner Section -->
+            <section class="mb-8">
+                <a href="https://murauma.github.io/freedomcup/" class="block group relative rounded-lg shadow-lg overflow-hidden" style="padding-top: 41.66%;">
+                    <iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="https://www.youtube.com/embed/Y8AdCI95eCQ?autoplay=1&mute=1&loop=1&playlist=Y8AdCI95eCQ&controls=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="MURA Background Video"></iframe>
+                    <div class="absolute top-0 left-0 right-0 bottom-0 bg-blue-700 bg-opacity-40 flex items-end group-hover:bg-opacity-50 transition-all duration-300">
+                         <div class="p-4 md:p-8 text-white w-full">
+                             <h2 class="text-xl md:text-3xl font-bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Next Grand Event: The Merdeka Cup!</h2>
+                             <p class="text-sm md:text-base" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Coming this August. Prepare your best horse girls!</p>
+                         </div>
+                    </div>
+                </a>
+            </section>
+
+            <!-- Scrollable Thumbnails Section -->
+            <section class="mb-12 fade-in-section">
+                <div class="relative bg-white p-4 rounded-lg shadow-md">
+                    <div id="thumbnail-container" class="overflow-hidden">
+                        <div id="thumbnail-scroller" class="flex items-center space-x-4 no-scrollbar"></div>
+                    </div>
+                    <button id="scroll-left" class="absolute left-0 top-1/2 -translate-y-1/2 bg-white bg-opacity-75 rounded-full p-1 ml-2 text-gray-700 hover:bg-opacity-100 transition z-10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                    <button id="scroll-right" class="absolute right-0 top-1/2 -translate-y-1/2 bg-white bg-opacity-75 rounded-full p-1 mr-2 text-gray-700 hover:bg-opacity-100 transition z-10"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+                </div>
+            </section>
+
+            <!-- Main content grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column (wider) -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- News Section -->
+                    <section id="news" class="bg-white p-6 rounded-lg shadow-md fade-in-section border-2 border-pink-500">
+                        <h2 class="header-skew header-skew-pink mb-6">News</h2>
+                        <div class="space-y-6">
+                            <div class="news-item pl-4 py-2"><p class="text-sm text-gray-500">EVENT | 2025.07.05</p><h3 class="font-bold text-lg text-gray-800">Merdeka Cup 2025 Announced!</h3><p class="text-gray-600 text-justify">Get ready for the biggest event of the year! The MURA Merdeka Cup is coming this August. Click to see the full details and format.</p></div>
+                        </div>
+                        <div class="text-center mt-6">
+                            <button id="view-more-news-btn" class="inline-block bg-pink-500 text-white font-bold px-6 py-2 rounded-full hover:bg-pink-600 transition-colors">View more >></button>
+                        </div>
+                    </section>
+                     <!-- Weekly Race Events Section -->
+                    <section id="events" class="bg-white p-6 rounded-lg shadow-md fade-in-section border-2 border-blue-500">
+                        <h2 class="header-skew mb-6">Weekly Races</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gray-100 p-4 rounded-lg"> <h3 class="font-bold text-xl text-blue-600">This Week: Mile Championship</h3><p class="text-gray-700 mt-2"><strong>Track:</strong> Tokyo Turf 1600m</p><p class="text-gray-700"><strong>Deadline:</strong> Saturday, 11:59 PM</p><p class="mt-4 text-sm text-gray-600">Get your best milers ready for a showdown! Focus on Speed and Intelligence.</p><a href="weekly-race.html" class="mt-4 w-full text-center block bg-green-500 text-white font-bold py-2 rounded-lg hover:bg-green-600">More Info</a></div>
+                            <div class="bg-gray-100 p-4 rounded-lg"><h3 class="font-bold text-xl text-gray-800">Next Week: Dirt Derby</h3><p class="text-gray-700 mt-2"><strong>Track:</strong> Ohi Dirt 2000m</p><p class="text-gray-700"><strong>Conditions:</strong> Heavy Rain</p><p class="mt-4 text-sm text-gray-600">Power is key! Time to let your dirt specialists like Oguri Cap and Smart Falcon shine.</p><button class="mt-4 w-full bg-gray-400 text-white font-bold py-2 rounded-lg cursor-not-allowed">Info Coming Soon</button></div>
+                        </div>
+                    </section>
+                    <!-- Broadcasts Section -->
+                    <section id="broadcasts" class="bg-white p-6 rounded-lg shadow-md fade-in-section border-2 border-yellow-500">
+                        <h2 class="header-skew header-skew-yellow mb-6">Broadcasts</h2>
+                        <p class="mb-6 text-gray-800 text-justify">Catch official MURA livestreams and our talented members' streams right here! Members who wish to have their scheduled streams featured can inform the admins on Discord.</p>
+                        <div id="streams-grid" class="grid md:grid-cols-2 gap-6">
+                            <!-- Streams will be populated by JavaScript -->
+                        </div>
+                        <div id="broadcasts-pagination" class="flex justify-center items-center mt-6 space-x-4">
+                            <button id="prev-stream-page" class="bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">&lt; Prev</button>
+                            <span id="stream-page-info" class="text-gray-700 font-semibold"></span>
+                            <button id="next-stream-page" class="bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">Next &gt;</button>
+                        </div>
+                    </section>
+                </div>
+                <!-- Right Column (narrower) -->
+                <div class="space-y-8">
+                    <!-- About Section -->
+                    <section id="about" class="bg-white rounded-lg shadow-md overflow-hidden fade-in-section border-2 border-green-500">
+                        <div class="p-6"><h2 class="header-skew header-skew-green mb-4">About MURA</h2></div>
+                        <img src="https://i.ibb.co/G3th0mkr/MURA.webp" alt="MURA Community Photo" class="w-full h-auto">
+                        <div class="p-6"><p class="text-gray-700 text-justify"><strong>MURA (Malayan Umamusume Racing Association)</strong> is a club and a community for Umamusume: Pretty Derby players from Malaysia and Singapore. We get together to share our love for the game through weekly race events, sharing game info, and simply celebrating Umamusume with camaraderie.</p></div>
+                    </section>
+                    <!-- Community Hub Section -->
+                    <section id="community" class="bg-white p-6 rounded-lg shadow-md fade-in-section border-2 border-orange-500">
+                        <h2 class="header-skew header-skew-orange mb-6">Community Hub</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="view-guides-btn" class="content-card block bg-blue-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-blue-500">Game Guides</button>
+                            <button id="view-events-btn" class="content-card block bg-red-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-red-500">Events</button>
+                            <button id="view-fan-media-btn" class="content-card block bg-yellow-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-yellow-500">Fan Media</button>
+                            <button id="view-members-btn" class="content-card block bg-purple-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-purple-500">Members</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Page View (Initially Hidden) -->
+        <div id="page-news" class="page-view hidden is-hiding">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border-2 border-pink-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="header-skew header-skew-pink">News Archive</h2>
+                    <button class="back-to-home-btn bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span class="hidden md:inline">Back to Home</span>
+                    </button>
+                </div>
+                <div id="news-list" class="space-y-8">
+                    <div class="p-4 rounded-lg border-l-4 border-pink-400 bg-gray-50"><p class="text-sm text-gray-500">EVENT | 2025.07.05</p><h3 class="font-bold text-xl text-gray-800 mt-1">Merdeka Cup 2025 Announced!</h3><p class="text-gray-600 mt-2 text-justify">Get ready for the biggest event of the year! The MURA Merdeka Cup is coming this August. This multi-day event will test trainers across all distances. Check out the full event details to prepare your best horse girls!</p><a href="./events/merdeka-cup-2025.html" class="inline-block mt-4 text-pink-600 font-bold hover:underline">Read More >></a></div>
+                    <div class="p-4 rounded-lg border-l-4 border-pink-400 bg-gray-50"><p class="text-sm text-gray-500">COMMUNITY | 2025.07.02</p><h3 class="font-bold text-xl text-gray-800 mt-1">Community Spotlight: ewidaria</h3><p class="text-gray-600 mt-2 text-justify">This week we're shining a spotlight on one of our most helpful members, ewidaria! Known for their in-depth knowledge of game mechanics and helpful guides, they are a cornerstone of the MURA community.</p><a href="#" class="inline-block mt-4 text-pink-600 font-bold hover:underline">Read More >></a></div>
+                    <div class="p-4 rounded-lg border-l-4 border-pink-400 bg-gray-50"><p class="text-sm text-gray-500">COMMUNITY | 2025.06.30</p><h3 class="font-bold text-xl text-gray-800 mt-1">MURA Website Launched!</h3><p class="text-gray-600 mt-2 text-justify">Welcome to the official hub for all MURA members! We're excited to bring our community closer together. Here you will find all the latest news, event announcements, and community highlights.</p><a href="./news/website-launch.html" class="inline-block mt-4 text-pink-600 font-bold hover:underline">Read More >></a></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Guides Page View (Initially Hidden) -->
+        <div id="page-guides" class="page-view hidden is-hiding">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border-2 border-purple-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="header-skew header-skew-purple">Game Guides</h2>
+                    <button class="back-to-home-btn bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span class="hidden md:inline">Back to Home</span>
+                    </button>
+                </div>
+                
+                <div id="guides-list" class="space-y-6">
+                    <div class="p-4 rounded-lg border-l-4 border-purple-400 bg-gray-50">
+                        <h3 class="font-bold text-xl text-gray-800">A (semi-competitive but) full casual's guide/tips to Uma Musume EN/Global</h3>
+                        <p class="text-sm text-gray-500 mt-1">By: Ricky | June 30, 2025</p>
+                        <p class="text-gray-600 mt-2 text-justify">You want your Uma to be the very best, like no one ever was but you don't have good cards like most tutorials gave you? Here's a guide for you!</p>
+                        <a href="./guides/ricky-casual-guide-06-2025.html" class="inline-block mt-4 text-purple-600 font-bold hover:underline">Read More >></a>
+                    </div>
+                    <div class="p-4 rounded-lg border-l-4 border-purple-400 bg-gray-50">
+                        <h3 class="font-bold text-xl text-gray-800">The Five Stats of the Apocalypse: A Guide to Not Sucking</h3>
+                        <p class="text-sm text-gray-500 mt-1">By: ewidaria | July 1, 2025</p>
+                        <p class="text-gray-600 mt-2 text-justify">So, you've fallen into the horse girl rabbit hole. You saw the anime, you saw the memes, and now you're here, staring at a screen with five stats and a vague sense of dread. This guide is for you.</p>
+                        <a href="./guides/ewidaria-stats-n-aptitude-guide-07-2025.html" class="inline-block mt-4 text-purple-600 font-bold hover:underline">Read More >></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Page View (Initially Hidden) -->
+        <div id="page-events" class="page-view hidden is-hiding">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border-2 border-red-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="header-skew header-skew-red">Events</h2>
+                    <button class="back-to-home-btn bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span class="hidden md:inline">Back to Home</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Event 1 -->
+                    <a href="./events/merdeka-cup-2025.html" class="group block rounded-lg overflow-hidden shadow-lg">
+                        <div class="relative overflow-hidden">
+                            <img src="https://otakuusamagazine.com/wp-content/uploads/2022/11/uma.jpg" alt="Merdeka Cup" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300">
+                        </div>
+                        <div class="p-4 bg-gray-50">
+                            <h3 class="font-bold text-lg text-gray-800 group-hover:text-red-600 transition-colors">MURA Merdeka Cup</h3>
+                            <p class="text-sm text-gray-500 mt-1">August 31, 2025</p>
+                            <p class="text-gray-600 mt-2 text-justify text-sm">Celebrate the spirit of independence with our biggest race of the year! Prepare your best long-distance runners for a grueling challenge.</p>
+                        </div>
+                    </a>
+                    <!-- Add more events here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Fan Media Page View (Initially Hidden) -->
+        <div id="page-fan-media" class="page-view hidden is-hiding">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border-2 border-yellow-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="header-skew header-skew-orange">Fan Media</h2>
+                    <button class="back-to-home-btn bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span class="hidden md:inline">Back to Home</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                    <a href="./fan-media/fanart.html" class="content-card block bg-yellow-400 text-white p-8 rounded-lg font-bold text-2xl hover:bg-yellow-500">Art</a>
+                    <a href="./fan-media/videos.html" class="content-card block bg-red-500 text-white p-8 rounded-lg font-bold text-2xl hover:bg-red-600">Videos</a>
+                    <a href="./fan-media/music.html" class="content-card block bg-green-500 text-white p-8 rounded-lg font-bold text-2xl hover:bg-green-600">Music</a>
+                    <a href="./fan-media/writings.html" class="content-card block bg-blue-500 text-white p-8 rounded-lg font-bold text-2xl hover:bg-blue-600">Writings</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Members Page View (Initially Hidden) -->
+        <div id="page-members" class="page-view hidden is-hiding">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border-2 border-purple-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="header-skew header-skew-purple">Members</h2>
+                    <div class="flex items-center space-x-2">
+                        <a href="register.html" class="bg-purple-600 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center md:space-x-2">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+                            <span class="hidden md:inline">Register</span>
+                        </a>
+                        <button class="back-to-home-btn bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                            <span class="hidden md:inline">Back to Home</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="members-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- Member cards will be populated here -->
+                </div>
+                 <div id="members-pagination" class="flex justify-center items-center mt-6 space-x-4">
+                    <button id="prev-member-page" class="bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">&lt; Prev</button>
+                    <span id="member-page-info" class="text-gray-700 font-semibold"></span>
+                    <button id="next-member-page" class="bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">Next &gt;</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Member Detail Modal -->
+    <div id="member-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div id="member-modal-content" class="modal-content bg-white w-full max-w-lg rounded-lg shadow-xl flex flex-col md:flex-row transform scale-95 transition-transform duration-300">
+            <!-- Content will be injected here -->
+        </div>
+    </div>
+
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // This script runs after the HTML document has been fully loaded.
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Mobile Menu Logic ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const openIcon = document.getElementById('menu-open-icon');
+            const closeIcon = document.getElementById('menu-close-icon');
+
+            if (mobileMenuButton && mobileMenu && openIcon && closeIcon) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    openIcon.classList.toggle('hidden');
+                    closeIcon.classList.toggle('hidden');
+                });
+            }
+            
+            // --- Page Navigation Logic ---
+            const pageHome = document.getElementById('page-home');
+            const pageNews = document.getElementById('page-news');
+            const pageGuides = document.getElementById('page-guides');
+            const pageFanMedia = document.getElementById('page-fan-media');
+            const pageEvents = document.getElementById('page-events');
+            const pageMembers = document.getElementById('page-members');
+            
+            const logoLink = document.getElementById('logo-link');
+            const viewMoreNewsBtn = document.getElementById('view-more-news-btn');
+            const viewGuidesBtn = document.getElementById('view-guides-btn');
+            const viewFanMediaBtn = document.getElementById('view-fan-media-btn');
+            const viewEventsBtn = document.getElementById('view-events-btn');
+            const viewMembersBtn = document.getElementById('view-members-btn');
+            const backToHomeBtns = document.querySelectorAll('.back-to-home-btn');
+            
+            const mainNavLinks = document.querySelectorAll('#main-nav a');
+            const transitionDuration = 300; // ms, should match CSS transition
+
+            function switchPage(pageToHide, pageToShow) {
+                if(pageToHide) pageToHide.classList.add('is-hiding');
+                setTimeout(() => {
+                    if(pageToHide) pageToHide.classList.add('hidden');
+                    if(pageToShow) pageToShow.classList.remove('hidden');
+                    requestAnimationFrame(() => {
+                        if(pageToShow) pageToShow.classList.remove('is-hiding');
+                    });
+                    window.scrollTo(0, 0);
+                }, transitionDuration);
+            }
+
+            if(logoLink) {
+                logoLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const currentPage = document.querySelector('.page-view:not(.hidden)');
+                    if (currentPage && currentPage.id !== 'page-home') {
+                        switchPage(currentPage, pageHome);
+                    }
+                });
+            }
+
+            if(viewMoreNewsBtn) viewMoreNewsBtn.addEventListener('click', () => switchPage(pageHome, pageNews));
+            if(viewGuidesBtn) viewGuidesBtn.addEventListener('click', () => switchPage(pageHome, pageGuides));
+            if(viewFanMediaBtn) viewFanMediaBtn.addEventListener('click', () => switchPage(pageHome, pageFanMedia));
+            if(viewEventsBtn) viewEventsBtn.addEventListener('click', () => switchPage(pageHome, pageEvents));
+            if(viewMembersBtn) viewMembersBtn.addEventListener('click', () => switchPage(pageHome, pageMembers));
+            
+            backToHomeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const currentPage = btn.closest('.page-view');
+                    switchPage(currentPage, pageHome);
+                });
+            });
+            
+            mainNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const currentPage = document.querySelector('.page-view:not(.hidden)');
+                    if (currentPage && currentPage.id === 'page-home') {
+                       // Already on home page, default anchor behavior is fine.
+                    } else if (currentPage) {
+                        e.preventDefault();
+                        switchPage(currentPage, pageHome);
+                        setTimeout(() => {
+                            const targetId = link.getAttribute('href');
+                            document.querySelector(targetId)?.scrollIntoView({ behavior: 'smooth' });
+                        }, transitionDuration + 50);
+                    }
+                });
+            });
+
+            // --- Infinite Carousel Logic ---
+            const scroller = document.getElementById('thumbnail-scroller');
+            if (scroller) {
+                const images = [
+                    { src: 'https://images.microcms-assets.io/assets/973fc097984b400db8729642ddff5938/dcb082b48a6e438fb0b0129d3063083a/slider_designyourisland.jpg?fm=webp', alt: 'Design Your Island Event' },
+                    { src: 'https://i3.ytimg.com/vi/Th9gDQ_I748/maxresdefault.jpg', alt: 'Uma Musume Special' },
+                    { src: 'https://i.ibb.co/rKjpKm0L/thumb-fivestats.jpg', alt: 'Five Stats Guide by Ewidaria' },
+                    { src: 'https://images.microcms-assets.io/assets/973fc097984b400db8729642ddff5938/6f21c61171564d1f9b446d323b8fd305/slider_star-blossom_comics-4.jpg?fm=webp', alt: 'Star Blossom Comics' },
+                    { src: 'https://i.ibb.co/Wp6nSsKb/a-guide-by-ricky.webp', alt: 'A Casual Guide to Umamusume by Ricky' },
+                    { src: 'https://images-ext-1.discordapp.net/external/tfZT4VvvhF81us-2cxUu_szWyMCs8RX6OWpgozSgWbk/https/pbs.twimg.com/media/GudWyYybIAAwi8h.jpg?format=webp', alt: 'Uma Musume Event' },
+                    { src: 'https://i.ytimg.com/vi/Dds2E0KgpVs/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA5Hf-myeXXcm1Dc-tm63B1yRZiXw', alt: 'Uma Musume PV' },
+                    { src: 'https://i.ibb.co/bMrv4q0y/Regu-Rekomiya-Exploring-Honse-Umamusume.jpg', alt: 'Regu Rekomiya - Exploring Honse Umamusume' }
+                ];
+
+                let isTransitioning = false;
+                let autoScrollInterval;
+
+                const createImageElement = (image) => {
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.className = 'flex-shrink-0 w-1/2 md:w-1/4 transition-transform duration-300';
+                    const img = document.createElement('img');
+                    img.loading = 'lazy'; // Use native lazy loading
+                    img.src = image.src;
+                    img.alt = image.alt;
+                    img.className = 'w-full h-auto rounded-md shadow-sm hover:scale-105';
+                    img.onerror = () => { img.onerror = null; img.src = 'https://placehold.co/400x225/cccccc/ffffff?text=Image+Error'; };
+                    link.appendChild(img);
+                    return link;
+                };
+
+                images.forEach(image => scroller.appendChild(createImageElement(image)));
+                const itemsToCloneAtEnd = Array.from(scroller.children).slice(0, 4);
+                itemsToCloneAtEnd.forEach(item => scroller.appendChild(item.cloneNode(true)));
+                const itemsToCloneAtStart = Array.from(scroller.children).slice(images.length - 4, images.length);
+                itemsToCloneAtStart.reverse().forEach(item => scroller.prepend(item.cloneNode(true)));
+                
+                const getScrollAmount = () => scroller.children[0].offsetWidth + 16;
+                scroller.style.transition = 'none';
+                scroller.scrollLeft = getScrollAmount() * 4;
+                scroller.getBoundingClientRect(); 
+                scroller.style.transition = 'transform 0.5s ease-in-out';
+
+                const moveRight = () => {
+                    if (isTransitioning) return;
+                    isTransitioning = true;
+                    scroller.style.transform = `translateX(-${getScrollAmount()}px)`;
+                    setTimeout(() => {
+                        scroller.appendChild(scroller.firstElementChild);
+                        scroller.style.transition = 'none';
+                        scroller.style.transform = 'translateX(0)';
+                        scroller.getBoundingClientRect(); 
+                        scroller.style.transition = 'transform 0.5s ease-in-out';
+                        isTransitioning = false;
+                    }, 500);
+                };
+
+                const moveLeft = () => {
+                    if (isTransitioning) return;
+                    isTransitioning = true;
+                    scroller.style.transition = 'none';
+                    scroller.style.transform = `translateX(-${getScrollAmount()}px)`;
+                    scroller.prepend(scroller.lastElementChild);
+                    scroller.getBoundingClientRect(); 
+                    scroller.style.transition = 'transform 0.5s ease-in-out';
+                    scroller.style.transform = 'translateX(0)';
+                    setTimeout(() => { isTransitioning = false; }, 500);
+                };
+
+                const startAutoScroll = () => {
+                    if (autoScrollInterval) clearInterval(autoScrollInterval);
+                    autoScrollInterval = setInterval(moveRight, 3000);
+                };
+                const stopAutoScroll = () => clearInterval(autoScrollInterval);
+
+                const scrollLeftBtn = document.getElementById('scroll-left');
+                const scrollRightBtn = document.getElementById('scroll-right');
+                const container = document.getElementById('thumbnail-container');
+                
+                if(scrollLeftBtn) scrollLeftBtn.addEventListener('click', moveLeft);
+                if(scrollRightBtn) scrollRightBtn.addEventListener('click', moveRight);
+                if(container) {
+                    container.addEventListener('mouseenter', stopAutoScroll);
+                    container.addEventListener('mouseleave', startAutoScroll);
+                }
+                startAutoScroll();
+            }
+
+            // --- Broadcasts Section Logic ---
+            const streamsGrid = document.getElementById('streams-grid');
+            if(streamsGrid) {
+                const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR9hVvXBKzHEfiKRVN0C4amXpr_WMqE6g7uspSnPBtCf_5wxTwDdLXH1gOIEIdNWxz8RrLQ8b4Sv_ey/pub?output=csv';
+                
+                const parseCSV = (text) => {
+                    const lines = text.trim().split(/\r?\n/);
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    const result = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i]) continue;
+                        
+                        const values = lines[i].match(/(?:"[^"]*"|[^,]+)/g) || [];
+                        const obj = {};
+                        for (let j = 0; j < headers.length; j++) {
+                            let value = (values[j] || '').trim();
+                            if (value.startsWith('"') && value.endsWith('"')) {
+                                value = value.substring(1, value.length - 1).replace(/""/g, '"');
+                            }
+                            obj[headers[j]] = value;
+                        }
+                        result.push(obj);
+                    }
+                    return result;
+                }
+
+                const fetchAndRenderStreams = () => {
+                    fetch(`${googleSheetUrl}&_=${new Date().getTime()}`, { cache: "no-cache" })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(csvText => {
+                            const allStreams = parseCSV(csvText).filter(stream => stream.stream_url && stream.status && stream.status.trim().toLowerCase() !== 'offline');
+                            
+                            // Sort streams: live first, then scheduled
+                            allStreams.sort((a, b) => {
+                                if (a.status === 'live' && b.status !== 'live') return -1;
+                                if (a.status !== 'live' && b.status === 'live') return 1;
+                                return 0;
+                            });
+
+                            let currentPage = 1;
+                            const itemsPerPage = 4;
+
+                            const displayStreams = () => {
+                                streamsGrid.innerHTML = '';
+                                const paginationControls = document.getElementById('broadcasts-pagination');
+                                
+                                if (allStreams.length === 0) {
+                                    streamsGrid.innerHTML = `<p class="text-gray-500 col-span-2">No live or scheduled streams right now. Check back later!</p>`;
+                                    paginationControls.style.display = 'none';
+                                    return;
+                                }
+
+                                paginationControls.style.display = 'flex';
+                                
+                                const totalPages = Math.ceil(allStreams.length / itemsPerPage);
+                                const startIndex = (currentPage - 1) * itemsPerPage;
+                                const paginatedStreams = allStreams.slice(startIndex, startIndex + itemsPerPage);
+
+                                paginatedStreams.forEach(stream => {
+                                    const thumbnailUrl = stream.thumbnail_url || 'https://placehold.co/480x360/1a1a1a/ffffff?text=No+Thumbnail';
+                                    let statusBadge = '';
+                                    let linkClass = 'group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300';
+                                    
+                                    switch(stream.status.trim().toLowerCase()) {
+                                        case 'live':
+                                            statusBadge = `<div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center space-x-1"><div class="w-2 h-2 bg-white rounded-full animate-pulse"></div><span>LIVE</span></div>`;
+                                            break;
+                                        case 'scheduled':
+                                            statusBadge = `<div class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-md"><span>SCHEDULED</span></div>`;
+                                            break;
+                                    }
+
+                                    const streamCard = `
+                                        <a href="${stream.stream_url}" target="_blank" rel="noopener noreferrer" class="${linkClass}">
+                                            <div class="relative">
+                                                <img src="${thumbnailUrl}" alt="Stream Thumbnail for ${stream.title}" class="w-full h-auto object-cover" onerror="this.onerror=null;this.src='https://placehold.co/480x360/1a1a1a/ffffff?text=Stream+Offline';">
+                                                ${statusBadge}
+                                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white opacity-0 group-hover:opacity-80 transition-opacity duration-300" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div class="p-4 bg-gray-50">
+                                                <h3 class="font-bold text-lg text-gray-800">${stream.title}</h3>
+                                                <p class="text-sm text-gray-600 mt-1">${stream.author}</p>
+                                            </div>
+                                        </a>
+                                    `;
+                                    streamsGrid.innerHTML += streamCard;
+                                });
+
+                                document.getElementById('stream-page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+                                document.getElementById('prev-stream-page').disabled = currentPage === 1;
+                                document.getElementById('next-stream-page').disabled = currentPage === totalPages;
+                            };
+                            
+                            document.getElementById('prev-stream-page').addEventListener('click', () => {
+                                if (currentPage > 1) {
+                                    currentPage--;
+                                    displayStreams();
+                                }
+                            });
+
+                            document.getElementById('next-stream-page').addEventListener('click', () => {
+                                const totalPages = Math.ceil(allStreams.length / itemsPerPage);
+                                if (currentPage < totalPages) {
+                                    currentPage++;
+                                    displayStreams();
+                                }
+                            });
+
+                            displayStreams();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching or parsing stream data:', error);
+                            streamsGrid.innerHTML = `<p class="text-red-500 col-span-2">Could not load stream information. Please try again later.</p>`;
+                        });
+                };
+                
+                // Initial fetch and set auto-refresh
+                fetchAndRenderStreams();
+                setInterval(fetchAndRenderStreams, 300000); // 300000ms = 5 minutes
+            }
+
+            // --- Members Page Logic ---
+            const membersGrid = document.getElementById('members-grid');
+            if (membersGrid) {
+                const membersSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvNzIWKeko3vUNMfzq_uFVKSDN_ulDNX1W1UJ20KeMTUiFMtzZJtEO21jmE622KPtqD3L_GIOsUFeY/pub?gid=1388632960&single=true&output=csv';
+                const memberModal = document.getElementById('member-modal');
+                const memberModalContent = document.getElementById('member-modal-content');
+                let allMembers = [];
+                let currentMemberPage = 1;
+                const membersPerPage = 10;
+
+                const parseCSV = (text) => {
+                    const lines = text.trim().split(/\r?\n/);
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    const result = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i]) continue;
+                        const values = lines[i].match(/(?:"[^"]*"|[^,]+)/g) || [];
+                        const obj = {};
+                        for (let j = 0; j < headers.length; j++) {
+                            let value = (values[j] || '').trim();
+                            if (value.startsWith('"') && value.endsWith('"')) {
+                                value = value.substring(1, value.length - 1).replace(/""/g, '"');
+                            }
+                            // Use bracket notation to handle headers with spaces
+                            obj[headers[j]] = value;
+                        }
+                        result.push(obj);
+                    }
+                    return result;
+                }
+                
+                const displayMembers = () => {
+                    membersGrid.innerHTML = '';
+                    const paginationControls = document.getElementById('members-pagination');
+
+                    if (allMembers.length === 0) {
+                        membersGrid.innerHTML = `<p class="text-gray-500 col-span-full">No members found.</p>`;
+                        paginationControls.style.display = 'none';
+                        return;
+                    }
+                    
+                    paginationControls.style.display = 'flex';
+
+                    const totalPages = Math.ceil(allMembers.length / membersPerPage);
+                    const startIndex = (currentMemberPage - 1) * membersPerPage;
+                    const paginatedMembers = allMembers.slice(startIndex, startIndex + membersPerPage);
+
+                    paginatedMembers.forEach(member => {
+                        const card = document.createElement('div');
+                        card.className = 'group cursor-pointer';
+                        card.innerHTML = `
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:-translate-y-1 transition-transform duration-300">
+                                <img src="${member['Profile Picture URL']}" alt="${member['Display Name']}" class="w-full h-40 object-cover">
+                                <div class="p-3 text-center">
+                                    <h3 class="font-bold text-md text-gray-800">${member['Display Name']}</h3>
+                                    <p class="text-xs text-gray-500">${member['Trainer ID']}</p>
+                                </div>
+                            </div>
+                        `;
+                        card.addEventListener('click', () => showMemberModal(member));
+                        membersGrid.appendChild(card);
+                    });
+
+                    document.getElementById('member-page-info').textContent = `Page ${currentMemberPage} of ${totalPages}`;
+                    document.getElementById('prev-member-page').disabled = currentMemberPage === 1;
+                    document.getElementById('next-member-page').disabled = currentMemberPage === totalPages;
+                };
+
+                fetch(`${membersSheetUrl}&_=${new Date().getTime()}`, { cache: 'no-cache' })
+                    .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok'))
+                    .then(csvText => {
+                        allMembers = parseCSV(csvText).filter(member => member['Display Name']);
+                        displayMembers();
+                    })
+                    .catch(error => {
+                        console.error('Error loading members:', error);
+                        membersGrid.innerHTML = `<p class="text-red-500 col-span-full">Could not load member list.</p>`;
+                    });
+                
+                document.getElementById('prev-member-page').addEventListener('click', () => {
+                    if (currentMemberPage > 1) {
+                        currentMemberPage--;
+                        displayMembers();
+                    }
+                });
+
+                document.getElementById('next-member-page').addEventListener('click', () => {
+                    const totalPages = Math.ceil(allMembers.length / membersPerPage);
+                    if (currentMemberPage < totalPages) {
+                        currentMemberPage++;
+                        displayMembers();
+                    }
+                });
+
+                const showMemberModal = (member) => {
+                    memberModalContent.innerHTML = `
+                        <img src="${member['Profile Picture URL']}" alt="${member['Display Name']}" class="w-full md:w-1/3 h-auto object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none">
+                        <div class="p-6 flex flex-col justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">${member['Display Name']}</h2>
+                                <p class="text-sm text-gray-500 mb-4">Favorite: ${member['Favorite Umamusume']}</p>
+                                <p class="text-gray-700">${member.Bio}</p>
+                            </div>
+                            <button id="close-member-modal" class="mt-4 self-end bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700">Close</button>
+                        </div>
+                    `;
+                    memberModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        memberModal.classList.remove('opacity-0');
+                        memberModalContent.classList.remove('scale-95');
+                    }, 10);
+
+                    document.getElementById('close-member-modal').addEventListener('click', hideMemberModal);
+                };
+
+                const hideMemberModal = () => {
+                    memberModal.classList.add('opacity-0');
+                    memberModalContent.classList.add('scale-95');
+                    setTimeout(() => {
+                        memberModal.classList.add('hidden');
+                    }, 300);
+                };
+
+                memberModal.addEventListener('click', (e) => {
+                    if (e.target === memberModal) {
+                        hideMemberModal();
+                    }
+                });
+            }
+
+            // --- Intersection Observer for Fade-In Sections ---
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            sections.forEach(section => { observer.observe(section); });
+        });
+    </script>
+
+</body>
+</html>
+
+Update the index.ht

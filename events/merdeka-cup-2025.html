@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.U.R.A. Freedom Event</title>
+    <!-- Favicon Link -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for custom typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- Custom CSS from original site --- */
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        .header-skew {
+            position: relative;
+            background-color: #3B82F6; /* Blue-500 (Default) */
+            color: white;
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            display: inline-block;
+            font-weight: 900;
+            font-size: 1.5rem;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            margin-left: -1rem;
+        }
+        
+        .header-skew-pink {
+            background-color: #EC4899; /* Pink-500 */
+        }
+        
+        .header-skew-blue {
+             background-color: #3B82F6; /* Blue-500 */
+        }
+
+        .header-skew-purple {
+            background-color: #8B5CF6; /* Violet-500 */
+        }
+
+        .header-skew-amber {
+            background-color: #F59E0B; /* Amber-500 */
+        }
+        
+        .header-skew-emerald {
+             background-color: #10B981; /* Emerald-500 */
+        }
+
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(2rem);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Placeholder -->
+    <div id="main-header">
+        <!-- You can place your site's main header here -->
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Event Page View -->
+        <div id="page-event">
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-md border-2 border-purple-500">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="header-skew header-skew-purple">M.U.R.A. Freedom Event</h1>
+                    <a href="index.html" class="bg-blue-700 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span>Back to Home</span>
+                    </a>
+                </div>
+
+                <div class="space-y-12">
+                    <!-- M.U.R.A. Triple Tiara -->
+                    <section class="fade-in-section p-6 rounded-lg border-l-4 border-pink-400 bg-gray-50">
+                        <h2 class="header-skew header-skew-pink mb-4">M.U.R.A. Triple Tiara</h2>
+                        <p class="text-lg font-semibold text-gray-700">28 August 2025, Thursday @ 21:00</p>
+                        <div class="mt-4 space-y-2 text-gray-800">
+                            <p><strong>Eligibility:</strong> Only mares Umamusume.</p>
+                            <p><strong>Format:</strong> Send one Umamusume per race.</p>
+                            <div>
+                                <strong>Races:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>Oka Sho (Mile)</li>
+                                    <li>Oaks (Medium)</li>
+                                    <li>Shuuka Sho (Medium)</li>
+                                </ul>
+                            </div>
+                            <p><strong>Scoring:</strong> Placement is determined by the average placement across all 3 races. A lower average equals a higher final placement.</p>
+                            <p><strong>Progression:</strong> Top 5 will move on to the finals.</p>
+                            <p><strong>Prize:</strong> Top 3 earn the <span class="font-bold text-pink-600">M.U.R.A. Triple Tiara</span> title (Discord Role).</p>
+                        </div>
+                    </section>
+
+                    <!-- M.U.R.A. Triple Crown -->
+                    <section class="fade-in-section p-6 rounded-lg border-l-4 border-blue-400 bg-gray-50">
+                        <h2 class="header-skew header-skew-blue mb-4">M.U.R.A. Triple Crown</h2>
+                        <p class="text-lg font-semibold text-gray-700">29 August 2025, Friday @ 21:00</p>
+                        <div class="mt-4 space-y-2 text-gray-800">
+                            <p><strong>Eligibility:</strong> Only stallions Umamusume.</p>
+                            <p><strong>Format:</strong> Send one Umamusume per race.</p>
+                            <div>
+                                <strong>Races:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>Satsuki Sho (Medium)</li>
+                                    <li>Japan Derby (Medium)</li>
+                                    <li>Kikkuka Sho (Long)</li>
+                                </ul>
+                            </div>
+                            <p><strong>Scoring:</strong> Placement is determined by the average placement. A lower average equals a higher final placement.</p>
+                            <p><strong>Progression:</strong> Top 5 will move on to the finals. (If a participant already qualified from the Triple Tiara, the next participant in line will be counted).</p>
+                            <p><strong>Prize:</strong> Top 3 earn the <span class="font-bold text-blue-600">M.U.R.A. Triple Crown</span> title (Discord Role).</p>
+                        </div>
+                    </section>
+
+                    <!-- M.U.R.A. Freedom Cup Finals -->
+                    <section class="fade-in-section p-6 rounded-lg border-l-4 border-amber-400 bg-gray-50">
+                        <h2 class="header-skew header-skew-amber mb-4">M.U.R.A. Freedom Cup Finals</h2>
+                        <p class="text-lg font-semibold text-gray-700">30 August 2025, Saturday @ 21:00</p>
+                        <div class="mt-4 space-y-2 text-gray-800">
+                            <p><strong>Format:</strong> Send one Umamusume for all races.</p>
+                             <div>
+                                <strong>Races:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>Osaka Hai (Medium)</li>
+                                    <li>Takarazuka Kinen (Medium)</li>
+                                    <li>Japan Cup (Medium)</li>
+                                </ul>
+                            </div>
+                            <p><strong>Scoring:</strong> Placement is determined by the average placement. A lower average equals a higher final placement.</p>
+                            <p><strong>Prize:</strong> 1st place earns the <span class="font-bold text-amber-600">M.U.R.A. Freedom Champ</span> title (Discord Role).</p>
+                        </div>
+                    </section>
+
+                    <!-- M.U.R.A. Urara Award -->
+                    <section class="fade-in-section p-6 rounded-lg border-l-4 border-emerald-400 bg-gray-50">
+                        <h2 class="header-skew header-skew-emerald mb-4">M.U.R.A. Urara Award</h2>
+                        <p class="text-lg font-semibold text-gray-700">31st August 2025, Sunday @ 21:00</p>
+                        <div class="mt-4 space-y-2 text-gray-800">
+                            <p><strong>Eligibility:</strong> Only Haru Urara.</p>
+                            <p><strong>Format:</strong> Send one Haru Urara for all races.</p>
+                             <div>
+                                <strong>Races (All Dirt):</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>Champions Cup (Mile)</li>
+                                    <li>February Stakes (Mile)</li>
+                                    <li>Kashiwa Kinen (Mile)</li>
+                                </ul>
+                            </div>
+                            <p><strong>Scoring:</strong> Placement is determined by the average placement. A lower average equals a higher final placement.</p>
+                            <p><strong>Prize:</strong> 1st place earns the <span class="font-bold text-emerald-600">Urara Stan</span> title (Discord Role).</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="main-footer">
+        <!-- You can place your site's main footer here -->
+    </div>
+
+    <script>
+        // --- Intersection Observer for Fade-In Sections ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Article Template - MURA</title>
+    <!-- Favicon Link -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for custom typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- Custom CSS for unique styling beyond Tailwind --- */
+
+        /* Sets the base font and the new fixed background for the entire page */
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        /* Creates the skewed, banner-like header style for section titles */
+        .header-skew {
+            position: relative;
+            background-color: #EC4899; /* Pink-500 */
+            color: white;
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            display: inline-block;
+            font-weight: 900;
+            font-size: 1.5rem;
+            /* clip-path creates the custom polygon shape */
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            margin-left: -1rem; /* Negative margin to make it bleed off the container edge slightly */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Logo / Site Title -->
+            <a href="../index.html" class="px-4 py-3 hover:bg-blue-800 transition-colors">
+                <div class="flex flex-col items-start leading-tight">
+                    <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
+                    <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
+                </div>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
+                <a href="../index.html#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>News</span>
+                </a>
+                <a href="../index.html#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>About</span>
+                </a>
+                <a href="../index.html#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>Events</span>
+                </a>
+                <a href="../index.html#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">&rsaquo;</span>
+                    <span>Community</span>
+                </a>
+            </nav>
+            
+            <!-- Join Us Button -->
+            <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="hidden md:flex bg-gray-900 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-black self-stretch transition-colors">
+                <span>Join Us</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+                    <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+                </svg>
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden px-4">
+                 <button class="text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- News Article Content Box -->
+        <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-pink-500">
+            
+            <!-- Article Header -->
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-2">This is The Title of The News Article</h1>
+            <p class="text-md text-gray-500 mb-8">COMMUNITY | July 1, 2025</p>
+
+            <!-- Article Body -->
+            <div class="prose max-w-none text-justify">
+                <p>This is a paragraph of the article content. It's styled with justified alignment to create clean, straight edges on both the left and right sides, similar to a newspaper or magazine. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
+                
+                <p>You can include links within your text, like this one to the <a href="https://umamusume.jp/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">official Umamusume website</a>. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue.</p>
+                
+                <img src="https://placehold.co/800x450/ec4899/ffffff?text=Article+Image" alt="Placeholder image for the article" class="w-full rounded-lg shadow-md my-8">
+
+                <h2 class="text-2xl font-bold mt-8 mb-4">Using Sub-Headers to Structure Content</h2>
+                <p>Sub-headers are a great way to break up long articles into smaller, more digestible sections. This helps readers follow along and find the information they're looking for. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales.</p>
+                
+                <h3 class="text-xl font-bold mt-6 mb-4">Lists are Also Supported</h3>
+                <p>You can easily add bulleted lists to your articles:</p>
+                <ul class="list-disc list-inside space-y-2 my-4">
+                    <li>This is the first item in a list.</li>
+                    <li>This is the second item, which can be longer to show how text wraps.</li>
+                    <li>And a third item to complete the list.</li>
+                </ul>
+                
+                <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. Sorbi et per conubia nostra, per inceptos hymenaeos.</p>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-12 text-center">
+                 <a href="../index.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span>Back to Main Site</span>
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
