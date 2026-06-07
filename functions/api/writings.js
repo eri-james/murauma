@@ -2,13 +2,11 @@
  * GET /api/writings — List Writings
  * 
  * Returns all approved writings sorted by most recent first.
- * Data is sanitized before sending as defense-in-depth,
- * complementing client-side DOMPurify.
+ * Data was sanitized on insert — serve as-is from the database.
+ * Client-side DOMPurify provides runtime XSS defense.
  */
 import {
   errorResponse,
-  sanitizeHtml,
-  sanitizeText,
 } from '../_shared/utils.js';
 
 export async function onRequestGet(context) {
@@ -25,13 +23,12 @@ export async function onRequestGet(context) {
       )
       .all();
 
-    // Sanitize data before sending to client (defense in depth)
-    // Title is plain text — escape entities; Content may have HTML from Markdown
+    // Data was sanitized on insert — serve as-is (no double-sanitization)
     const writings = results.map(row => ({
       id: row.id,
-      title: sanitizeText(row.title || ''),
-      author: sanitizeText(row.author_name || 'Unknown'),
-      content: sanitizeHtml(row.content || ''),
+      title: row.title || '',
+      author: row.author_name || 'Unknown',
+      content: row.content || '',
       timestamp: row.created_at,
     }));
 

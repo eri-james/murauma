@@ -1,13 +1,12 @@
 /**
- * Admin API — Member Management
+ * Admin API — Member Management (List only)
  *
- * All endpoints require the ADMIN_SECRET header for authentication.
- * Set ADMIN_SECRET in Cloudflare Dashboard → Pages → murauma → Settings → Environment variables.
+ * Requires the X-Admin-Secret header for authentication.
  *
  * Endpoints:
- *   GET  /api/admin/members?status=pending   — List members by status
- *   POST /api/admin/members/approve          — Approve a member by trainer_id
- *   POST /api/admin/members/reject           — Reject a member by trainer_id
+ *   GET /api/admin/members?status=pending   — List members by status
+ *   POST /api/admin/members/approve         — (see members/approve.js)
+ *   POST /api/admin/members/reject          — (see members/reject.js)
  */
 import {
   errorResponse,
@@ -17,13 +16,18 @@ import {
 
 /**
  * Validates the admin secret from the request header.
+ * Uses timing-safe comparison to prevent timing attacks.
  */
 function authenticate(request, env) {
   const secret = request.headers.get('X-Admin-Secret');
-  if (!secret || secret !== env.ADMIN_SECRET) {
-    return false;
+  if (!secret || !env.ADMIN_SECRET) return false;
+  // Timing-safe comparison
+  if (secret.length !== env.ADMIN_SECRET.length) return false;
+  let result = 0;
+  for (let i = 0; i < secret.length; i++) {
+    result |= secret.charCodeAt(i) ^ env.ADMIN_SECRET.charCodeAt(i);
   }
-  return true;
+  return result === 0;
 }
 
 /**
@@ -51,12 +55,13 @@ export async function onRequestGet(context) {
       .bind(status)
       .all();
 
+    // Data was sanitized on insert — serve as-is
     const members = results.map(row => ({
       id: row.id,
-      name: sanitizeText(row.name || ''),
+      name: row.name || '',
       trainerId: row.trainer_id,
-      favoriteUma: sanitizeText(row.favorite_uma || ''),
-      bio: sanitizeText(row.bio || ''),
+      favoriteUma: row.favorite_uma || '',
+      bio: row.bio || '',
       status: row.status,
       createdAt: row.created_at,
     }));
@@ -70,60 +75,13 @@ export async function onRequestGet(context) {
 }
 
 /**
- * POST /api/admin/members/approve — Approve a member
- * Body: { trainerId: "123456789012" }
- */
-export async function onRequestPost(context) {
-  const { request, env } = context;
-  const db = env.DB;
-
-  if (!authenticate(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
-
-  try {
-    const data = await request.json();
-    const action = request.url.endsWith('/reject') ? 'reject' : 'approve';
-    const newStatus = action === 'reject' ? 'rejected' : 'approved';
-
-    if (!data.trainerId || !/^\d{12}$/.test(data.trainerId)) {
-      return errorResponse('Valid 12-digit Trainer ID is required.');
-    }
-
-    const existing = await db
-      .prepare('SELECT id, status FROM members WHERE trainer_id = ?')
-      .bind(data.trainerId)
-      .first();
-
-    if (!existing) {
-      return errorResponse('Member not found.');
-    }
-
-    if (existing.status === newStatus) {
-      return errorResponse(`Member is already ${newStatus}.`);
-    }
-
-    await db
-      .prepare('UPDATE members SET status = ? WHERE trainer_id = ?')
-      .bind(newStatus, data.trainerId)
-      .run();
-
-    return successResponse(`Member ${data.trainerId} has been ${newStatus}.`);
-
-  } catch (error) {
-    console.error('Admin update member error:', error.message);
-    return errorResponse('Failed to update member status.', 500);
-  }
-}
-
-/**
  * Handle CORS preflight requests.
  */
 export function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Origin': 'https://murauma.pages.dev',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Secret',
     },
   });

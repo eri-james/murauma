@@ -19,6 +19,9 @@ import {
   verifyHcaptcha,
 } from '../_shared/utils.js';
 
+// Maximum JSON body size: 100KB (writings up to 50KB + overhead)
+const MAX_BODY_SIZE = 100 * 1024;
+
 // Titles are plain text, not HTML — use sanitizeText to escape all entities
 // Content (Markdown) may contain raw HTML fragments — use sanitizeHtml
 
@@ -27,6 +30,12 @@ export async function onRequestPost(context) {
   const db = env.DB;
 
   try {
+    // --- Enforce body size limit ---
+    const contentLength = parseInt(request.headers.get('Content-Length') || '0', 10);
+    if (contentLength > MAX_BODY_SIZE) {
+      return errorResponse('Request body too large.', 413);
+    }
+
     // --- Parse request body ---
     const data = await request.json();
 
@@ -66,11 +75,13 @@ export async function onRequestPost(context) {
       return errorResponse('Your membership has not been approved yet. Please wait for admin approval.');
     }
 
-    // --- Sanitize content (Markdown may contain raw HTML) ---
+    // --- Sanitize content once on write ---
     // Title is plain text — escape HTML entities, don't allow any tags
+    // Content (Markdown) may contain raw HTML — whitelist-sanitize allowed tags
+    // Author name was already sanitized on registration — re-sanitize as defense-in-depth
     const sanitizedTitle = sanitizeText(titleResult.value);
     const sanitizedContent = sanitizeHtml(contentResult.value);
-    const authorName = sanitizeText(member.name);
+    const authorName = member.name; // Already sanitized on register insert
 
     // --- Save Writing to D1 (status: pending — requires admin approval) ---
     try {

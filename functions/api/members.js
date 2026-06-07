@@ -4,10 +4,10 @@
  * Returns all approved members sorted by most recent first.
  * Used by the Members page on index.html to display the member grid.
  * Profile pictures are served via /api/avatar/{trainer_id}.
+ * Data was sanitized on insert — serve as-is.
  */
 import {
   errorResponse,
-  sanitizeText,
 } from '../_shared/utils.js';
 
 export async function onRequestGet(context) {
@@ -24,12 +24,12 @@ export async function onRequestGet(context) {
       )
       .all();
 
-    // Sanitize data before sending to client
+    // Data was sanitized on insert — serve as-is (no double-sanitization)
     const members = results.map(row => ({
       trainerId: row.trainer_id,
-      name: sanitizeText(row.name || 'Anonymous'),
-      favoriteUma: sanitizeText(row.favorite_uma || ''),
-      bio: sanitizeText(row.bio || ''),
+      name: row.name || 'Anonymous',
+      favoriteUma: row.favorite_uma || '',
+      bio: row.bio || '',
       avatarUrl: `/api/avatar/${row.trainer_id}`,
       joinedAt: row.created_at,
     }));

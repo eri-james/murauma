@@ -1,31 +1,31 @@
 /**
- * Admin API — Writing Management
+ * Admin API — Writing Management (List + Delete)
  *
- * All endpoints require the ADMIN_SECRET header for authentication.
- * Set ADMIN_SECRET in Cloudflare Dashboard → Pages → murauma → Settings → Environment variables.
+ * Requires the X-Admin-Secret header for authentication.
  *
  * Endpoints:
- *   GET    /api/admin/writings?status=pending         — List writings by status
- *   POST   /api/admin/writings/approve                 — Approve a writing by ID
- *   POST   /api/admin/writings/reject                  — Reject a writing by ID
- *   DELETE /api/admin/writings                         — Delete a writing by ID
+ *   GET    /api/admin/writings?status=pending  — List writings by status
+ *   POST   /api/admin/writings/approve         — (see writings/approve.js)
+ *   POST   /api/admin/writings/reject          — (see writings/reject.js)
+ *   DELETE /api/admin/writings                 — Delete a writing by ID
  */
 import {
   errorResponse,
   successResponse,
-  sanitizeText,
-  sanitizeHtml,
 } from '../../_shared/utils.js';
 
 /**
- * Validates the admin secret from the request header.
+ * Timing-safe admin authentication.
  */
 function authenticate(request, env) {
   const secret = request.headers.get('X-Admin-Secret');
-  if (!secret || secret !== env.ADMIN_SECRET) {
-    return false;
+  if (!secret || !env.ADMIN_SECRET) return false;
+  if (secret.length !== env.ADMIN_SECRET.length) return false;
+  let result = 0;
+  for (let i = 0; i < secret.length; i++) {
+    result |= secret.charCodeAt(i) ^ env.ADMIN_SECRET.charCodeAt(i);
   }
-  return true;
+  return result === 0;
 }
 
 /**
@@ -58,12 +58,13 @@ export async function onRequestGet(context) {
       .bind(status)
       .all();
 
+    // Data was sanitized on insert — serve as-is
     const writings = results.map(row => ({
       id: row.id,
-      title: sanitizeText(row.title || ''),
-      authorName: sanitizeText(row.author_name || ''),
+      title: row.title || '',
+      authorName: row.author_name || '',
       trainerId: row.trainer_id,
-      contentPreview: sanitizeHtml((row.content || '').substring(0, 300)),
+      contentPreview: (row.content || '').substring(0, 300),
       status: row.status,
       createdAt: row.created_at,
     }));
@@ -73,69 +74,6 @@ export async function onRequestGet(context) {
   } catch (error) {
     console.error('Admin list writings error:', error.message);
     return errorResponse('Failed to list writings.', 500);
-  }
-}
-
-/**
- * POST /api/admin/writings/approve or /api/admin/writings/reject
- * Body: { id: 123 }
- *
- * DELETE /api/admin/writings
- * Body: { id: 123 }
- */
-export async function onRequestPost(context) {
-  const { request, env } = context;
-  const db = env.DB;
-
-  if (!authenticate(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
-
-  try {
-    const data = await request.json();
-    const url = new URL(request.url);
-    const pathname = url.pathname;
-
-    // Determine action from URL path
-    let action;
-    if (pathname.endsWith('/approve')) {
-      action = 'approve';
-    } else if (pathname.endsWith('/reject')) {
-      action = 'reject';
-    } else {
-      return errorResponse('Unknown action. Use /approve or /reject.');
-    }
-
-    const newStatus = action === 'approve' ? 'approved' : 'rejected';
-
-    // Validate writing ID
-    if (!data.id || !Number.isInteger(data.id)) {
-      return errorResponse('Valid writing ID (integer) is required.');
-    }
-
-    const existing = await db
-      .prepare('SELECT id, status, title FROM writings WHERE id = ?')
-      .bind(data.id)
-      .first();
-
-    if (!existing) {
-      return errorResponse('Writing not found.');
-    }
-
-    if (existing.status === newStatus) {
-      return errorResponse(`Writing is already ${newStatus}.`);
-    }
-
-    await db
-      .prepare('UPDATE writings SET status = ? WHERE id = ?')
-      .bind(newStatus, data.id)
-      .run();
-
-    return successResponse(`Writing #${data.id} ("${existing.title}") has been ${newStatus}.`);
-
-  } catch (error) {
-    console.error('Admin update writing error:', error.message);
-    return errorResponse('Failed to update writing status.', 500);
   }
 }
 
@@ -186,8 +124,8 @@ export async function onRequestDelete(context) {
 export function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Origin': 'https://murauma.pages.dev',
+      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Secret',
     },
   });

@@ -20,11 +20,20 @@ import {
   MAX_IMAGE_SIZE_BYTES,
 } from '../_shared/utils.js';
 
+// Maximum JSON body size: 10MB (profile pictures up to 5MB + overhead)
+const MAX_BODY_SIZE = 10 * 1024 * 1024;
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = env.DB;
 
   try {
+    // --- Enforce body size limit ---
+    const contentLength = parseInt(request.headers.get('Content-Length') || '0', 10);
+    if (contentLength > MAX_BODY_SIZE) {
+      return errorResponse('Request body too large.', 413);
+    }
+
     // --- Parse request body ---
     const data = await request.json();
 
@@ -87,7 +96,8 @@ export async function onRequestPost(context) {
       return errorResponse('Invalid image data.');
     }
 
-    // --- Save Member to D1 (including profile picture as base64) ---
+    // --- Sanitize and Save Member to D1 ---
+    // Sanitize once on write — data will be served as-is on read
     const sanitizedName = sanitizeText(nameResult.value);
     const sanitizedFavUma = sanitizeText(favUmaResult.value);
     const sanitizedBio = sanitizeText(bioResult.value);
