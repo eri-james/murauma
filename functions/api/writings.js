@@ -20,6 +20,7 @@ export async function onRequestGet(context) {
       .prepare(
         `SELECT id, title, author_name, content, created_at
          FROM writings
+         WHERE status = 'approved'
          ORDER BY created_at DESC`
       )
       .all();
@@ -38,8 +39,8 @@ export async function onRequestGet(context) {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        // Cache for 60 seconds at the edge to reduce D1 reads
-        'Cache-Control': 'public, max-age=60',
+        // Cache for 30 seconds at the edge to reduce D1 reads
+        'Cache-Control': 'public, max-age=30',
       },
     });
 

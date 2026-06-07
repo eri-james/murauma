@@ -72,12 +72,12 @@ export async function onRequestPost(context) {
     const sanitizedContent = sanitizeHtml(contentResult.value);
     const authorName = sanitizeText(member.name);
 
-    // --- Save Writing to D1 ---
+    // --- Save Writing to D1 (status: pending — requires admin approval) ---
     try {
       await db
         .prepare(
-          `INSERT INTO writings (title, author_name, trainer_id, content)
-           VALUES (?, ?, ?, ?)`
+          `INSERT INTO writings (title, author_name, trainer_id, content, status)
+           VALUES (?, ?, ?, ?, 'pending')`
         )
         .bind(sanitizedTitle, authorName, trainerResult.value, sanitizedContent)
         .run();
@@ -86,7 +86,7 @@ export async function onRequestPost(context) {
       return errorResponse('Failed to save writing. Please try again.');
     }
 
-    return successResponse('Writing submitted successfully! It will appear in the Writings Library shortly.');
+    return successResponse('Writing submitted successfully! It will be reviewed by an admin before appearing in the Writings Library.');
 
   } catch (error) {
     console.error('Writing submission error:', error.message);

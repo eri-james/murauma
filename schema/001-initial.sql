@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS writings (
     author_name TEXT NOT NULL CHECK(length(author_name) <= 50 AND length(author_name) > 0),
     trainer_id TEXT NOT NULL CHECK(length(trainer_id) = 12),
     content TEXT NOT NULL CHECK(length(content) <= 50000 AND length(content) > 0),
+    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (trainer_id) REFERENCES members(trainer_id)
 );
@@ -32,6 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_members_trainer_id ON members(trainer_id);
 CREATE INDEX IF NOT EXISTS idx_members_status ON members(status);
 CREATE INDEX IF NOT EXISTS idx_writings_created_at ON writings(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_writings_trainer_id ON writings(trainer_id);
+CREATE INDEX IF NOT EXISTS idx_writings_status ON writings(status);
 
 -- Rate limit tracking table (replaces Google Apps Script CacheService)
 CREATE TABLE IF NOT EXISTS rate_limits (

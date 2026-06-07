@@ -90,43 +90,92 @@ function validateTrainerId(value) {
 // ============================================================
 
 /**
- * Sanitizes HTML content by removing dangerous elements and attributes.
- * This complements client-side DOMPurify for defense-in-depth.
+ * Allowed HTML tags for writing content (Markdown-generated).
+ * Tags not in this list will be stripped but their text content preserved.
+ */
+const ALLOWED_TAGS = new Set([
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'p', 'br', 'hr',
+  'em', 'strong', 'b', 'i', 'u', 's', 'del', 'ins',
+  'ul', 'ol', 'li',
+  'blockquote', 'pre', 'code',
+  'a', 'img',
+  'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'sup', 'sub',
+]);
+
+/**
+ * Allowed HTML attributes per tag.
+ * Keys are tag names, values are Sets of allowed attribute names.
+ */
+const ALLOWED_ATTRS = {
+  a: new Set(['href', 'title']),
+  img: new Set(['src', 'alt', 'title', 'width', 'height']),
+  td: new Set(['align', 'colspan', 'rowspan']),
+  th: new Set(['align', 'colspan', 'rowspan']),
+};
+
+/**
+ * Dangerous URL schemes that should be stripped.
+ */
+const DANGEROUS_URL_SCHEMES = /^(javascript|data|vbscript):/i;
+
+/**
+ * Sanitizes HTML content using a whitelist approach.
+ * - Strips all tags not in ALLOWED_TAGS (preserving text content)
+ * - Removes all attributes not in ALLOWED_ATTRS for each tag
+ * - Removes dangerous URL schemes (javascript:, data:) from href/src
+ * - This complements client-side DOMPurify for defense-in-depth
  */
 function sanitizeHtml(html) {
   if (typeof html !== 'string') return '';
-  
-  // Remove <script> tags and their content
-  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
-  // Remove <iframe> tags
-  html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
-  
-  // Remove <object>, <embed>, <form> tags
-  html = html.replace(/<(object|embed|form)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi, '');
-  
-  // Remove on* event handler attributes
-  html = html.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, '');
-  
-  // Remove javascript: URLs
-  html = html.replace(/(href|src)\s*=\s*["']javascript:[^"']*["']/gi, '$1=""');
-  
-  // Remove data: URLs in src (XSS vector)
-  html = html.replace(/src\s*=\s*["']data:[^"']*["']/gi, 'src=""');
-  
-  // Remove dangerous style attributes
-  html = html.replace(/\s+style\s*=\s*(?:"[^"]*"|'[^']*')/gi, (match) => {
-    const lower = match.toLowerCase();
-    if (lower.includes('expression(') || lower.includes('javascript:') || lower.includes('url(')) {
-      return '';
+
+  // Process the HTML tag by tag using a regex scanner
+  // This handles both self-closing and regular tags
+  return html.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*\/?>/g, (fullMatch, tagName) => {
+    const lowerTag = tagName.toLowerCase();
+
+    // Closing tags: always allow if the tag itself is allowed
+    if (fullMatch.startsWith('</')) {
+      if (ALLOWED_TAGS.has(lowerTag)) {
+        return `</${lowerTag}>`;
+      }
+      return ''; // Strip disallowed closing tags
     }
-    return match;
+
+    // Opening or self-closing tags
+    if (!ALLOWED_TAGS.has(lowerTag)) {
+      return ''; // Strip disallowed tags entirely
+    }
+
+    // Parse attributes from the tag
+    const attrRegex = /\s+([a-zA-Z][a-zA-Z0-9-]*)\s*(?:=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?/g;
+    const allowedTagAttrs = ALLOWED_ATTRS[lowerTag] || new Set();
+    const safeAttrs = [];
+    let match;
+
+    while ((match = attrRegex.exec(fullMatch)) !== null) {
+      const attrName = match[1].toLowerCase();
+      if (!allowedTagAttrs.has(attrName)) continue;
+
+      // Extract the attribute value
+      const valueMatch = match[0].match(/=\s*(?:"([^"]*)"|'([^']*)'|(\S+))/);
+      let value = valueMatch ? (valueMatch[1] ?? valueMatch[2] ?? valueMatch[3]) : '';
+
+      // Sanitize URL attributes
+      if ((attrName === 'href' || attrName === 'src') && DANGEROUS_URL_SCHEMES.test(value.trim())) {
+        continue; // Drop dangerous URLs entirely
+      }
+
+      safeAttrs.push(`${attrName}="${value.replace(/"/g, '&quot;')}"`);
+    }
+
+    const isSelfClosing = fullMatch.endsWith('/>') || lowerTag === 'br' || lowerTag === 'hr' || lowerTag === 'img';
+    if (isSelfClosing) {
+      return safeAttrs.length > 0 ? `<${lowerTag} ${safeAttrs.join(' ')} />` : `<${lowerTag} />`;
+    }
+    return safeAttrs.length > 0 ? `<${lowerTag} ${safeAttrs.join(' ')}>` : `<${lowerTag}>`;
   });
-  
-  // Remove <meta> and <link> tags
-  html = html.replace(/<(meta|link)\b[^>]*\/?>/gi, '');
-  
-  return html.trim();
 }
 
 /**
