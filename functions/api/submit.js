@@ -19,6 +19,9 @@ import {
   verifyHcaptcha,
 } from '../_shared/utils.js';
 
+// Titles are plain text, not HTML — use sanitizeText to escape all entities
+// Content (Markdown) may contain raw HTML fragments — use sanitizeHtml
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const db = env.DB;
@@ -64,7 +67,8 @@ export async function onRequestPost(context) {
     }
 
     // --- Sanitize content (Markdown may contain raw HTML) ---
-    const sanitizedTitle = sanitizeHtml(titleResult.value);
+    // Title is plain text — escape HTML entities, don't allow any tags
+    const sanitizedTitle = sanitizeText(titleResult.value);
     const sanitizedContent = sanitizeHtml(contentResult.value);
     const authorName = sanitizeText(member.name);
 

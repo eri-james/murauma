@@ -20,10 +20,8 @@ database_name = "murauma-db"
 database_id = "4919fadc-6878-4b79-a885-853f388bb31c"
 
 # ============================================================
-# SECRETS (set via CLI, never stored in repo)
+# SECRETS (set via Cloudflare Dashboard → Workers → Pages → murauma → Settings → Environment variables)
 # ============================================================
-# hCaptcha secret key:
-#   npx wrangler secret put HCAPTCHA_SECRET
-#   Then paste: ES_5ac6268269644eb7a90d5865ad7f8a7b
-#
-# These are accessed in Workers via context.env.HCAPTCHA_SECRET
+# HCAPTCHA_SECRET — hCaptcha secret key for server-side verification
+#   Set in Cloudflare dashboard under Pages > murauma > Settings > Environment variables
+#   Accessed in Workers via context.env.HCAPTCHA_SECRET

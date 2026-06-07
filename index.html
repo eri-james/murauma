@@ -15,7 +15,7 @@
     <meta property="og:title" content="Malayan Umamusume Racing Association (MURA)">
     <meta property="og:description" content="The community hub for Umamusume players in Malaysia and Singapore. Join us for weekly races, guides, and more!">
     <meta property="og:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
-    <meta property="og:url" content="https://your-website-url.com"> <!-- Replace with your actual website URL -->
+    <meta property="og:url" content="https://murauma.pages.dev">
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
@@ -753,40 +753,21 @@
             // --- Members Page Logic ---
             const membersGrid = document.getElementById('members-grid');
             if (membersGrid) {
-                const membersSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvNzIWKeko3vUNMfzq_uFVKSDN_ulDNX1W1UJ20KeMTUiFMtzZJtEO21jmE622KPtqD3L_GIOsUFeY/pub?gid=1388632960&single=true&output=csv';
                 const memberModal = document.getElementById('member-modal');
                 const memberModalContent = document.getElementById('member-modal-content');
                 let allMembers = [];
                 let currentMemberPage = 1;
                 const membersPerPage = 10;
 
-                const parseCSV = (text) => {
-                    const lines = text.trim().split(/\r?\n/);
-                    const headers = lines[0].split(',').map(h => h.trim());
-                    const result = [];
-                    for (let i = 1; i < lines.length; i++) {
-                        if (!lines[i]) continue;
-                        const values = lines[i].match(/(?:"[^"]*"|[^,]+)/g) || [];
-                        const obj = {};
-                        for (let j = 0; j < headers.length; j++) {
-                            let value = (values[j] || '').trim();
-                            if (value.startsWith('"') && value.endsWith('"')) {
-                                value = value.substring(1, value.length - 1).replace(/""/g, '"');
-                            }
-                            // Use bracket notation to handle headers with spaces
-                            obj[headers[j]] = value;
-                        }
-                        result.push(obj);
-                    }
-                    return result;
-                }
+                // Cloudflare Workers API endpoint (relative path — same domain as the site)
+                const membersApiUrl = '/api/members';
                 
                 const displayMembers = () => {
                     membersGrid.innerHTML = '';
                     const paginationControls = document.getElementById('members-pagination');
 
                     if (allMembers.length === 0) {
-                        membersGrid.innerHTML = `<p class="text-gray-500 col-span-full">No members found.</p>`;
+                        membersGrid.innerHTML = `<p class="text-gray-500 col-span-full">No members found. <a href="register.html" class="text-purple-600 font-bold hover:underline">Be the first to join!</a></p>`;
                         paginationControls.style.display = 'none';
                         return;
                     }
@@ -801,15 +782,13 @@
                         const card = document.createElement('div');
                         card.className = 'group cursor-pointer';
                         // Sanitize user-submitted data before injecting into DOM to prevent XSS
-                        const safeName = DOMPurify.sanitize(member['Display Name']);
-                        const safePicUrl = DOMPurify.sanitize(member['Profile Picture URL'], { ALLOWED_URI_REGEXP: /^https?:/ });
-                        const safeTrainerId = DOMPurify.sanitize(member['Trainer ID']);
+                        const safeName = DOMPurify.sanitize(member.name);
+                        const safeAvatarUrl = DOMPurify.sanitize(member.avatarUrl, { ALLOWED_URI_REGEXP: /^(https?:|\/)/ });
                         card.innerHTML = `
                             <div class="bg-white rounded-lg shadow-md overflow-hidden transform group-hover:-translate-y-1 transition-transform duration-300">
-                                <img src="${safePicUrl}" alt="${safeName}" class="w-full h-40 object-cover">
+                                <img src="${safeAvatarUrl}" alt="${safeName}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/200x200/8B5CF6/ffffff?text=${encodeURIComponent(member.name.charAt(0))}';">
                                 <div class="p-3 text-center">
                                     <h3 class="font-bold text-md text-gray-800">${safeName}</h3>
-                                    <p class="text-xs text-gray-500">${safeTrainerId}</p>
                                 </div>
                             </div>
                         `;
@@ -822,15 +801,19 @@
                     document.getElementById('next-member-page').disabled = currentMemberPage === totalPages;
                 };
 
-                fetch(`${membersSheetUrl}&_=${new Date().getTime()}`, { cache: 'no-cache' })
-                    .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok'))
-                    .then(csvText => {
-                        allMembers = parseCSV(csvText).filter(member => member['Display Name']);
+                fetch(membersApiUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to load members.');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.result !== 'success') throw new Error(data.message);
+                        allMembers = data.members || [];
                         displayMembers();
                     })
                     .catch(error => {
                         console.error('Error loading members:', error);
-                        membersGrid.innerHTML = `<p class="text-red-500 col-span-full">Could not load member list.</p>`;
+                        membersGrid.innerHTML = `<p class="text-red-500 col-span-full">Could not load member list. Please try again later.</p>`;
                     });
                 
                 document.getElementById('prev-member-page').addEventListener('click', () => {
@@ -850,12 +833,12 @@
 
                 const showMemberModal = (member) => {
                     // Sanitize all user-submitted data before injecting into DOM to prevent XSS
-                    const safePicUrl = DOMPurify.sanitize(member['Profile Picture URL'], { ALLOWED_URI_REGEXP: /^https?:/ });
-                    const safeName = DOMPurify.sanitize(member['Display Name']);
-                    const safeFavUma = DOMPurify.sanitize(member['Favorite Umamusume']);
-                    const safeBio = DOMPurify.sanitize(member.Bio);
+                    const safeAvatarUrl = DOMPurify.sanitize(member.avatarUrl, { ALLOWED_URI_REGEXP: /^(https?:|\/)/ });
+                    const safeName = DOMPurify.sanitize(member.name);
+                    const safeFavUma = DOMPurify.sanitize(member.favoriteUma);
+                    const safeBio = DOMPurify.sanitize(member.bio);
                     memberModalContent.innerHTML = `
-                        <img src="${safePicUrl}" alt="${safeName}" class="w-full md:w-1/3 h-auto object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none">
+                        <img src="${safeAvatarUrl}" alt="${safeName}" class="w-full md:w-1/3 h-auto object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none" onerror="this.onerror=null;this.src='https://placehold.co/200x200/8B5CF6/ffffff?text=${encodeURIComponent(member.name.charAt(0))}';">
                         <div class="p-6 flex flex-col justify-between">
                             <div>
                                 <h2 class="text-2xl font-bold text-gray-900">${safeName}</h2>

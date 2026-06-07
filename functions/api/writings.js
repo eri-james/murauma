@@ -25,9 +25,10 @@ export async function onRequestGet(context) {
       .all();
 
     // Sanitize data before sending to client (defense in depth)
+    // Title is plain text — escape entities; Content may have HTML from Markdown
     const writings = results.map(row => ({
       id: row.id,
-      title: sanitizeHtml(row.title || ''),
+      title: sanitizeText(row.title || ''),
       author: sanitizeText(row.author_name || 'Unknown'),
       content: sanitizeHtml(row.content || ''),
       timestamp: row.created_at,
