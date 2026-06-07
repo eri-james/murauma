@@ -17,7 +17,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "murauma-db"
-database_id = "REPLACE_AFTER_CREATING_D1"  # Run: npx wrangler d1 create murauma-db
+database_id = "4919fadc-6878-4b79-a885-853f388bb31c"
 
 # ============================================================
 # R2 BUCKET (profile picture uploads)
