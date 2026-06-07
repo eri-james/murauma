@@ -192,8 +192,8 @@
             const submitButton = document.getElementById('submit-button');
             const statusMessage = document.getElementById('status-message');
             
-            // The URL you got from deploying your Google Apps Script as a web app.
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbzRjRDMNbB1f5VvdAjeORHEQiOzeQ26Zt8Po4Vul8nfdBS6Fg0tHds0YUAtYvswlZ4jog/exec';
+            // Cloudflare Workers API endpoint (relative path — same domain as the site)
+            const apiUrl = '/api/submit';
 
             if (form) {
                 form.addEventListener('submit', (e) => {
@@ -222,18 +222,25 @@
                         hCaptchaToken: hCaptchaResponse.value // Include CAPTCHA token for server verification
                     };
 
-                    fetch(webAppUrl, {
+                    fetch(apiUrl, {
                         method: 'POST',
                         body: JSON.stringify(formData),
                         headers: {
-                            'Content-Type': 'text/plain;charset=utf-8', 
+                            'Content-Type': 'application/json',
                         },
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok && response.status !== 400) {
+                            throw new Error(`Server error (${response.status})`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.result === 'success') {
                             statusMessage.innerHTML = `<p class="text-green-600 font-bold">${data.message}</p>`;
                             form.reset();
+                            // Reset hCaptcha widget after successful submission
+                            if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
                         } else {
                             throw new Error(data.message || 'An unknown error occurred.');
                         }

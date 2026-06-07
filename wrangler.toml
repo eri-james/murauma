@@ -1,0 +1,39 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "murauma"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Pages project config
+# The "main" field is not needed for Pages — functions are auto-discovered
+# from the /functions directory.
+
+# ============================================================
+# D1 DATABASE
+# ============================================================
+# After running `npx wrangler d1 create murauma-db`, paste the
+# database_id here. The binding name "DB" is what the Worker
+# functions use via context.env.DB.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "murauma-db"
+database_id = "REPLACE_AFTER_CREATING_D1"  # Run: npx wrangler d1 create murauma-db
+
+# ============================================================
+# R2 BUCKET (profile picture uploads)
+# ============================================================
+# After running `npx wrangler r2 bucket create murauma-assets`, 
+# the bucket becomes available via context.env.BUCKET.
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "murauma-assets"
+
+# ============================================================
+# SECRETS (set via CLI, never stored in repo)
+# ============================================================
+# hCaptcha secret key:
+#   npx wrangler secret put HCAPTCHA_SECRET
+#   Then paste: ES_5ac6268269644eb7a90d5865ad7f8a7b
+#
+# These are accessed in Workers via context.env.HCAPTCHA_SECRET

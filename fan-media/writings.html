@@ -118,14 +118,13 @@
             const modalBody = document.getElementById('modal-body');
             const closeModalButton = document.getElementById('close-writing-modal');
 
-            // URL of your deployed Google Apps Script
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwkEMe5cIE90uMkqogH3Fm4PagKOVBmYJZqMH12ozdv3sUU3gxfMOpMirJHu6d_kW1zHQ/exec';
+            // Cloudflare Workers API endpoint (relative path — same domain as the site)
+            const apiUrl = '/api/writings';
 
             const fetchWritings = async () => {
                 try {
-                    // Call the Apps Script with the 'listFiles' action
-                    const response = await fetch(`${webAppUrl}?action=listWritings`);
-                    if (!response.ok) throw new Error('Failed to list files via Apps Script.');
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) throw new Error('Failed to load writings.');
                     
                     const data = await response.json();
                     if (data.result !== 'success') throw new Error(data.message);
