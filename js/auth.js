@@ -48,6 +48,15 @@
             }
         });
 
+        // Show admin link for admin users
+        document.querySelectorAll('[data-auth="admin"]').forEach(el => {
+            if (user && user.role === 'admin') {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+
         // Set up logout buttons
         document.querySelectorAll('[data-auth="logout"]').forEach(btn => {
             btn.addEventListener('click', async (e) => {

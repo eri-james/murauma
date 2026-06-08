@@ -78,6 +78,9 @@
                     <path fill-rule="evenodd" d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
                 </svg>
             </a>
+            <a href="/admin/" data-auth="admin" class="hidden md:flex bg-red-600 text-white px-4 py-4 font-bold items-center space-x-2 hover:bg-red-700 self-stretch transition-colors">
+                <span>Admin</span>
+            </a>
             <a href="edit-profile.html" data-auth="logged-in" class="hidden hidden md:flex bg-purple-700 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-purple-800 self-stretch transition-colors">
                 <span data-auth="username"></span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
@@ -100,6 +103,7 @@
             <a href="register.html" data-auth="logged-out" class="block text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black transition-colors">Join Us</a>
             <a href="edit-profile.html" data-auth="logged-in" class="hidden block text-center py-3 px-4 text-sm bg-purple-700 hover:bg-purple-800 transition-colors">My Profile</a>
             <a href="login.html" data-auth="logged-out" class="hidden block text-center py-3 px-4 text-sm bg-blue-800 hover:bg-blue-900 transition-colors">Log In</a>
+            <a href="/admin/" data-auth="admin" class="hidden block text-center py-3 px-4 text-sm bg-red-600 hover:bg-red-700 transition-colors">Admin Dashboard</a>
             <button data-auth="logged-in" class="hidden block w-full text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black">Log Out</button>
         </div>
     </header>
@@ -781,6 +785,95 @@
     <!-- Shared mobile menu logic -->
     <script src="/js/mobile-menu.js"></script>
     <script src="/js/auth.js"></script>
+    <script>
+    // --- Dynamic Content Loading (Phase 4D) ---
+    // Loads News, Weekly Races, and Events from the API.
+    // If the API returns data, it replaces the static/hardcoded content.
+    // If the API is empty or fails, the existing static content remains as fallback.
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load dynamic news
+        fetch('/api/news')
+            .then(r => r.json())
+            .then(data => {
+                if (data.result === 'success' && data.news && data.news.length > 0) {
+                    // Replace homepage news section content
+                    const newsSection = document.querySelector('#news .space-y-6');
+                    if (newsSection) {
+                        newsSection.innerHTML = data.news.slice(0, 3).map(n => {
+                            const cat = n.category ? n.category.toUpperCase() : 'NEWS';
+                            const date = new Date(n.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+                            return `<div class="news-item pl-4 py-2">
+                                <p class="text-sm text-gray-500">${cat} | ${date}</p>
+                                <h3 class="font-bold text-lg text-gray-800">${DOMPurify.sanitize(n.title)}</h3>
+                                <p class="text-gray-600 text-justify">${DOMPurify.sanitize(n.description)}</p>
+                            </div>`;
+                        }).join('');
+                    }
+                    // Replace news archive page
+                    const newsList = document.getElementById('news-list');
+                    if (newsList) {
+                        newsList.innerHTML = data.news.map(n => {
+                            const cat = n.category ? n.category.toUpperCase() : 'NEWS';
+                            const date = new Date(n.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+                            const link = n.slug ? `./news-detail.html?slug=${encodeURIComponent(n.slug)}` : '#';
+                            return `<div class="p-4 rounded-lg border-l-4 border-pink-400 bg-gray-50">
+                                <p class="text-sm text-gray-500">${cat} | ${date}</p>
+                                <h3 class="font-bold text-xl text-gray-800 mt-1">${DOMPurify.sanitize(n.title)}</h3>
+                                <p class="text-gray-600 mt-2 text-justify">${DOMPurify.sanitize(n.description)}</p>
+                                <a href="${link}" class="inline-block mt-4 text-pink-600 font-bold hover:underline">Read More >></a>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+            })
+            .catch(() => {}); // Silent fail — static content remains
+
+        // Load dynamic weekly races
+        fetch('/api/weekly-races')
+            .then(r => r.json())
+            .then(data => {
+                if (data.result === 'success' && data.races && data.races.length > 0) {
+                    const racesSection = document.querySelector('#events .grid');
+                    if (racesSection) {
+                        racesSection.innerHTML = data.races.map(r => {
+                            const desc = DOMPurify.sanitize(r.description || 'No description available.');
+                            return `<div class="bg-gray-100 p-4 rounded-lg">
+                                <h3 class="font-bold text-xl text-blue-600">${DOMPurify.sanitize(r.title)}</h3>
+                                <p class="text-gray-700 mt-2"><strong>Track:</strong> ${DOMPurify.sanitize(r.track)}</p>
+                                <p class="text-gray-700"><strong>Deadline:</strong> ${DOMPurify.sanitize(r.deadline)}</p>
+                                <p class="mt-4 text-sm text-gray-600">${desc}</p>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+            })
+            .catch(() => {});
+
+        // Load dynamic events
+        fetch('/api/events')
+            .then(r => r.json())
+            .then(data => {
+                if (data.result === 'success' && data.events && data.events.length > 0) {
+                    const eventsGrid = document.querySelector('#page-events .grid');
+                    if (eventsGrid) {
+                        eventsGrid.innerHTML = data.events.map(e => {
+                            const img = e.imageUrl ? `<div class="relative overflow-hidden"><img src="${DOMPurify.sanitize(e.imageUrl)}" alt="${DOMPurify.sanitize(e.title)}" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy"></div>` : '';
+                            const link = e.slug ? `./event-detail.html?slug=${encodeURIComponent(e.slug)}` : '#';
+                            return `<a href="${link}" class="group block rounded-lg overflow-hidden shadow-lg">
+                                ${img}
+                                <div class="p-4 bg-gray-50">
+                                    <h3 class="font-bold text-lg text-gray-800 group-hover:text-red-600 transition-colors">${DOMPurify.sanitize(e.title)}</h3>
+                                    <p class="text-sm text-gray-500 mt-1">${DOMPurify.sanitize(e.startDate)}</p>
+                                    <p class="text-gray-600 mt-2 text-justify text-sm">${DOMPurify.sanitize(e.description)}</p>
+                                </div>
+                            </a>`;
+                        }).join('');
+                    }
+                }
+            })
+            .catch(() => {});
+    });
+    </script>
 </body>
 </html>
 
