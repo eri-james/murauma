@@ -8,6 +8,8 @@
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <!-- Tailwind CSS (built) -->
     <link rel="stylesheet" href="../css/tailwind.min.css">
+    <!-- DOMPurify for XSS prevention on user-submitted content -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,21 +24,18 @@
     <!-- =================================================================== -->
     <header class="bg-blue-700 text-white shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <!-- Logo / Site Title -->
             <a href="../index.html" class="px-4 py-3 hover:bg-blue-800 transition-colors">
                 <div class="flex flex-col items-start leading-tight">
                     <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
                     <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
                 </div>
             </a>
-            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
                 <a href="../index.html#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>News</span></a>
                 <a href="../index.html#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>About</span></a>
                 <a href="../index.html#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Events</span></a>
                 <a href="../index.html#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Community</span></a>
             </nav>
-            <!-- Mobile Menu Button (Hamburger) -->
             <div class="md:hidden px-4">
                 <button id="mobile-menu-button" class="text-white focus:outline-none">
                     <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -44,7 +43,6 @@
                 </button>
             </div>
         </div>
-        <!-- Mobile Menu (Hidden by default) -->
         <div id="mobile-menu" class="hidden md:hidden bg-blue-800">
             <a href="../index.html#news" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">News</a>
             <a href="../index.html#about" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">About</a>
@@ -58,39 +56,24 @@
     <!-- MAIN CONTENT AREA -->
     <!-- =================================================================== -->
     <main class="container mx-auto px-4 py-8">
-        <!-- Main content container with white background and green border -->
         <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-green-500">
             <!-- Page Header -->
             <div class="flex justify-between items-center mb-6">
                 <h1 class="header-skew">Music Library</h1>
-                <!-- Back button that uses browser history to go to the previous page -->
-                <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                    <span class="hidden md:inline">Back</span>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <a href="../submit-fan-media.html" class="bg-green-500 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                        <span class="hidden md:inline">Submit Music</span>
+                    </a>
+                    <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span class="hidden md:inline">Back</span>
+                    </button>
+                </div>
             </div>
-            <!-- Gallery Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- Dummy Music 1 -->
-                <a href="#" class="group block rounded-lg overflow-hidden shadow-lg">
-                    <div class="relative overflow-hidden">
-                        <img src="https://placehold.co/500x500/10B981/ffffff?text=Cover+Art" alt="Album Art" class="w-full object-cover aspect-square group-hover:scale-110 transition-transform duration-300">
-                    </div>
-                    <div class="p-3 bg-gray-50">
-                        <h3 class="font-bold text-md text-gray-800 truncate group-hover:text-green-600">GIRLS' LEGEND U (Remix)</h3>
-                        <p class="text-sm text-gray-500">by DJ Uma</p>
-                    </div>
-                </a>
-                <!-- Dummy Music 2 -->
-                <a href="#" class="group block rounded-lg overflow-hidden shadow-lg">
-                    <div class="relative overflow-hidden">
-                        <img src="https://placehold.co/500x500/10B981/ffffff?text=Cover+Art" alt="Album Art" class="w-full object-cover aspect-square group-hover:scale-110 transition-transform duration-300">
-                    </div>
-                    <div class="p-3 bg-gray-50">
-                        <h3 class="font-bold text-md text-gray-800 truncate group-hover:text-green-600">Umapyoi Densetsu (Lo-fi)</h3>
-                        <p class="text-sm text-gray-500">by Chill Beats</p>
-                    </div>
-                </a>
+            <!-- Music Gallery -->
+            <div id="music-gallery" class="space-y-6">
+                <p id="loading-message" class="text-center text-gray-500 py-8">Loading music...</p>
             </div>
         </div>
     </main>
@@ -100,7 +83,7 @@
     <!-- =================================================================== -->
     <footer class="bg-gray-800 text-white mt-12">
         <div class="container mx-auto px-4 py-6 text-center">
-            <p>© 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
             <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
             <div class="flex justify-center space-x-4 mt-4">
                 <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
@@ -113,6 +96,134 @@
     <!-- =================================================================== -->
     <!-- JAVASCRIPT LOGIC -->
     <!-- =================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gallery = document.getElementById('music-gallery');
+            const loadingMessage = document.getElementById('loading-message');
+
+            /**
+             * Detects if a URL is a Spotify link and returns embed URL.
+             */
+            function getSpotifyEmbedUrl(url) {
+                try {
+                    const u = new URL(url);
+                    if (u.hostname === 'open.spotify.com') {
+                        // e.g. open.spotify.com/track/XXX or open.spotify.com/album/XXX
+                        const parts = u.pathname.split('/').filter(Boolean);
+                        if (parts.length >= 2) {
+                            const type = parts[0]; // track, album, playlist
+                            const id = parts[1].split('?')[0];
+                            return `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`;
+                        }
+                    }
+                } catch {}
+                return null;
+            }
+
+            /**
+             * Detects if a URL is a SoundCloud link and returns embed URL.
+             */
+            function getSoundCloudEmbedUrl(url) {
+                try {
+                    const u = new URL(url);
+                    if (u.hostname === 'soundcloud.com' || u.hostname.endsWith('.soundcloud.com')) {
+                        return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%2310b981&auto_play=false&hide_related=true&show_comments=true&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
+                    }
+                } catch {}
+                return null;
+            }
+
+            /**
+             * Detects if a URL is a YouTube link and returns embed URL (for music videos).
+             */
+            function getYouTubeEmbedUrl(url) {
+                try {
+                    const u = new URL(url);
+                    if (u.hostname.includes('youtube.com') && u.searchParams.get('v')) {
+                        return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
+                    }
+                    if (u.hostname === 'youtu.be') {
+                        return `https://www.youtube.com/embed/${u.pathname.slice(1).split('/')[0].split('?')[0]}`;
+                    }
+                } catch {}
+                return null;
+            }
+
+            const fetchMusic = async () => {
+                try {
+                    const response = await fetch('/api/fan-media?type=music');
+                    if (!response.ok) throw new Error('Failed to load music.');
+                    const data = await response.json();
+                    if (data.result !== 'success') throw new Error(data.message);
+
+                    const items = data.items || [];
+                    if (items.length === 0) {
+                        loadingMessage.textContent = 'No music has been submitted yet. Be the first to share your music!';
+                        return;
+                    }
+
+                    gallery.innerHTML = '';
+
+                    items.forEach(item => {
+                        const safeTitle = DOMPurify.sanitize(item.title);
+                        const safeAuthor = DOMPurify.sanitize(item.author);
+                        const safeDesc = DOMPurify.sanitize(item.description);
+
+                        const card = document.createElement('div');
+                        card.className = 'bg-gray-50 rounded-lg shadow-md overflow-hidden p-4 md:p-6';
+
+                        // Check for embeddable URLs
+                        const spotifyEmbed = getSpotifyEmbedUrl(item.url);
+                        const soundcloudEmbed = getSoundCloudEmbedUrl(item.url);
+                        const youtubeEmbed = getYouTubeEmbedUrl(item.url);
+
+                        let embedHtml = '';
+
+                        if (spotifyEmbed) {
+                            embedHtml = `<iframe src="${spotifyEmbed}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" class="rounded-lg"></iframe>`;
+                        } else if (soundcloudEmbed) {
+                            embedHtml = `<iframe src="${soundcloudEmbed}" width="100%" height="166" frameBorder="0" allowfullscreen="" allow="autoplay" loading="lazy" class="rounded-lg"></iframe>`;
+                        } else if (youtubeEmbed) {
+                            embedHtml = `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:0.5rem;"><iframe src="${youtubeEmbed}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+                        } else {
+                            // Generic link card
+                            embedHtml = `
+                                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-4 p-4 bg-white rounded-lg border border-gray-200 hover:border-green-400 hover:shadow-md transition-all group">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 16 16"><path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13c0-1.104 1.12-2 2.5-2s2.5.896 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2z"/><path fill-rule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/><path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4V2.905z"/></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-gray-800 group-hover:text-green-600 truncate">${safeTitle}</p>
+                                        <p class="text-sm text-gray-500">Listen on external site</p>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400 group-hover:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                </a>
+                            `;
+                        }
+
+                        card.innerHTML = `
+                            ${embedHtml}
+                            <div class="mt-3">
+                                <h3 class="font-bold text-lg text-gray-800">${safeTitle}</h3>
+                                <p class="text-sm text-gray-500">by ${safeAuthor}</p>
+                                ${safeDesc ? `<p class="text-sm text-gray-600 mt-1">${safeDesc}</p>` : ''}
+                            </div>
+                        `;
+
+                        gallery.appendChild(card);
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching music:', error);
+                    loadingMessage.textContent = 'Could not load music. Please try again later.';
+                    loadingMessage.classList.add('text-red-500');
+                }
+            };
+
+            fetchMusic();
+        });
+    </script>
     <script src="../js/mobile-menu.js"></script>
+    <script src="../js/auth.js"></script>
 </body>
 </html>

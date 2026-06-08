@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Fan Media - MURA</title>
+    <!-- Favicon Link -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- Tailwind CSS (built) -->
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <!-- hCaptcha for bot prevention -->
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Logo / Site Title -->
+            <a href="index.html" class="px-4 py-3 hover:bg-blue-800 transition-colors">
+                <div class="flex flex-col items-start leading-tight">
+                    <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
+                    <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
+                </div>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
+                <a href="index.html#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>News</span></a>
+                <a href="index.html#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>About</span></a>
+                <a href="index.html#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Events</span></a>
+                <a href="index.html#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Community</span></a>
+            </nav>
+            
+            <!-- Join Us / Profile Button -->
+            <a href="register.html" data-auth="logged-out" class="hidden md:flex bg-gray-900 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-black self-stretch transition-colors">
+                <span>Join Us</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg>
+            </a>
+            <a href="edit-profile.html" data-auth="logged-in" class="hidden hidden md:flex bg-purple-700 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-purple-800 self-stretch transition-colors">
+                <span data-auth="username"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden px-4">
+                <button id="mobile-menu-button" class="text-white focus:outline-none">
+                    <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-800">
+            <a href="index.html#news" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">News</a>
+            <a href="index.html#about" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">About</a>
+            <a href="index.html#events" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Events</a>
+            <a href="index.html#community" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Community</a>
+            <a href="register.html" data-auth="logged-out" class="block text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black transition-colors">Join Us</a>
+            <a href="edit-profile.html" data-auth="logged-in" class="hidden block text-center py-3 px-4 text-sm bg-purple-700 hover:bg-purple-800 transition-colors">My Profile</a>
+            <a href="login.html" data-auth="logged-out" class="hidden block text-center py-3 px-4 text-sm bg-blue-800 hover:bg-blue-900 transition-colors">Log In</a>
+            <button data-auth="logged-in" class="hidden block w-full text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black">Log Out</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Submission Form Box -->
+        <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-yellow-400 max-w-2xl mx-auto">
+            
+            <!-- Form Header -->
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Share Your Fan Media</h1>
+            <p class="text-md text-gray-600 mb-8">Share your creative works with the MURA community! Post links to your artwork, videos, or music. All submissions require admin approval before appearing publicly.</p>
+
+            <!-- Not logged in notice -->
+            <div id="not-logged-in-notice" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded hidden">
+                <p class="text-sm text-yellow-800">You must be logged in to submit fan media. Please <a href="login.html" class="font-medium text-blue-600 hover:underline">log in</a> or <a href="register.html" class="font-medium text-blue-600 hover:underline">register</a> first.</p>
+            </div>
+
+            <!-- Submission Form -->
+            <form id="fan-media-form" class="space-y-6">
+                
+                <!-- Media Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Media Type <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="mediaType" value="art" class="peer sr-only" checked>
+                            <div class="p-3 text-center rounded-lg border-2 border-gray-200 peer-checked:border-yellow-400 peer-checked:bg-yellow-50 hover:bg-gray-50 transition-colors">
+                                <span class="text-2xl block mb-1">&#127912;</span>
+                                <span class="font-bold text-sm text-gray-700">Art</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="mediaType" value="video" class="peer sr-only">
+                            <div class="p-3 text-center rounded-lg border-2 border-gray-200 peer-checked:border-red-400 peer-checked:bg-red-50 hover:bg-gray-50 transition-colors">
+                                <span class="text-2xl block mb-1">&#127909;</span>
+                                <span class="font-bold text-sm text-gray-700">Video</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer">
+                            <input type="radio" name="mediaType" value="music" class="peer sr-only">
+                            <div class="p-3 text-center rounded-lg border-2 border-gray-200 peer-checked:border-green-400 peer-checked:bg-green-50 hover:bg-gray-50 transition-colors">
+                                <span class="text-2xl block mb-1">&#127925;</span>
+                                <span class="font-bold text-sm text-gray-700">Music</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <div>
+                    <label for="mediaTitle" class="block text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
+                    <input type="text" name="mediaTitle" id="mediaTitle" required placeholder="Give your creation a title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+
+                <!-- URL -->
+                <div>
+                    <label for="mediaUrl" class="block text-sm font-medium text-gray-700">Link / URL <span class="text-red-500">*</span></label>
+                    <p class="text-xs text-gray-500 mb-1" id="url-hint">Paste the link to your content. YouTube, Spotify, SoundCloud, or direct image links are supported.</p>
+                    <input type="url" name="mediaUrl" id="mediaUrl" required placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+
+                <!-- Description (optional) -->
+                <div>
+                    <label for="mediaDescription" class="block text-sm font-medium text-gray-700">Description <span class="text-gray-400 font-normal">(optional)</span></label>
+                    <p class="text-xs text-gray-500 mb-1">Tell us about your creation. Max 500 characters.</p>
+                    <textarea id="mediaDescription" name="mediaDescription" rows="3" maxlength="500" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="A short description of your work..."></textarea>
+                </div>
+
+                <!-- hCaptcha Widget -->
+                <div class="pt-4">
+                    <div class="h-captcha" data-sitekey="638c202c-9f8a-47f4-8b8c-912c48fc2ec6" data-theme="light"></div>
+                    <p id="captcha-error" class="text-red-600 text-sm mt-2 hidden">Please complete the CAPTCHA verification.</p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button id="submit-button" type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Submit Fan Media
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Status Message Area -->
+            <div id="status-message" class="mt-6 text-center"></div>
+
+            <!-- Back Button -->
+            <div class="mt-12 text-center">
+                <a href="index.html" class="text-blue-700 hover:text-blue-800 font-medium inline-flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span>Back to Main Site</span>
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- Check auth state ---
+            let isLoggedIn = false;
+            try {
+                const meResp = await fetch('/api/me');
+                const meData = await meResp.json();
+                if (meData.result === 'success' && meData.user) {
+                    isLoggedIn = true;
+                } else {
+                    document.getElementById('not-logged-in-notice').classList.remove('hidden');
+                    document.getElementById('fan-media-form').style.display = 'none';
+                }
+            } catch (err) {
+                document.getElementById('not-logged-in-notice').classList.remove('hidden');
+                document.getElementById('fan-media-form').style.display = 'none';
+            }
+
+            // --- Update URL hint based on selected type ---
+            const typeRadios = document.querySelectorAll('input[name="mediaType"]');
+            const urlHint = document.getElementById('url-hint');
+            const hints = {
+                art: 'Paste a link to your artwork (e.g. DeviantArt, Twitter image, imgur, or direct image URL).',
+                video: 'Paste a YouTube video link. It will be embedded as a playable video on the gallery page.',
+                music: 'Paste a Spotify or SoundCloud link. It will be embedded as a playable widget on the music page.'
+            };
+            typeRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    urlHint.textContent = hints[radio.value] || hints.art;
+                });
+            });
+
+            // --- Form Submission Logic ---
+            const form = document.getElementById('fan-media-form');
+            const submitButton = document.getElementById('submit-button');
+            const statusMessage = document.getElementById('status-message');
+            const apiUrl = '/api/fan-media/submit';
+
+            if (form && isLoggedIn) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
+                    statusMessage.textContent = '';
+
+                    // Verify hCaptcha
+                    const hCaptchaResponse = document.querySelector('[name="h-captcha-response"]');
+                    const captchaError = document.getElementById('captcha-error');
+                    if (!hCaptchaResponse || !hCaptchaResponse.value) {
+                        captchaError.classList.remove('hidden');
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Fan Media';
+                        return;
+                    }
+                    captchaError.classList.add('hidden');
+
+                    // Get selected type
+                    const selectedType = document.querySelector('input[name="mediaType"]:checked').value;
+
+                    const formData = {
+                        type: selectedType,
+                        title: document.getElementById('mediaTitle').value,
+                        description: document.getElementById('mediaDescription').value || null,
+                        url: document.getElementById('mediaUrl').value,
+                        hCaptchaToken: hCaptchaResponse.value
+                    };
+
+                    fetch(apiUrl, {
+                        method: 'POST',
+                        body: JSON.stringify(formData),
+                        headers: { 'Content-Type': 'application/json' },
+                    })
+                    .then(response => {
+                        if (!response.ok && response.status !== 400) {
+                            throw new Error(`Server error (${response.status})`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.result === 'success') {
+                            statusMessage.innerHTML = `<p class="text-green-600 font-bold">${data.message}</p>`;
+                            form.reset();
+                            if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
+                            // Reset type selection visual
+                            document.querySelector('input[name="mediaType"][value="art"]').checked = true;
+                            urlHint.textContent = hints.art;
+                        } else {
+                            throw new Error(data.message || 'An unknown error occurred.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        statusMessage.innerHTML = `<p class="text-red-600 font-bold">An error occurred: ${error.message}</p>`;
+                    })
+                    .finally(() => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Fan Media';
+                    });
+                });
+            }
+        });
+    </script>
+    <script src="/js/mobile-menu.js"></script>
+    <script src="/js/auth.js"></script>
+</body>
+</html>

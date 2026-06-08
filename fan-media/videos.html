@@ -8,6 +8,8 @@
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <!-- Tailwind CSS (built) -->
     <link rel="stylesheet" href="../css/tailwind.min.css">
+    <!-- DOMPurify for XSS prevention on user-submitted content -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +17,10 @@
     <link rel="preload" href="../fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="../css/fonts.css">
     <link rel="stylesheet" href="../css/common.css">
+    <style>
+        .video-embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 0.5rem 0.5rem 0 0; }
+        .video-embed-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    </style>
 </head>
 <body>
     <!-- =================================================================== -->
@@ -22,21 +28,18 @@
     <!-- =================================================================== -->
     <header class="bg-blue-700 text-white shadow-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <!-- Logo / Site Title -->
             <a href="../index.html" class="px-4 py-3 hover:bg-blue-800 transition-colors">
                 <div class="flex flex-col items-start leading-tight">
                     <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
                     <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
                 </div>
             </a>
-            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
                 <a href="../index.html#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>News</span></a>
                 <a href="../index.html#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>About</span></a>
                 <a href="../index.html#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Events</span></a>
                 <a href="../index.html#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Community</span></a>
             </nav>
-            <!-- Mobile Menu Button (Hamburger) -->
             <div class="md:hidden px-4">
                 <button id="mobile-menu-button" class="text-white focus:outline-none">
                     <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -44,7 +47,6 @@
                 </button>
             </div>
         </div>
-        <!-- Mobile Menu (Hidden by default) -->
         <div id="mobile-menu" class="hidden md:hidden bg-blue-800">
             <a href="../index.html#news" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">News</a>
             <a href="../index.html#about" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">About</a>
@@ -58,49 +60,24 @@
     <!-- MAIN CONTENT AREA -->
     <!-- =================================================================== -->
     <main class="container mx-auto px-4 py-8">
-        <!-- Main content container with white background and red border -->
         <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
             <!-- Page Header -->
             <div class="flex justify-between items-center mb-6">
                 <h1 class="header-skew">Video Gallery</h1>
-                <!-- Back button that uses browser history to go to the previous page -->
-                <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                    <span class="hidden md:inline">Back</span>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <a href="../submit-fan-media.html" class="bg-red-500 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                        <span class="hidden md:inline">Submit Video</span>
+                    </a>
+                    <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                        <span class="hidden md:inline">Back</span>
+                    </button>
+                </div>
             </div>
-            <!-- Gallery Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Dummy Video 1 -->
-                <a href="#" class="group block rounded-lg overflow-hidden shadow-lg">
-                    <div class="relative overflow-hidden">
-                        <img src="https://img.youtube.com/vi/PVwF6duN6O4/hqdefault.jpg" alt="Video Thumbnail" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy">
-                    </div>
-                    <div class="p-4 bg-gray-50">
-                        <h3 class="font-bold text-lg text-gray-800 truncate group-hover:text-red-600">Merdeka Cup Highlights</h3>
-                        <p class="text-sm text-gray-500">by MURA Official</p>
-                    </div>
-                </a>
-                <!-- Dummy Video 2 -->
-                <a href="#" class="group block rounded-lg overflow-hidden shadow-lg">
-                    <div class="relative overflow-hidden">
-                        <img src="https://img.youtube.com/vi/K1W2Kqv1Z0I/hqdefault.jpg" alt="Video Thumbnail" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy">
-                    </div>
-                    <div class="p-4 bg-gray-50">
-                        <h3 class="font-bold text-lg text-gray-800 truncate group-hover:text-red-600">Top 10 Gacha Pulls</h3>
-                        <p class="text-sm text-gray-500">by MemberCreator</p>
-                    </div>
-                </a>
-                <!-- Dummy Video 3 -->
-                 <a href="#" class="group block rounded-lg overflow-hidden shadow-lg">
-                    <div class="relative overflow-hidden">
-                        <img src="https://img.youtube.com/vi/n6gUfQu_w1A/hqdefault.jpg" alt="Video Thumbnail" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy">
-                    </div>
-                    <div class="p-4 bg-gray-50">
-                        <h3 class="font-bold text-lg text-gray-800 truncate group-hover:text-red-600">URA Finals Speedrun</h3>
-                        <p class="text-sm text-gray-500">by ProGamer</p>
-                    </div>
-                </a>
+            <!-- Video Gallery Grid -->
+            <div id="video-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p id="loading-message" class="col-span-full text-center text-gray-500 py-8">Loading videos...</p>
             </div>
         </div>
     </main>
@@ -110,7 +87,7 @@
     <!-- =================================================================== -->
     <footer class="bg-gray-800 text-white mt-12">
         <div class="container mx-auto px-4 py-6 text-center">
-            <p>© 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
             <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
             <div class="flex justify-center space-x-4 mt-4">
                 <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
@@ -123,6 +100,100 @@
     <!-- =================================================================== -->
     <!-- JAVASCRIPT LOGIC -->
     <!-- =================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gallery = document.getElementById('video-gallery');
+            const loadingMessage = document.getElementById('loading-message');
+
+            /**
+             * Extracts YouTube video ID from various URL formats.
+             * Supports: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+             */
+            function extractYouTubeId(url) {
+                try {
+                    const u = new URL(url);
+                    // youtube.com/watch?v=ID
+                    if (u.hostname.includes('youtube.com') && u.searchParams.get('v')) {
+                        return u.searchParams.get('v');
+                    }
+                    // youtu.be/ID
+                    if (u.hostname === 'youtu.be') {
+                        return u.pathname.slice(1).split('/')[0].split('?')[0];
+                    }
+                    // youtube.com/embed/ID
+                    if (u.hostname.includes('youtube.com') && u.pathname.startsWith('/embed/')) {
+                        return u.pathname.split('/')[2]?.split('?')[0];
+                    }
+                } catch {}
+                return null;
+            }
+
+            const fetchVideos = async () => {
+                try {
+                    const response = await fetch('/api/fan-media?type=video');
+                    if (!response.ok) throw new Error('Failed to load videos.');
+                    const data = await response.json();
+                    if (data.result !== 'success') throw new Error(data.message);
+
+                    const items = data.items || [];
+                    if (items.length === 0) {
+                        loadingMessage.textContent = 'No videos have been submitted yet. Be the first to share your video!';
+                        return;
+                    }
+
+                    gallery.innerHTML = '';
+
+                    items.forEach(item => {
+                        const safeTitle = DOMPurify.sanitize(item.title);
+                        const safeAuthor = DOMPurify.sanitize(item.author);
+                        const safeDesc = DOMPurify.sanitize(item.description);
+                        const ytId = extractYouTubeId(item.url);
+
+                        const card = document.createElement('div');
+                        card.className = 'rounded-lg overflow-hidden shadow-lg bg-gray-100';
+
+                        if (ytId) {
+                            // YouTube embed
+                            card.innerHTML = `
+                                <div class="video-embed-container">
+                                    <iframe src="https://www.youtube.com/embed/${ytId}" title="${safeTitle}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                                </div>
+                                <div class="p-4 bg-gray-50">
+                                    <h3 class="font-bold text-lg text-gray-800 truncate">${safeTitle}</h3>
+                                    <p class="text-sm text-gray-500">by ${safeAuthor}</p>
+                                    ${safeDesc ? `<p class="text-xs text-gray-400 mt-1 line-clamp-2">${safeDesc}</p>` : ''}
+                                </div>
+                            `;
+                        } else {
+                            // Link card for non-YouTube videos
+                            card.innerHTML = `
+                                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block">
+                                    <div class="relative aspect-video bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
+                                </a>
+                                <div class="p-4 bg-gray-50">
+                                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="font-bold text-lg text-gray-800 hover:text-red-600 truncate block">${safeTitle}</a>
+                                    <p class="text-sm text-gray-500">by ${safeAuthor}</p>
+                                    ${safeDesc ? `<p class="text-xs text-gray-400 mt-1 line-clamp-2">${safeDesc}</p>` : ''}
+                                </div>
+                            `;
+                        }
+
+                        gallery.appendChild(card);
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching videos:', error);
+                    loadingMessage.textContent = 'Could not load videos. Please try again later.';
+                    loadingMessage.classList.add('text-red-500');
+                }
+            };
+
+            fetchVideos();
+        });
+    </script>
     <script src="../js/mobile-menu.js"></script>
+    <script src="../js/auth.js"></script>
 </body>
 </html>
