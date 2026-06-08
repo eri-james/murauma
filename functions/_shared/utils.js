@@ -248,6 +248,154 @@ function sanitizeHtml(html) {
   });
 }
 
+// ============================================================
+// RICH HTML SANITIZATION (for Quill.js / guide content)
+// ============================================================
+
+/**
+ * Allowed HTML tags for rich text content (Quill.js-generated).
+ * Broader than the basic ALLOWED_TAGS used for Markdown content.
+ */
+const RICH_ALLOWED_TAGS = new Set([
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'p', 'br', 'hr',
+  'em', 'strong', 'b', 'i', 'u', 's', 'del', 'ins',
+  'ul', 'ol', 'li',
+  'blockquote', 'pre', 'code',
+  'a', 'img',
+  'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'sup', 'sub',
+  'span', 'div',
+  'iframe', // For embedded YouTube/Spotify (restricted below)
+]);
+
+/**
+ * Allowed HTML attributes per tag for rich content.
+ * Includes class/style for Quill formatting.
+ */
+const RICH_ALLOWED_ATTRS = {
+  a: new Set(['href', 'title', 'target', 'rel']),
+  img: new Set(['src', 'alt', 'title', 'width', 'height', 'class', 'style']),
+  td: new Set(['align', 'colspan', 'rowspan']),
+  th: new Set(['align', 'colspan', 'rowspan']),
+  iframe: new Set(['src', 'title', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'loading']),
+  span: new Set(['class', 'style']),
+  div: new Set(['class', 'style']),
+  p: new Set(['class', 'style']),
+  h1: new Set(['class', 'style']),
+  h2: new Set(['class', 'style']),
+  h3: new Set(['class', 'style']),
+  h4: new Set(['class', 'style']),
+  h5: new Set(['class', 'style']),
+  h6: new Set(['class', 'style']),
+  pre: new Set(['class']),
+  code: new Set(['class']),
+  blockquote: new Set(['class', 'style']),
+  ul: new Set(['class']),
+  ol: new Set(['class']),
+  li: new Set(['class']),
+};
+
+/**
+ * Allowed iframe src patterns (YouTube, Spotify, SoundCloud embeds only).
+ */
+const ALLOWED_IFRAME_SRC = [
+  'https://www.youtube.com/embed/',
+  'https://open.spotify.com/embed/',
+  'https://w.soundcloud.com/player/',
+];
+
+/**
+ * Sanitizes rich HTML content (from Quill.js editor) using a whitelist approach.
+ * Broader than sanitizeHtml — allows span, div, class, style, and iframes.
+ * Still blocks dangerous schemes, scripts, and event handlers.
+ */
+function sanitizeRichHtml(html) {
+  if (typeof html !== 'string') return '';
+
+  return html.replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*\/?>/g, (fullMatch, tagName) => {
+    const lowerTag = tagName.toLowerCase();
+
+    // Closing tags
+    if (fullMatch.startsWith('</')) {
+      if (RICH_ALLOWED_TAGS.has(lowerTag)) {
+        return `</${lowerTag}>`;
+      }
+      return '';
+    }
+
+    // Opening or self-closing tags
+    if (!RICH_ALLOWED_TAGS.has(lowerTag)) {
+      return '';
+    }
+
+    // Parse attributes
+    const attrRegex = /\s+([a-zA-Z][a-zA-Z0-9-]*)\s*(?:=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?/g;
+    const allowedTagAttrs = RICH_ALLOWED_ATTRS[lowerTag] || new Set();
+    const safeAttrs = [];
+    let match;
+
+    while ((match = attrRegex.exec(fullMatch)) !== null) {
+      const attrName = match[1].toLowerCase();
+
+      // Block all event handler attributes (onclick, onerror, etc.)
+      if (attrName.startsWith('on')) continue;
+
+      if (!allowedTagAttrs.has(attrName)) continue;
+
+      // Extract the attribute value
+      const valueMatch = match[0].match(/=\s*(?:"([^"]*)"|'([^']*)'|(\S+))/);
+      let value = valueMatch ? (valueMatch[1] ?? valueMatch[2] ?? valueMatch[3]) : '';
+
+      // Sanitize URL attributes (href, src)
+      if (attrName === 'href' || attrName === 'src') {
+        // Special handling for iframe src — only allow known embed domains
+        if (lowerTag === 'iframe' && attrName === 'src') {
+          const isAllowed = ALLOWED_IFRAME_SRC.some(pattern => value.startsWith(pattern));
+          if (!isAllowed) continue;
+        } else if (DANGEROUS_URL_SCHEMES.test(value.trim())) {
+          continue;
+        }
+      }
+
+      // Sanitize style attributes — strip url() and expression() to prevent CSS exfiltration
+      if (attrName === 'style') {
+        if (/url\s*\(/i.test(value) || /expression\s*\(/i.test(value)) {
+          continue;
+        }
+      }
+
+      safeAttrs.push(`${attrName}="${value.replace(/"/g, '&quot;')}"`);
+    }
+
+    const isSelfClosing = fullMatch.endsWith('/>') || lowerTag === 'br' || lowerTag === 'hr' || lowerTag === 'img';
+    if (isSelfClosing) {
+      return safeAttrs.length > 0 ? `<${lowerTag} ${safeAttrs.join(' ')} />` : `<${lowerTag} />`;
+    }
+    return safeAttrs.length > 0 ? `<${lowerTag} ${safeAttrs.join(' ')}>` : `<${lowerTag}>`;
+  });
+}
+
+// ============================================================
+// SLUG GENERATION
+// ============================================================
+
+/**
+ * Generates a URL-friendly slug from a title.
+ * - Lowercase, hyphens instead of spaces
+ * - Only alphanumeric + hyphens
+ * - Max 100 characters
+ */
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')   // Remove non-word chars (except spaces/hyphens)
+    .replace(/[\s_]+/g, '-')    // Replace spaces/underscores with hyphens
+    .replace(/-+/g, '-')        // Collapse multiple hyphens
+    .replace(/^-+|-+$/g, '')    // Trim hyphens
+    .substring(0, 100);         // Limit length
+}
+
 /**
  * Sanitizes plain text by escaping HTML entities.
  * Use for fields that should be plain text only (names, bios, etc.)
@@ -743,7 +891,9 @@ export {
   validateUsername,
   validatePassword,
   sanitizeHtml,
+  sanitizeRichHtml,
   sanitizeText,
+  generateSlug,
   checkRateLimit,
   getClientKey,
   verifyHcaptcha,

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write a Guide - MURA</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <!-- Quill.js Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <!-- hCaptcha -->
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <link rel="stylesheet" href="/css/common.css">
+    <style>
+        /* Quill editor container */
+        #editor-container {
+            height: 400px;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            font-size: 15px;
+        }
+        @media (min-width: 768px) {
+            #editor-container { height: 550px; }
+        }
+        /* Quill content area */
+        .ql-editor {
+            min-height: 300px;
+        }
+        .ql-editor img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        /* Fix Quill toolbar wrapping on mobile */
+        .ql-toolbar.ql-snow {
+            white-space: normal;
+        }
+        /* Word count */
+        #word-count {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="px-4 py-3 hover:bg-blue-800 transition-colors">
+                <div class="flex flex-col items-start leading-tight">
+                    <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
+                    <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
+                </div>
+            </a>
+            <nav class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
+                <a href="index.html#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>News</span></a>
+                <a href="index.html#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>About</span></a>
+                <a href="index.html#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Events</span></a>
+                <a href="index.html#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch"><span class="text-sm">&rsaquo;</span><span>Community</span></a>
+            </nav>
+            <a href="register.html" data-auth="logged-out" class="hidden md:flex bg-gray-900 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-black self-stretch transition-colors">
+                <span>Join Us</span>
+            </a>
+            <a href="edit-profile.html" data-auth="logged-in" class="hidden hidden md:flex bg-purple-700 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-purple-800 self-stretch transition-colors">
+                <span data-auth="username"></span>
+            </a>
+            <div class="md:hidden px-4">
+                <button id="mobile-menu-button" class="text-white focus:outline-none">
+                    <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-800">
+            <a href="index.html#news" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">News</a>
+            <a href="index.html#about" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">About</a>
+            <a href="index.html#events" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Events</a>
+            <a href="index.html#community" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Community</a>
+            <a href="register.html" data-auth="logged-out" class="block text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black transition-colors">Join Us</a>
+            <a href="edit-profile.html" data-auth="logged-in" class="hidden block text-center py-3 px-4 text-sm bg-purple-700 hover:bg-purple-800 transition-colors">My Profile</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-purple-500 max-w-4xl mx-auto">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Write a Game Guide</h1>
+            <p class="text-md text-gray-600 mb-8">Share your knowledge with the MURA community! Write a guide to help other trainers. Your guide will need admin approval before being published.</p>
+
+            <!-- Not logged in notice -->
+            <div id="not-logged-in-notice" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded hidden">
+                <p class="text-sm text-yellow-800">You must be logged in to write a guide. Please <a href="login.html" class="font-medium text-blue-600 hover:underline">log in</a> or <a href="register.html" class="font-medium text-blue-600 hover:underline">register</a> first.</p>
+            </div>
+
+            <form id="guide-form" class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="guideTitle" class="block text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
+                    <input type="text" id="guideTitle" required placeholder="e.g. Beginner's Guide to Training Speed Types" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                </div>
+
+                <!-- Rich Text Editor -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Content <span class="text-red-500">*</span></label>
+                    <p class="text-xs text-gray-500 mb-2">Use the rich text editor below to write your guide. You can add images by clicking the image icon in the toolbar. Images will be resized automatically.</p>
+                    <div id="editor-container" class="rounded-md border border-gray-300"></div>
+                    <div id="word-count">0 characters</div>
+                </div>
+
+                <!-- hCaptcha -->
+                <div class="pt-4">
+                    <div class="h-captcha" data-sitekey="638c202c-9f8a-47f4-8b8c-912c48fc2ec6" data-theme="light"></div>
+                    <p id="captcha-error" class="text-red-600 text-sm mt-2 hidden">Please complete the CAPTCHA verification.</p>
+                </div>
+
+                <!-- Submit -->
+                <div class="pt-4">
+                    <button id="submit-button" type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Submit Guide
+                    </button>
+                </div>
+            </form>
+
+            <div id="status-message" class="mt-6 text-center"></div>
+
+            <div class="mt-8 text-center">
+                <a href="guides.html" class="text-blue-700 hover:text-blue-800 font-medium inline-flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span>Browse Guides</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- Check auth ---
+            let isLoggedIn = false;
+            try {
+                const meResp = await fetch('/api/me');
+                const meData = await meResp.json();
+                if (meData.result === 'success' && meData.user) {
+                    isLoggedIn = true;
+                } else {
+                    document.getElementById('not-logged-in-notice').classList.remove('hidden');
+                    document.getElementById('guide-form').style.display = 'none';
+                }
+            } catch (err) {
+                document.getElementById('not-logged-in-notice').classList.remove('hidden');
+                document.getElementById('guide-form').style.display = 'none';
+            }
+
+            // --- Initialize Quill ---
+            const quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Write your guide here...',
+                modules: {
+                    toolbar: {
+                        container: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            ['blockquote', 'code-block'],
+                            ['link', 'image'],
+                            ['clean']
+                        ],
+                        handlers: {
+                            // Custom image handler: resize before inserting
+                            image: function() {
+                                const input = document.createElement('input');
+                                input.setAttribute('type', 'file');
+                                input.setAttribute('accept', 'image/png, image/jpeg, image/gif, image/webp');
+                                input.click();
+
+                                input.onchange = () => {
+                                    const file = input.files[0];
+                                    if (!file) return;
+
+                                    // Resize image to max 800px width
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                        const img = new Image();
+                                        img.onload = () => {
+                                            let w = img.width, h = img.height;
+                                            const maxW = 800;
+                                            if (w > maxW) {
+                                                const ratio = maxW / w;
+                                                w = maxW;
+                                                h = Math.round(h * ratio);
+                                            }
+                                            const canvas = document.createElement('canvas');
+                                            canvas.width = w;
+                                            canvas.height = h;
+                                            const ctx = canvas.getContext('2d');
+                                            ctx.drawImage(img, 0, 0, w, h);
+                                            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                                            const range = quill.getSelection(true);
+                                            quill.insertEmbed(range.index, 'image', dataUrl);
+                                            quill.setSelection(range.index + 1);
+                                        };
+                                        img.src = e.target.result;
+                                    };
+                                    reader.readAsDataURL(file);
+                                };
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- Word count ---
+            const wordCount = document.getElementById('word-count');
+            quill.on('text-change', () => {
+                const text = quill.getText();
+                wordCount.textContent = `${text.trim().length} characters`;
+            });
+
+            // --- Form submission ---
+            const form = document.getElementById('guide-form');
+            const submitButton = document.getElementById('submit-button');
+            const statusMessage = document.getElementById('status-message');
+
+            if (form && isLoggedIn) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
+                    statusMessage.textContent = '';
+
+                    // hCaptcha check
+                    const hCaptchaResponse = document.querySelector('[name="h-captcha-response"]');
+                    const captchaError = document.getElementById('captcha-error');
+                    if (!hCaptchaResponse || !hCaptchaResponse.value) {
+                        captchaError.classList.remove('hidden');
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Guide';
+                        return;
+                    }
+                    captchaError.classList.add('hidden');
+
+                    const title = document.getElementById('guideTitle').value.trim();
+                    const content = quill.root.innerHTML; // Get HTML content from Quill
+
+                    if (!title) {
+                        statusMessage.innerHTML = '<p class="text-red-600 font-bold">Please enter a title.</p>';
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Guide';
+                        return;
+                    }
+
+                    // Check if editor is empty (Quill puts <p><br></p> in empty editors)
+                    const textContent = quill.getText().trim();
+                    if (!textContent) {
+                        statusMessage.innerHTML = '<p class="text-red-600 font-bold">Please write some content for your guide.</p>';
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Guide';
+                        return;
+                    }
+
+                    const formData = {
+                        title,
+                        content,
+                        hCaptchaToken: hCaptchaResponse.value
+                    };
+
+                    fetch('/api/guides/submit', {
+                        method: 'POST',
+                        body: JSON.stringify(formData),
+                        headers: { 'Content-Type': 'application/json' },
+                    })
+                    .then(response => {
+                        if (!response.ok && response.status !== 400) {
+                            throw new Error(`Server error (${response.status})`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.result === 'success') {
+                            statusMessage.innerHTML = `<p class="text-green-600 font-bold">${data.message}</p>`;
+                            form.reset();
+                            quill.setContents([]);
+                            wordCount.textContent = '0 characters';
+                            if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
+                        } else {
+                            throw new Error(data.message || 'An unknown error occurred.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        statusMessage.innerHTML = `<p class="text-red-600 font-bold">An error occurred: ${error.message}</p>`;
+                        if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
+                    })
+                    .finally(() => {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Submit Guide';
+                    });
+                });
+            }
+        });
+    </script>
+    <script src="/js/mobile-menu.js"></script>
+    <script src="/js/auth.js"></script>
+</body>
+</html>
