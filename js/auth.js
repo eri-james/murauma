@@ -20,14 +20,22 @@
      * Finds elements with data-auth attributes and toggles them.
      */
     function updateNav(user) {
-        // Update all elements with data-auth="logged-in" (show when logged in)
+        // Update all elements with data-auth="logged-in" (show when logged in, hide when logged out)
         document.querySelectorAll('[data-auth="logged-in"]').forEach(el => {
-            el.classList.remove('hidden');
+            if (user) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
         });
 
-        // Update all elements with data-auth="logged-out" (show when logged out)
+        // Update all elements with data-auth="logged-out" (show when logged out, hide when logged in)
         document.querySelectorAll('[data-auth="logged-out"]').forEach(el => {
-            el.classList.add('hidden');
+            if (user) {
+                el.classList.add('hidden');
+            } else {
+                el.classList.remove('hidden');
+            }
         });
 
         // Update username displays
@@ -45,10 +53,12 @@
             if (user && user.avatarUrl) {
                 el.src = user.avatarUrl;
                 el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
             }
         });
 
-        // Show admin link for admin users
+        // Show admin link for admin users only
         document.querySelectorAll('[data-auth="admin"]').forEach(el => {
             if (user && user.role === 'admin') {
                 el.classList.remove('hidden');
@@ -57,17 +67,26 @@
             }
         });
 
-        // Set up logout buttons
+        // Show/hide logout buttons and attach click handlers
         document.querySelectorAll('[data-auth="logout"]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try {
-                    await fetch('/api/logout', { method: 'POST' });
-                    window.location.reload();
-                } catch (err) {
-                    console.error('Logout failed:', err);
-                }
-            });
+            if (user) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+            // Only attach click listener once
+            if (!btn._logoutBound) {
+                btn._logoutBound = true;
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    try {
+                        await fetch('/api/logout', { method: 'POST' });
+                        window.location.reload();
+                    } catch (err) {
+                        console.error('Logout failed:', err);
+                    }
+                });
+            }
         });
     }
 

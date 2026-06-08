@@ -81,7 +81,7 @@
             <a href="/admin/" data-auth="admin" class="hidden md:flex bg-red-600 text-white px-4 py-4 font-bold items-center space-x-2 hover:bg-red-700 self-stretch transition-colors">
                 <span>Admin</span>
             </a>
-            <a href="edit-profile.html" data-auth="logged-in" class="hidden hidden md:flex bg-purple-700 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-purple-800 self-stretch transition-colors">
+            <a href="edit-profile.html" data-auth="logged-in" class="hidden md:flex bg-purple-700 text-white px-5 py-4 font-bold items-center space-x-2 hover:bg-purple-800 self-stretch transition-colors">
                 <span data-auth="username"></span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
             </a>
@@ -101,10 +101,10 @@
             <a href="#events" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Events</a>
             <a href="#community" class="block text-center py-3 px-4 text-sm hover:bg-blue-900 transition-colors">Community</a>
             <a href="register.html" data-auth="logged-out" class="block text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black transition-colors">Join Us</a>
-            <a href="edit-profile.html" data-auth="logged-in" class="hidden block text-center py-3 px-4 text-sm bg-purple-700 hover:bg-purple-800 transition-colors">My Profile</a>
-            <a href="login.html" data-auth="logged-out" class="hidden block text-center py-3 px-4 text-sm bg-blue-800 hover:bg-blue-900 transition-colors">Log In</a>
-            <a href="/admin/" data-auth="admin" class="hidden block text-center py-3 px-4 text-sm bg-red-600 hover:bg-red-700 transition-colors">Admin Dashboard</a>
-            <button data-auth="logged-in" class="hidden block w-full text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black">Log Out</button>
+            <a href="edit-profile.html" data-auth="logged-in" class="hidden text-center py-3 px-4 text-sm bg-purple-700 hover:bg-purple-800 transition-colors">My Profile</a>
+            <a href="login.html" data-auth="logged-out" class="hidden text-center py-3 px-4 text-sm bg-blue-800 hover:bg-blue-900 transition-colors">Log In</a>
+            <a href="/admin/" data-auth="admin" class="hidden text-center py-3 px-4 text-sm bg-red-600 hover:bg-red-700 transition-colors">Admin Dashboard</a>
+            <button data-auth="logout" class="hidden text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black w-full">Log Out</button>
         </div>
     </header>
 
@@ -462,7 +462,6 @@
                 
                 const getScrollAmount = () => scroller.children[0].offsetWidth + 16;
                 scroller.style.transition = 'none';
-                scroller.scrollLeft = getScrollAmount() * 4;
                 scroller.getBoundingClientRect(); 
                 scroller.style.transition = 'transform 0.5s ease-in-out';
 
@@ -484,8 +483,8 @@
                     if (isTransitioning) return;
                     isTransitioning = true;
                     scroller.style.transition = 'none';
-                    scroller.style.transform = `translateX(-${getScrollAmount()}px)`;
                     scroller.prepend(scroller.lastElementChild);
+                    scroller.style.transform = `translateX(${getScrollAmount()}px)`;
                     scroller.getBoundingClientRect(); 
                     scroller.style.transition = 'transform 0.5s ease-in-out';
                     scroller.style.transform = 'translateX(0)';
@@ -802,10 +801,12 @@
                         newsSection.innerHTML = data.news.slice(0, 3).map(n => {
                             const cat = n.category ? n.category.toUpperCase() : 'NEWS';
                             const date = new Date(n.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+                            const link = n.slug ? `./news/${encodeURIComponent(n.slug)}.html` : '#';
                             return `<div class="news-item pl-4 py-2">
                                 <p class="text-sm text-gray-500">${cat} | ${date}</p>
                                 <h3 class="font-bold text-lg text-gray-800">${DOMPurify.sanitize(n.title)}</h3>
                                 <p class="text-gray-600 text-justify">${DOMPurify.sanitize(n.description)}</p>
+                                ${n.slug ? `<a href="${link}" class="inline-block mt-2 text-pink-600 font-bold hover:underline">Read More >></a>` : ''}
                             </div>`;
                         }).join('');
                     }
@@ -815,7 +816,7 @@
                         newsList.innerHTML = data.news.map(n => {
                             const cat = n.category ? n.category.toUpperCase() : 'NEWS';
                             const date = new Date(n.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
-                            const link = n.slug ? `./news-detail.html?slug=${encodeURIComponent(n.slug)}` : '#';
+                            const link = n.slug ? `./news/${encodeURIComponent(n.slug)}.html` : '#';
                             return `<div class="p-4 rounded-lg border-l-4 border-pink-400 bg-gray-50">
                                 <p class="text-sm text-gray-500">${cat} | ${date}</p>
                                 <h3 class="font-bold text-xl text-gray-800 mt-1">${DOMPurify.sanitize(n.title)}</h3>
@@ -858,7 +859,7 @@
                     if (eventsGrid) {
                         eventsGrid.innerHTML = data.events.map(e => {
                             const img = e.imageUrl ? `<div class="relative overflow-hidden"><img src="${DOMPurify.sanitize(e.imageUrl)}" alt="${DOMPurify.sanitize(e.title)}" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy"></div>` : '';
-                            const link = e.slug ? `./event-detail.html?slug=${encodeURIComponent(e.slug)}` : '#';
+                            const link = e.slug ? `./events/${encodeURIComponent(e.slug)}.html` : '#';
                             return `<a href="${link}" class="group block rounded-lg overflow-hidden shadow-lg">
                                 ${img}
                                 <div class="p-4 bg-gray-50">
@@ -876,5 +877,3 @@
     </script>
 </body>
 </html>
-
-Update the index.ht
