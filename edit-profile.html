@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile — MURA</title>
+    <meta name="description" content="Edit your MURA member profile.">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <header class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="px-4 py-3 hover:bg-blue-800 transition-colors">
+                <div class="flex flex-col items-start leading-tight">
+                    <span class="font-extrabold text-sm tracking-wider">MALAYAN UMAMUSUME</span>
+                    <span class="font-bold text-xs tracking-widest opacity-80">RACING ASSOCIATION</span>
+                </div>
+            </a>
+            <nav class="hidden md:flex items-center divide-x divide-blue-600 font-bold">
+                <a href="index.html#news" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">›</span><span>News</span>
+                </a>
+                <a href="index.html#about" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">›</span><span>About</span>
+                </a>
+                <a href="index.html#events" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">›</span><span>Events</span>
+                </a>
+                <a href="index.html#community" class="px-4 py-4 flex items-center space-x-2 hover:bg-blue-800 transition-colors self-stretch">
+                    <span class="text-sm">›</span><span>Community</span>
+                </a>
+            </nav>
+            <div class="hidden md:flex items-center space-x-2">
+                <span id="nav-username" class="text-sm text-blue-200"></span>
+                <button id="nav-logout-btn" class="bg-gray-900 text-white px-4 py-4 font-bold hover:bg-black self-stretch transition-colors text-sm hidden">Log Out</button>
+            </div>
+            <div class="md:hidden px-4">
+                <button id="mobile-menu-button" class="text-white focus:outline-none">
+                    <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-800">
+            <a href="index.html#news" class="block text-center py-3 px-4 text-sm hover:bg-blue-900">News</a>
+            <a href="index.html#about" class="block text-center py-3 px-4 text-sm hover:bg-blue-900">About</a>
+            <a href="index.html#events" class="block text-center py-3 px-4 text-sm hover:bg-blue-900">Events</a>
+            <a href="index.html#community" class="block text-center py-3 px-4 text-sm hover:bg-blue-900">Community</a>
+            <button id="mobile-logout-btn" class="block w-full text-center py-3 px-4 text-sm bg-gray-900 hover:bg-black">Log Out</button>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="container mx-auto px-4 py-16 text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Loading your profile...</p>
+    </div>
+
+    <!-- Not Logged In State -->
+    <div id="not-logged-in" class="container mx-auto px-4 py-8 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-md border-2 border-red-400 max-w-md mx-auto text-center">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Not Logged In</h1>
+            <p class="text-gray-600 mb-6">You need to be logged in to edit your profile.</p>
+            <a href="login.html" class="inline-block bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700">Log In</a>
+        </div>
+    </div>
+
+    <!-- Pending Approval State -->
+    <div id="pending-state" class="container mx-auto px-4 py-8 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-md border-2 border-yellow-400 max-w-md mx-auto text-center">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Registration Pending</h1>
+            <p class="text-gray-600 mb-2">Your registration is still waiting for admin approval.</p>
+            <p class="text-sm text-gray-500">You'll be able to edit your profile once approved. Check back soon!</p>
+            <div class="mt-6">
+                <a href="index.html" class="text-blue-700 hover:text-blue-800 font-medium">Back to Main Site</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Edit Form (hidden until loaded) -->
+    <main id="profile-form-container" class="container mx-auto px-4 py-8 hidden">
+        <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-purple-500 max-w-2xl mx-auto">
+            
+            <div class="flex items-center space-x-4 mb-8">
+                <img id="current-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-purple-300">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-800">Edit Profile</h1>
+                    <p class="text-sm text-gray-500">Logged in as <span id="display-username" class="font-medium text-purple-600"></span></p>
+                </div>
+            </div>
+
+            <form id="profile-form" class="space-y-6">
+                
+                <!-- Profile Section -->
+                <div class="bg-purple-50 rounded-lg p-4">
+                    <h2 class="font-bold text-purple-800 mb-4">Profile Info</h2>
+
+                    <!-- Display Name -->
+                    <div class="mb-4">
+                        <label for="displayName" class="block text-sm font-medium text-gray-700">Display Name / Nickname</label>
+                        <input type="text" name="displayName" id="displayName" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Trainer ID -->
+                    <div class="mb-4">
+                        <label for="trainerID" class="block text-sm font-medium text-gray-700">In-Game Trainer ID <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input type="text" name="trainerID" id="trainerID" pattern="\d{12}" title="12-digit Trainer ID" placeholder="e.g. 900478090080"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Favorite Uma -->
+                    <div class="mb-4">
+                        <label for="favoriteUma" class="block text-sm font-medium text-gray-700">Favorite Umamusume <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input type="text" name="favoriteUma" id="favoriteUma"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Bio -->
+                    <div>
+                        <label for="bio" class="block text-sm font-medium text-gray-700">Short Bio / Quote <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <textarea id="bio" name="bio" rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                    </div>
+                </div>
+
+                <!-- Profile Picture -->
+                <div>
+                    <label for="profilePicture" class="block text-sm font-medium text-gray-700">Change Profile Picture <span class="text-gray-400 font-normal">(leave empty to keep current)</span></label>
+                    <p class="text-xs text-gray-500 mb-2">Square image recommended. Max 5MB. Will be resized to 256x256.</p>
+                    <input type="file" name="profilePicture" id="profilePicture" accept="image/png, image/jpeg, image/gif, image/webp"
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h2 class="font-bold text-gray-700 mb-4">Change Password <span class="text-gray-400 font-normal text-sm">(optional)</span></h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="currentPassword" class="block text-sm font-medium text-gray-700">Current Password</label>
+                            <input type="password" id="currentPassword" autocomplete="current-password"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700">New Password</label>
+                                <input type="password" id="newPassword" autocomplete="new-password"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="confirmNewPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                <input type="password" id="confirmNewPassword" autocomplete="new-password"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="pt-2">
+                    <button id="save-button" type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+
+            <!-- Status Message -->
+            <div id="status-message" class="mt-6 text-center"></div>
+
+            <!-- Back Button -->
+            <div class="mt-8 text-center">
+                <a href="index.html" class="text-blue-700 hover:text-blue-800 font-medium inline-flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span>Back to Main Site</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function resizeImage(file, maxDim = 256) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.width, h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        const ratio = Math.min(maxDim / w, maxDim / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const mimeType = 'image/jpeg';
+                    const dataUrl = canvas.toDataURL(mimeType, 0.85);
+                    resolve({ dataUrl, mimeType });
+                };
+                img.onerror = () => reject(new Error('Failed to load image.'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingState = document.getElementById('loading-state');
+            const notLoggedIn = document.getElementById('not-logged-in');
+            const pendingState = document.getElementById('pending-state');
+            const profileForm = document.getElementById('profile-form-container');
+            const navUsername = document.getElementById('nav-username');
+            const displayUsername = document.getElementById('display-username');
+            const currentAvatar = document.getElementById('current-avatar');
+            const saveButton = document.getElementById('save-button');
+            const statusMessage = document.getElementById('status-message');
+
+            // --- Load current user data ---
+            try {
+                const response = await fetch('/api/me');
+                const data = await response.json();
+
+                if (data.result !== 'success') {
+                    // Not logged in
+                    loadingState.classList.add('hidden');
+                    notLoggedIn.classList.remove('hidden');
+                    return;
+                }
+
+                const user = data.user;
+
+                // Show username in nav
+                navUsername.textContent = `@${user.username}`;
+                document.getElementById('nav-logout-btn').classList.remove('hidden');
+
+                // Show avatar
+                currentAvatar.src = user.avatarUrl;
+
+                // Check if pending
+                if (user.status === 'pending') {
+                    loadingState.classList.add('hidden');
+                    pendingState.classList.remove('hidden');
+                    return;
+                }
+
+                // Fill form with current data
+                document.getElementById('displayName').value = user.displayName || '';
+                document.getElementById('trainerID').value = user.trainerId || '';
+                document.getElementById('favoriteUma').value = user.favoriteUma || '';
+                document.getElementById('bio').value = user.bio || '';
+                displayUsername.textContent = `@${user.username}`;
+
+                // Show form
+                loadingState.classList.add('hidden');
+                profileForm.classList.remove('hidden');
+
+            } catch (err) {
+                console.error('Failed to load profile:', err);
+                loadingState.classList.add('hidden');
+                notLoggedIn.classList.remove('hidden');
+            }
+
+            // --- Logout ---
+            const handleLogout = async () => {
+                try {
+                    await fetch('/api/logout', { method: 'POST' });
+                    window.location.href = 'login.html';
+                } catch (err) {
+                    console.error('Logout error:', err);
+                }
+            };
+            document.getElementById('nav-logout-btn')?.addEventListener('click', handleLogout);
+            document.getElementById('mobile-logout-btn')?.addEventListener('click', handleLogout);
+
+            // --- Profile Form Submission ---
+            const form = document.getElementById('profile-form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
+                    statusMessage.textContent = '';
+
+                    try {
+                        const updateData = {
+                            displayName: document.getElementById('displayName').value,
+                            favoriteUma: document.getElementById('favoriteUma').value || null,
+                            bio: document.getElementById('bio').value || null,
+                            trainerID: document.getElementById('trainerID').value || null,
+                        };
+
+                        // Profile picture (if changed)
+                        const file = document.getElementById('profilePicture').files[0];
+                        if (file) {
+                            const { dataUrl, mimeType } = await resizeImage(file, 256);
+                            updateData.profilePicture = dataUrl;
+                            updateData.mimeType = mimeType;
+                        }
+
+                        // Password change (if filled)
+                        const currentPassword = document.getElementById('currentPassword').value;
+                        const newPassword = document.getElementById('newPassword').value;
+                        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                        if (currentPassword || newPassword || confirmNewPassword) {
+                            if (!currentPassword || !newPassword) {
+                                statusMessage.innerHTML = '<p class="text-red-600 font-bold">Please fill in both current and new password to change your password.</p>';
+                                saveButton.disabled = false;
+                                saveButton.textContent = 'Save Changes';
+                                return;
+                            }
+                            if (newPassword !== confirmNewPassword) {
+                                statusMessage.innerHTML = '<p class="text-red-600 font-bold">New passwords do not match.</p>';
+                                saveButton.disabled = false;
+                                saveButton.textContent = 'Save Changes';
+                                return;
+                            }
+                            updateData.currentPassword = currentPassword;
+                            updateData.newPassword = newPassword;
+                        }
+
+                        const response = await fetch('/api/members/profile', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updateData),
+                        });
+
+                        const data = await response.json();
+                        if (data.result === 'success') {
+                            statusMessage.innerHTML = '<p class="text-green-600 font-bold">Profile saved successfully!</p>';
+                            // Clear password fields
+                            document.getElementById('currentPassword').value = '';
+                            document.getElementById('newPassword').value = '';
+                            document.getElementById('confirmNewPassword').value = '';
+                            document.getElementById('profilePicture').value = '';
+                            // Refresh avatar if changed
+                            if (file) {
+                                currentAvatar.src = currentAvatar.src.split('?')[0] + '?t=' + Date.now();
+                            }
+                        } else {
+                            statusMessage.innerHTML = `<p class="text-red-600 font-bold">${data.message || 'Failed to save profile.'}</p>`;
+                        }
+                    } catch (err) {
+                        console.error('Profile save error:', err);
+                        statusMessage.innerHTML = '<p class="text-red-600 font-bold">A network error occurred.</p>';
+                    } finally {
+                        saveButton.disabled = false;
+                        saveButton.textContent = 'Save Changes';
+                    }
+                });
+            }
+        });
+    </script>
+    <script src="/js/mobile-menu.js"></script>
+</body>
+</html>

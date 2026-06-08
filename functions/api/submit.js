@@ -1,11 +1,12 @@
 /**
- * POST /api/submit — Writing Submission
+ * POST /api/submit — Writing Submission (Auth-based)
  * 
- * Validates form data, verifies hCaptcha, looks up the author's name
- * from the members table by trainer ID, and saves the writing to D1.
+ * Validates form data, verifies hCaptcha, uses the authenticated
+ * user's identity to submit the writing under their name.
+ * Falls back to trainer_id-based submission for backward compatibility.
  * 
  * Request body (JSON):
- *   { formType, trainerID, title, content, hCaptchaToken }
+ *   { trainerID (legacy), title, content, hCaptchaToken }
  */
 import {
   errorResponse,
@@ -17,13 +18,11 @@ import {
   checkRateLimit,
   getClientKey,
   verifyHcaptcha,
+  getOptionalAuth,
 } from '../_shared/utils.js';
 
 // Maximum JSON body size: 100KB (writings up to 50KB + overhead)
 const MAX_BODY_SIZE = 100 * 1024;
-
-// Titles are plain text, not HTML — use sanitizeText to escape all entities
-// Content (Markdown) may contain raw HTML fragments — use sanitizeHtml
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -52,45 +51,74 @@ export async function onRequestPost(context) {
     }
 
     // --- Validate Fields ---
-    const trainerResult = validateTrainerId(data.trainerID);
-    if (!trainerResult.valid) return errorResponse(trainerResult.error);
-
     const titleResult = validateField(data.title, 200, 'Title');
     if (!titleResult.valid) return errorResponse(titleResult.error);
 
     const contentResult = validateField(data.content, 50000, 'Content');
     if (!contentResult.valid) return errorResponse(contentResult.error);
 
-    // --- Look up author name from members table ---
-    const member = await db
-      .prepare('SELECT name, status FROM members WHERE trainer_id = ?')
-      .bind(trainerResult.value)
-      .first();
+    // --- Identify the author ---
+    // Try authenticated user first
+    const authUser = await getOptionalAuth(request, env);
+    let authorId = null;
+    let authorName = null;
+    let authorTrainerId = null;
 
-    if (!member) {
-      return errorResponse('Trainer ID not found. You must be a registered member to submit writings.');
-    }
+    if (authUser && authUser.userId > 0) {
+      // Authenticated user — look up their member record
+      const member = await db
+        .prepare('SELECT id, name, trainer_id, status FROM members WHERE id = ?')
+        .bind(authUser.userId)
+        .first();
 
-    if (member.status !== 'approved') {
-      return errorResponse('Your membership has not been approved yet. Please wait for admin approval.');
+      if (!member) {
+        return errorResponse('Member account not found.');
+      }
+
+      if (member.status !== 'approved') {
+        return errorResponse('Your membership has not been approved yet. Please wait for admin approval.');
+      }
+
+      authorId = member.id;
+      authorName = member.name;
+      authorTrainerId = member.trainer_id;
+    } else {
+      // Legacy fallback: trainer_id-based submission
+      const trainerResult = validateTrainerId(data.trainerID);
+      if (!trainerResult.valid || !trainerResult.value) {
+        return errorResponse('Please log in to submit writings.');
+      }
+
+      const member = await db
+        .prepare('SELECT id, name, status FROM members WHERE trainer_id = ?')
+        .bind(trainerResult.value)
+        .first();
+
+      if (!member) {
+        return errorResponse('Trainer ID not found. You must be a registered member to submit writings.');
+      }
+
+      if (member.status !== 'approved') {
+        return errorResponse('Your membership has not been approved yet. Please wait for admin approval.');
+      }
+
+      authorId = member.id;
+      authorName = member.name;
+      authorTrainerId = trainerResult.value;
     }
 
     // --- Sanitize content once on write ---
-    // Title is plain text — escape HTML entities, don't allow any tags
-    // Content (Markdown) may contain raw HTML — whitelist-sanitize allowed tags
-    // Author name was already sanitized on registration — re-sanitize as defense-in-depth
     const sanitizedTitle = sanitizeText(titleResult.value);
     const sanitizedContent = sanitizeHtml(contentResult.value);
-    const authorName = member.name; // Already sanitized on register insert
 
     // --- Save Writing to D1 (status: pending — requires admin approval) ---
     try {
       await db
         .prepare(
-          `INSERT INTO writings (title, author_name, trainer_id, content, status)
-           VALUES (?, ?, ?, ?, 'pending')`
+          `INSERT INTO writings (title, author_name, trainer_id, user_id, content, status)
+           VALUES (?, ?, ?, ?, ?, 'pending')`
         )
-        .bind(sanitizedTitle, authorName, trainerResult.value, sanitizedContent)
+        .bind(sanitizedTitle, authorName, authorTrainerId, authorId, sanitizedContent)
         .run();
     } catch (dbError) {
       console.error('D1 insert error:', dbError.message);

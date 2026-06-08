@@ -2,7 +2,8 @@
  * Shared utilities for MURA Cloudflare Workers
  * 
  * This module provides sanitization, rate limiting, hCaptcha verification,
- * and common response helpers used across all API endpoints.
+ * authentication (JWT + PBKDF2), and common response helpers used across
+ * all API endpoints.
  */
 
 // ============================================================
@@ -16,6 +17,20 @@ const MAX_CONTENT_LENGTH = 50000;
 const MAX_NAME_LENGTH = 50;
 const MAX_BIO_LENGTH = 500;
 const MAX_TRAINER_ID_LENGTH = 12;
+const MAX_USERNAME_LENGTH = 30;
+const MIN_USERNAME_LENGTH = 3;
+
+// Password hashing configuration (PBKDF2)
+const PBKDF2_ITERATIONS = 100000;
+const PBKDF2_KEY_LENGTH = 256; // bits
+const SALT_LENGTH = 16; // bytes
+
+// JWT configuration
+const JWT_ALGORITHM = 'HS256';
+const JWT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
+
+// Cookie name for session
+const SESSION_COOKIE_NAME = 'mura_session';
 
 // Allowed MIME types for profile picture uploads
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
@@ -28,12 +43,13 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 /**
  * Creates a JSON response with CORS headers.
  */
-function jsonResponse(data, status = 200) {
+function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      ...extraHeaders,
     },
   });
 }
@@ -74,15 +90,69 @@ function validateField(value, maxLength, fieldName) {
 }
 
 /**
+ * Validates an optional string field — allows empty/null values.
+ * Returns { valid: true, value: null } if empty.
+ */
+function validateOptionalField(value, maxLength, fieldName) {
+  if (!value || typeof value !== 'string') {
+    return { valid: true, value: null, error: null };
+  }
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return { valid: true, value: null, error: null };
+  }
+  if (trimmed.length > maxLength) {
+    return { valid: false, value: '', error: `${fieldName} must be ${maxLength} characters or less.` };
+  }
+  return { valid: true, value: trimmed, error: null };
+}
+
+/**
  * Validates a 12-digit trainer ID.
  */
 function validateTrainerId(value) {
-  const result = validateField(value, MAX_TRAINER_ID_LENGTH, 'Trainer ID');
+  const result = validateOptionalField(value, MAX_TRAINER_ID_LENGTH, 'Trainer ID');
   if (!result.valid) return result;
-  if (!/^\d{12}$/.test(result.value)) {
+  if (result.value && !/^\d{12}$/.test(result.value)) {
     return { valid: false, value: '', error: 'Trainer ID must be exactly 12 digits.' };
   }
   return result;
+}
+
+/**
+ * Validates a username: alphanumeric + underscores, 3-30 chars.
+ */
+function validateUsername(value) {
+  if (!value || typeof value !== 'string') {
+    return { valid: false, value: '', error: 'Username is required.' };
+  }
+  const trimmed = value.trim().toLowerCase();
+  if (trimmed.length < MIN_USERNAME_LENGTH) {
+    return { valid: false, value: '', error: `Username must be at least ${MIN_USERNAME_LENGTH} characters.` };
+  }
+  if (trimmed.length > MAX_USERNAME_LENGTH) {
+    return { valid: false, value: '', error: `Username must be ${MAX_USERNAME_LENGTH} characters or less.` };
+  }
+  if (!/^[a-z0-9_]+$/.test(trimmed)) {
+    return { valid: false, value: '', error: 'Username can only contain lowercase letters, numbers, and underscores.' };
+  }
+  return { valid: true, value: trimmed, error: null };
+}
+
+/**
+ * Validates a password: minimum 8 characters.
+ */
+function validatePassword(value) {
+  if (!value || typeof value !== 'string') {
+    return { valid: false, error: 'Password is required.' };
+  }
+  if (value.length < 8) {
+    return { valid: false, error: 'Password must be at least 8 characters.' };
+  }
+  if (value.length > 128) {
+    return { valid: false, error: 'Password must be 128 characters or less.' };
+  }
+  return { valid: true, error: null };
 }
 
 // ============================================================
@@ -287,7 +357,320 @@ async function verifyHcaptcha(token, secret) {
 }
 
 // ============================================================
-// ADMIN AUTHENTICATION
+// PASSWORD HASHING (PBKDF2 via Web Crypto API)
+// ============================================================
+
+/**
+ * Hashes a password using PBKDF2 with a random salt.
+ * Returns { hash, salt } as hex strings.
+ */
+async function hashPassword(password) {
+  // Generate random salt
+  const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
+  const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    PBKDF2_KEY_LENGTH
+  );
+
+  const hashHex = Array.from(new Uint8Array(derivedBits))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  return { hash: hashHex, salt: saltHex };
+}
+
+/**
+ * Verifies a password against a stored hash and salt.
+ * Returns true if the password matches, false otherwise.
+ */
+async function verifyPassword(password, storedHash, storedSalt) {
+  if (!storedHash || !storedSalt) return false;
+
+  // Convert hex salt back to Uint8Array
+  const salt = new Uint8Array(storedSalt.match(/.{2}/g).map(byte => parseInt(byte, 16)));
+
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    PBKDF2_KEY_LENGTH
+  );
+
+  const hashHex = Array.from(new Uint8Array(derivedBits))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Timing-safe comparison
+  if (hashHex.length !== storedHash.length) return false;
+  let result = 0;
+  for (let i = 0; i < hashHex.length; i++) {
+    result |= hashHex.charCodeAt(i) ^ storedHash.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+// ============================================================
+// JWT (JSON Web Token) via Web Crypto API
+// ============================================================
+
+/**
+ * Base64url-encodes a string.
+ */
+function base64urlEncode(str) {
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * Base64url-encodes an ArrayBuffer.
+ */
+function base64urlEncodeBuffer(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return base64urlEncode(binary);
+}
+
+/**
+ * Decodes a base64url string to a regular string.
+ */
+function base64urlDecode(str) {
+  let padded = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (padded.length % 4) padded += '=';
+  return atob(padded);
+}
+
+/**
+ * Creates a signed JWT token.
+ * Payload includes: userId, username, role, iat, exp
+ */
+async function createJWT(payload, secret) {
+  const header = { alg: JWT_ALGORITHM, typ: 'JWT' };
+  
+  const now = Math.floor(Date.now() / 1000);
+  const tokenPayload = {
+    ...payload,
+    iat: now,
+    exp: now + JWT_EXPIRY_SECONDS,
+  };
+
+  const headerB64 = base64urlEncode(JSON.stringify(header));
+  const payloadB64 = base64urlEncode(JSON.stringify(tokenPayload));
+  const content = `${headerB64}.${payloadB64}`;
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(content));
+  const signatureB64 = base64urlEncodeBuffer(signature);
+
+  return `${content}.${signatureB64}`;
+}
+
+/**
+ * Verifies and decodes a JWT token.
+ * Returns the payload object if valid, or null if invalid/expired.
+ */
+async function verifyJWT(token, secret) {
+  if (!token || typeof token !== 'string') return null;
+
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+
+  const [headerB64, payloadB64, signatureB64] = parts;
+  const content = `${headerB64}.${payloadB64}`;
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+
+  // Convert base64url signature back to Uint8Array
+  const signatureBinary = base64urlDecode(signatureB64);
+  const signatureBytes = new Uint8Array(signatureBinary.length);
+  for (let i = 0; i < signatureBinary.length; i++) {
+    signatureBytes[i] = signatureBinary.charCodeAt(i);
+  }
+
+  try {
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      signatureBytes,
+      encoder.encode(content)
+    );
+    if (!isValid) return null;
+
+    const payload = JSON.parse(base64urlDecode(payloadB64));
+    
+    // Check expiration
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================
+// SESSION / COOKIE HELPERS
+// ============================================================
+
+/**
+ * Parses cookies from the request headers.
+ * Returns an object of { name: value } pairs.
+ */
+function parseCookies(request) {
+  const cookieHeader = request.headers.get('Cookie') || '';
+  const cookies = {};
+  for (const part of cookieHeader.split(';')) {
+    const [name, ...rest] = part.trim().split('=');
+    if (name) {
+      cookies[name.trim()] = rest.join('=').trim();
+    }
+  }
+  return cookies;
+}
+
+/**
+ * Returns the Set-Cookie header value for the session cookie.
+ */
+function sessionCookieValue(token, maxAge = JWT_EXPIRY_SECONDS) {
+  return `${SESSION_COOKIE_NAME}=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
+}
+
+/**
+ * Returns the Set-Cookie header value to clear the session cookie.
+ */
+function clearSessionCookieValue() {
+  return `${SESSION_COOKIE_NAME}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`;
+}
+
+// ============================================================
+// AUTH MIDDLEWARE
+// ============================================================
+
+/**
+ * Extracts and verifies the authenticated user from the request.
+ * Checks JWT in httpOnly cookie first, falls back to X-Admin-Secret header.
+ * 
+ * Returns { user: { userId, username, role } } on success,
+ * or { user: null, error: Response } on failure.
+ */
+async function getAuthenticatedUser(request, env) {
+  // Try JWT session cookie first
+  const cookies = parseCookies(request);
+  const token = cookies[SESSION_COOKIE_NAME];
+  
+  if (token) {
+    const payload = await verifyJWT(token, env.JWT_SECRET);
+    if (payload && payload.userId && payload.username) {
+      return { 
+        user: { 
+          userId: payload.userId, 
+          username: payload.username, 
+          role: payload.role || 'member' 
+        }, 
+        error: null 
+      };
+    }
+  }
+
+  // Fall back to admin secret header (for API-only admin access)
+  if (authenticateAdmin(request, env)) {
+    return { 
+      user: { userId: 0, username: 'admin', role: 'admin' }, 
+      error: null 
+    };
+  }
+
+  return { user: null, error: null };
+}
+
+/**
+ * Requires authentication — returns user or error response.
+ * Use for member-only endpoints.
+ */
+async function requireAuth(request, env) {
+  const { user, error } = await getAuthenticatedUser(request, env);
+  if (error) return { user: null, error };
+  if (!user) {
+    return { user: null, error: errorResponse('Authentication required. Please log in.', 401) };
+  }
+  // Check that the user is a real member (not just admin-secret-based)
+  if (user.userId === 0) {
+    return { user: null, error: errorResponse('Please log in with a member account.', 401) };
+  }
+  return { user, error: null };
+}
+
+/**
+ * Requires admin authentication — returns user or error response.
+ * Accepts both JWT (with admin role) and X-Admin-Secret header.
+ */
+async function requireAdmin(request, env) {
+  const { user } = await getAuthenticatedUser(request, env);
+  if (!user || user.role !== 'admin') {
+    return { user: null, error: errorResponse('Admin access required.', 403) };
+  }
+  return { user, error: null };
+}
+
+/**
+ * Optional authentication — returns user if logged in, null otherwise.
+ * Never returns an error — useful for endpoints that work for both
+ * logged-in and anonymous users.
+ */
+async function getOptionalAuth(request, env) {
+  const { user } = await getAuthenticatedUser(request, env);
+  return user;
+}
+
+// ============================================================
+// ADMIN AUTHENTICATION (legacy — X-Admin-Secret header)
 // ============================================================
 
 /**
@@ -345,18 +728,36 @@ export {
   MAX_NAME_LENGTH,
   MAX_BIO_LENGTH,
   MAX_TRAINER_ID_LENGTH,
+  MAX_USERNAME_LENGTH,
+  MIN_USERNAME_LENGTH,
   ALLOWED_MIME_TYPES,
   MAX_IMAGE_SIZE_BYTES,
+  SESSION_COOKIE_NAME,
+  JWT_EXPIRY_SECONDS,
   jsonResponse,
   errorResponse,
   successResponse,
   validateField,
+  validateOptionalField,
   validateTrainerId,
+  validateUsername,
+  validatePassword,
   sanitizeHtml,
   sanitizeText,
   checkRateLimit,
   getClientKey,
   verifyHcaptcha,
+  hashPassword,
+  verifyPassword,
+  createJWT,
+  verifyJWT,
+  parseCookies,
+  sessionCookieValue,
+  clearSessionCookieValue,
+  getAuthenticatedUser,
+  requireAuth,
+  requireAdmin,
+  getOptionalAuth,
   authenticateAdmin,
   adminCorsHeaders,
   adminPreflightResponse,

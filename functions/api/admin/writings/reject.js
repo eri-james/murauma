@@ -4,7 +4,7 @@
 import {
   errorResponse,
   successResponse,
-  authenticateAdmin,
+  requireAdmin,
   adminPreflightResponse,
 } from '../../../_shared/utils.js';
 
@@ -12,9 +12,8 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticateAdmin(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
+  const { user, error: authError } = await requireAdmin(request, env);
+  if (authError) return authError;
 
   try {
     const data = await request.json();

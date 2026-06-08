@@ -1,10 +1,12 @@
 /**
- * POST /api/admin/members/approve — Approve a member by trainer_id
+ * POST /api/admin/members/approve — Approve a member
+ * 
+ * Accepts either trainerId (12 digits) or memberId (numeric id).
  */
 import {
   errorResponse,
   successResponse,
-  authenticateAdmin,
+  requireAdmin,
   adminPreflightResponse,
 } from '../../../_shared/utils.js';
 
@@ -12,21 +14,29 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticateAdmin(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
+  const { user, error: authError } = await requireAdmin(request, env);
+  if (authError) return authError;
 
   try {
     const data = await request.json();
 
-    if (!data.trainerId || !/^\d{12}$/.test(data.trainerId)) {
-      return errorResponse('Valid 12-digit Trainer ID is required.');
-    }
+    let existing;
 
-    const existing = await db
-      .prepare('SELECT id, status FROM members WHERE trainer_id = ?')
-      .bind(data.trainerId)
-      .first();
+    if (data.memberId && Number.isInteger(data.memberId)) {
+      // Lookup by member ID
+      existing = await db
+        .prepare('SELECT id, name, status FROM members WHERE id = ?')
+        .bind(data.memberId)
+        .first();
+    } else if (data.trainerId && /^\d{12}$/.test(data.trainerId)) {
+      // Lookup by trainer ID (backward compatible)
+      existing = await db
+        .prepare('SELECT id, name, status FROM members WHERE trainer_id = ?')
+        .bind(data.trainerId)
+        .first();
+    } else {
+      return errorResponse('Valid Trainer ID or Member ID is required.');
+    }
 
     if (!existing) {
       return errorResponse('Member not found.');
@@ -37,11 +47,11 @@ export async function onRequestPost(context) {
     }
 
     await db
-      .prepare('UPDATE members SET status = ? WHERE trainer_id = ?')
-      .bind('approved', data.trainerId)
+      .prepare('UPDATE members SET status = ? WHERE id = ?')
+      .bind('approved', existing.id)
       .run();
 
-    return successResponse(`Member ${data.trainerId} has been approved.`);
+    return successResponse(`Member "${existing.name}" has been approved.`);
 
   } catch (error) {
     console.error('Admin approve member error:', error.message);

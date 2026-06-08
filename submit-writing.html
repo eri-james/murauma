@@ -88,13 +88,18 @@
             <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Submit Your Writing</h1>
             <p class="text-md text-gray-600 mb-8">Share your stories and guides with the MURA community. You must be a registered member to post.</p>
 
+            <!-- Not logged in notice -->
+            <div id="not-logged-in-notice" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded hidden">
+                <p class="text-sm text-yellow-800">You're not logged in. Please <a href="login.html" class="font-medium text-blue-600 hover:underline">log in</a> or <a href="register.html" class="font-medium text-blue-600 hover:underline">register</a> to submit writings.</p>
+            </div>
+
             <!-- Submission Form -->
             <form id="writing-form" class="space-y-6">
                 
-                <!-- Trainer ID -->
-                <div>
-                    <label for="trainerID" class="block text-sm font-medium text-gray-700">Your Trainer ID</label>
-                    <input type="text" name="trainerID" id="trainerID" required pattern="\d{12}" title="Please enter your 12-digit Trainer ID for verification." placeholder="Enter your 12-digit Trainer ID" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <!-- Trainer ID (shown only if not logged in) -->
+                <div id="trainer-id-field">
+                    <label for="trainerID" class="block text-sm font-medium text-gray-700">Your Trainer ID <span class="text-gray-400 font-normal">(log in to skip this)</span></label>
+                    <input type="text" name="trainerID" id="trainerID" pattern="\d{12}" title="Please enter your 12-digit Trainer ID for verification." placeholder="Enter your 12-digit Trainer ID" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 </div>
 
                 <!-- Title -->
@@ -153,13 +158,28 @@
     </footer>
     
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- Check auth state ---
+            let isLoggedIn = false;
+            try {
+                const meResp = await fetch('/api/me');
+                const meData = await meResp.json();
+                if (meData.result === 'success' && meData.user) {
+                    isLoggedIn = true;
+                    // Hide trainer ID field when logged in
+                    document.getElementById('trainer-id-field').style.display = 'none';
+                } else {
+                    // Show notice for non-logged-in users
+                    document.getElementById('not-logged-in-notice').classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('not-logged-in-notice').classList.remove('hidden');
+            }
+
             // --- Form Submission Logic ---
             const form = document.getElementById('writing-form');
             const submitButton = document.getElementById('submit-button');
             const statusMessage = document.getElementById('status-message');
-            
-            // Cloudflare Workers API endpoint (relative path — same domain as the site)
             const apiUrl = '/api/submit';
 
             if (form) {
@@ -167,7 +187,7 @@
                     e.preventDefault(); 
                     
                     submitButton.disabled = true;
-                    submitButton.innerHTML = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>`;
+                    submitButton.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>';
                     statusMessage.textContent = '';
 
                     // Verify hCaptcha before submitting
@@ -182,19 +202,26 @@
                     captchaError.classList.add('hidden');
 
                     const formData = {
-                        formType: 'writingSubmission', // This tells our script which function to run
-                        trainerID: document.getElementById('trainerID').value,
                         title: document.getElementById('writingTitle').value,
                         content: document.getElementById('writingContent').value,
-                        hCaptchaToken: hCaptchaResponse.value // Include CAPTCHA token for server verification
+                        hCaptchaToken: hCaptchaResponse.value
                     };
+
+                    // Include trainer ID only if not logged in
+                    if (!isLoggedIn) {
+                        formData.trainerID = document.getElementById('trainerID').value;
+                        if (!formData.trainerID) {
+                            statusMessage.innerHTML = '<p class="text-red-600 font-bold">Please log in or provide your Trainer ID.</p>';
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Submit Writing';
+                            return;
+                        }
+                    }
 
                     fetch(apiUrl, {
                         method: 'POST',
                         body: JSON.stringify(formData),
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                     })
                     .then(response => {
                         if (!response.ok && response.status !== 400) {
@@ -206,7 +233,6 @@
                         if (data.result === 'success') {
                             statusMessage.innerHTML = `<p class="text-green-600 font-bold">${data.message}</p>`;
                             form.reset();
-                            // Reset hCaptcha widget after successful submission
                             if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
                         } else {
                             throw new Error(data.message || 'An unknown error occurred.');

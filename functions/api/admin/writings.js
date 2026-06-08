@@ -9,7 +9,7 @@
 import {
   errorResponse,
   successResponse,
-  authenticateAdmin,
+  requireAdmin,
   adminPreflightResponse,
 } from '../../_shared/utils.js';
 
@@ -17,9 +17,8 @@ export async function onRequestGet(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticateAdmin(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
+  const { user, error: authError } = await requireAdmin(request, env);
+  if (authError) return authError;
 
   try {
     const url = new URL(request.url);
@@ -31,7 +30,7 @@ export async function onRequestGet(context) {
 
     const { results } = await db
       .prepare(
-        `SELECT id, title, author_name, trainer_id, content, status, created_at
+        `SELECT id, title, author_name, trainer_id, user_id, content, status, created_at
          FROM writings
          WHERE status = ?
          ORDER BY created_at DESC`
@@ -45,6 +44,7 @@ export async function onRequestGet(context) {
       title: row.title || '',
       authorName: row.author_name || '',
       trainerId: row.trainer_id,
+      userId: row.user_id,
       contentPreview: (row.content || '').substring(0, 300),
       status: row.status,
       createdAt: row.created_at,
@@ -62,9 +62,8 @@ export async function onRequestDelete(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticateAdmin(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
+  const { user, error: authError } = await requireAdmin(request, env);
+  if (authError) return authError;
 
   try {
     const data = await request.json();

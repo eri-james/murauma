@@ -1,23 +1,31 @@
 /**
- * POST /api/register — Member Registration
+ * POST /api/register — Member Registration (with username/password)
  * 
- * Validates form data, verifies hCaptcha, stores profile picture as base64
- * in D1, and saves the member record with "pending" status.
+ * Validates form data, verifies hCaptcha, hashes password with PBKDF2,
+ * stores profile picture as base64 in D1, and saves the member with "pending" status.
  * 
  * Request body (JSON):
- *   { memberName, trainerID, favoriteUma, bio, profilePicture, fileName, mimeType, hCaptchaToken }
+ *   { username, password, memberName, trainerID, favoriteUma, bio, profilePicture, mimeType, hCaptchaToken }
+ * 
+ * trainer_id, favorite_uma, and bio are now optional.
  */
 import {
   errorResponse,
-  successResponse,
+  jsonResponse,
   validateField,
+  validateOptionalField,
   validateTrainerId,
+  validateUsername,
+  validatePassword,
   sanitizeText,
   checkRateLimit,
   getClientKey,
   verifyHcaptcha,
+  hashPassword,
   ALLOWED_MIME_TYPES,
   MAX_IMAGE_SIZE_BYTES,
+  sessionCookieValue,
+  createJWT,
 } from '../_shared/utils.js';
 
 // Maximum JSON body size: 10MB (profile pictures up to 5MB + overhead)
@@ -49,26 +57,48 @@ export async function onRequestPost(context) {
       return errorResponse('CAPTCHA verification failed. Please try again.');
     }
 
-    // --- Validate Text Fields ---
+    // --- Validate Username ---
+    const usernameResult = validateUsername(data.username);
+    if (!usernameResult.valid) return errorResponse(usernameResult.error);
+
+    // --- Validate Password ---
+    const passwordResult = validatePassword(data.password);
+    if (!passwordResult.valid) return errorResponse(passwordResult.error);
+
+    // --- Validate Display Name (required) ---
     const nameResult = validateField(data.memberName, 50, 'Display Name');
     if (!nameResult.valid) return errorResponse(nameResult.error);
 
+    // --- Validate Trainer ID (optional) ---
     const trainerResult = validateTrainerId(data.trainerID);
     if (!trainerResult.valid) return errorResponse(trainerResult.error);
 
-    const favUmaResult = validateField(data.favoriteUma, 50, 'Favorite Umamusume');
+    // --- Validate Favorite Uma (optional) ---
+    const favUmaResult = validateOptionalField(data.favoriteUma, 50, 'Favorite Umamusume');
     if (!favUmaResult.valid) return errorResponse(favUmaResult.error);
 
-    const bioResult = validateField(data.bio, 500, 'Bio');
+    // --- Validate Bio (optional) ---
+    const bioResult = validateOptionalField(data.bio, 500, 'Bio');
     if (!bioResult.valid) return errorResponse(bioResult.error);
 
-    // --- Check for duplicate Trainer ID ---
-    const existing = await db
-      .prepare('SELECT id FROM members WHERE trainer_id = ?')
-      .bind(trainerResult.value)
+    // --- Check for duplicate Username ---
+    const existingUsername = await db
+      .prepare('SELECT id FROM members WHERE username = ?')
+      .bind(usernameResult.value)
       .first();
-    if (existing) {
-      return errorResponse('This Trainer ID is already registered.');
+    if (existingUsername) {
+      return errorResponse('This username is already taken.');
+    }
+
+    // --- Check for duplicate Trainer ID (if provided) ---
+    if (trainerResult.value) {
+      const existingTrainer = await db
+        .prepare('SELECT id FROM members WHERE trainer_id = ?')
+        .bind(trainerResult.value)
+        .first();
+      if (existingTrainer) {
+        return errorResponse('This Trainer ID is already registered.');
+      }
     }
 
     // --- Validate Profile Picture ---
@@ -96,26 +126,62 @@ export async function onRequestPost(context) {
       return errorResponse('Invalid image data.');
     }
 
+    // --- Hash Password ---
+    const { hash, salt } = await hashPassword(data.password);
+
     // --- Sanitize and Save Member to D1 ---
-    // Sanitize once on write — data will be served as-is on read
     const sanitizedName = sanitizeText(nameResult.value);
-    const sanitizedFavUma = sanitizeText(favUmaResult.value);
-    const sanitizedBio = sanitizeText(bioResult.value);
+    const sanitizedFavUma = favUmaResult.value ? sanitizeText(favUmaResult.value) : null;
+    const sanitizedBio = bioResult.value ? sanitizeText(bioResult.value) : null;
 
     try {
       await db
         .prepare(
-          `INSERT INTO members (name, trainer_id, favorite_uma, bio, profile_picture_data, profile_picture_mime, status)
-           VALUES (?, ?, ?, ?, ?, ?, 'pending')`
+          `INSERT INTO members (username, password_hash, password_salt, name, trainer_id, favorite_uma, bio, profile_picture_data, profile_picture_mime, role, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'member', 'pending')`
         )
-        .bind(sanitizedName, trainerResult.value, sanitizedFavUma, sanitizedBio, base64Data, data.mimeType)
+        .bind(
+          usernameResult.value,
+          hash,
+          salt,
+          sanitizedName,
+          trainerResult.value,
+          sanitizedFavUma,
+          sanitizedBio,
+          base64Data,
+          data.mimeType
+        )
         .run();
     } catch (dbError) {
       console.error('D1 insert error:', dbError.message);
       return errorResponse('Failed to save registration. Please try again.');
     }
 
-    return successResponse('Registration submitted successfully! Please wait for an admin to approve your entry.');
+    // --- Auto-login: issue JWT ---
+    // Get the newly created member's ID
+    const newMember = await db
+      .prepare('SELECT id FROM members WHERE username = ?')
+      .bind(usernameResult.value)
+      .first();
+
+    let cookieHeader = '';
+    if (newMember && env.JWT_SECRET) {
+      const token = await createJWT(
+        { userId: newMember.id, username: usernameResult.value, role: 'member' },
+        env.JWT_SECRET
+      );
+      cookieHeader = sessionCookieValue(token);
+    }
+
+    const responseHeaders = {};
+    if (cookieHeader) {
+      responseHeaders['Set-Cookie'] = cookieHeader;
+    }
+    return jsonResponse(
+      { result: 'success', message: 'Registration submitted successfully! Please wait for an admin to approve your entry.' },
+      200,
+      responseHeaders
+    );
 
   } catch (error) {
     console.error('Registration error:', error.message);

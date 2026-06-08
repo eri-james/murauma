@@ -8,7 +8,7 @@
 import {
   errorResponse,
   successResponse,
-  authenticateAdmin,
+  requireAdmin,
   adminPreflightResponse,
 } from '../../_shared/utils.js';
 
@@ -16,9 +16,8 @@ export async function onRequestGet(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticateAdmin(request, env)) {
-    return errorResponse('Unauthorized.', 401);
-  }
+  const { user, error: authError } = await requireAdmin(request, env);
+  if (authError) return authError;
 
   try {
     const url = new URL(request.url);
@@ -29,13 +28,14 @@ export async function onRequestGet(context) {
     }
 
     const { results } = await db
-      .prepare('SELECT id, name, trainer_id, favorite_uma, bio, status, created_at FROM members WHERE status = ? ORDER BY created_at DESC')
+      .prepare('SELECT id, username, name, trainer_id, favorite_uma, bio, status, created_at FROM members WHERE status = ? ORDER BY created_at DESC')
       .bind(status)
       .all();
 
     // Data was sanitized on insert — serve as-is
     const members = results.map(row => ({
       id: row.id,
+      username: row.username || '',
       name: row.name || '',
       trainerId: row.trainer_id,
       favoriteUma: row.favorite_uma || '',
