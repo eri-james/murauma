@@ -68,7 +68,7 @@
         .stat-card {
             background: rgba(255,255,255,0.95);
             border-radius: 0.75rem;
-            padding: 1.25rem;
+            padding: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             border: 2px solid transparent;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -87,7 +87,7 @@
         .admin-table { width: 100%; border-collapse: collapse; }
         .admin-table th {
             background: rgba(59,130,246,0.08);
-            padding: 0.625rem 0.75rem;
+            padding: 0.75rem 1rem;
             text-align: left;
             font-size: 0.75rem;
             font-weight: 800;
@@ -97,17 +97,18 @@
             border-bottom: 2px solid #3B82F6;
         }
         .admin-table td {
-            padding: 0.625rem 0.75rem;
+            padding: 0.75rem 1rem;
             border-bottom: 1px solid #e5e7eb;
             font-size: 0.875rem;
             color: #374151;
         }
         .admin-table tr:hover td { background: rgba(59,130,246,0.03); }
+        .admin-table td:last-child { white-space: nowrap; }
 
         /* ========== BADGES ========== */
         .badge {
             display: inline-block;
-            padding: 0.125rem 0.625rem;
+            padding: 0.25rem 0.75rem;
             font-size: 0.7rem;
             font-weight: 800;
             border-radius: 9999px;
@@ -124,11 +125,12 @@
 
         /* ========== BUTTONS ========== */
         .btn-sm {
-            padding: 0.25rem 0.625rem;
+            padding: 0.375rem 0.875rem;
             font-size: 0.75rem;
             font-weight: 700;
             border-radius: 0.375rem;
             transition: all 0.15s;
+            margin: 0.125rem;
         }
 
         /* ========== CONTENT CARDS (matching landing page style) ========== */
@@ -137,6 +139,7 @@
             border-radius: 0.75rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             overflow: hidden;
+            padding: 1.25rem;
         }
 
         /* ========== QUICK ACTION CARDS ========== */
@@ -172,7 +175,7 @@
             border-radius: 0.75rem;
             width: 100%; max-width: 720px;
             max-height: 90vh; overflow-y: auto;
-            padding: 1.5rem;
+            padding: 2rem;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
@@ -191,6 +194,29 @@
             .md\:p-6, .md\:p-10 { padding: 1rem; }
             .md\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .md\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        /* ========== FORM INPUTS IN MODALS ========== */
+        .modal-box input[type="text"],
+        .modal-box input[type="url"],
+        .modal-box input[type="number"],
+        .modal-box textarea,
+        .modal-box select {
+            padding: 0.625rem 0.875rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .modal-box input:focus,
+        .modal-box textarea:focus,
+        .modal-box select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .modal-box label {
+            font-weight: 700;
+            color: #374151;
         }
 
         /* ========== FULL WIDTH LAYOUT ========== */
@@ -314,7 +340,7 @@
                         <p id="stat-guides" class="stat-number text-purple-600">-</p>
                     </div>
                 </div>
-                <div class="admin-card p-6 border-2 border-green-500">
+                <div class="admin-card border-2 border-green-500">
                     <h3 class="header-skew header-skew-green mb-5">Quick Actions</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <button onclick="switchSection('members')" class="quick-action bg-amber-500 text-white p-5 text-sm flex flex-col items-center gap-2">
@@ -349,7 +375,7 @@
             <div id="section-members" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew" style="background-color:#F59E0B;">Members</h2>
-                    <select id="members-status-filter" class="border-2 border-amber-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-amber-400 focus:border-amber-400">
+                    <select id="members-status-filter" class="border-2 border-amber-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-amber-400 focus:border-amber-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -367,7 +393,7 @@
             <div id="section-writings" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew">Writings</h2>
-                    <select id="writings-status-filter" class="border-2 border-blue-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-blue-400 focus:border-blue-400">
+                    <select id="writings-status-filter" class="border-2 border-blue-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-blue-400 focus:border-blue-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -385,7 +411,7 @@
             <div id="section-fan-media" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew header-skew-pink">Fan Media</h2>
-                    <select id="fan-media-status-filter" class="border-2 border-pink-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-pink-400 focus:border-pink-400">
+                    <select id="fan-media-status-filter" class="border-2 border-pink-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-pink-400 focus:border-pink-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -403,7 +429,7 @@
             <div id="section-guides" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew header-skew-purple">Guides</h2>
-                    <select id="guides-status-filter" class="border-2 border-purple-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-purple-400 focus:border-purple-400">
+                    <select id="guides-status-filter" class="border-2 border-purple-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-purple-400 focus:border-purple-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -421,7 +447,7 @@
             <div id="section-weekly-races" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew">Weekly Races</h2>
-                    <button onclick="openWeeklyRaceForm()" class="bg-green-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-green-600 text-sm transition-colors">+ New Race</button>
+                    <button onclick="openWeeklyRaceForm()" class="bg-green-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-green-600 text-sm transition-colors">+ New Race</button>
                 </div>
                 <div class="admin-card border-2 border-blue-400 overflow-x-auto">
                     <table class="admin-table">
@@ -435,7 +461,7 @@
             <div id="section-events" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew header-skew-red">Events</h2>
-                    <button onclick="openEventForm()" class="bg-red-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-red-600 text-sm transition-colors">+ New Event</button>
+                    <button onclick="openEventForm()" class="bg-red-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-red-600 text-sm transition-colors">+ New Event</button>
                 </div>
                 <div class="admin-card border-2 border-red-400 overflow-x-auto">
                     <table class="admin-table">
@@ -449,7 +475,7 @@
             <div id="section-news" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="header-skew header-skew-pink">News</h2>
-                    <button onclick="openNewsForm()" class="bg-pink-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-pink-600 text-sm transition-colors">+ New Post</button>
+                    <button onclick="openNewsForm()" class="bg-pink-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-pink-600 text-sm transition-colors">+ New Post</button>
                 </div>
                 <div class="admin-card border-2 border-pink-400 overflow-x-auto">
                     <table class="admin-table">
@@ -763,7 +789,7 @@
         const isEdit = !!id;
         document.getElementById('modal-title').textContent = isEdit ? 'Edit Weekly Race' : 'New Weekly Race';
         document.getElementById('modal-content').innerHTML = `
-            <form id="weekly-race-form" class="space-y-4">
+            <form id="weekly-race-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-bold text-gray-700">Title *</label>
                     <input type="text" id="wr-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
@@ -789,8 +815,8 @@
                     <label class="flex items-center"><input type="checkbox" id="wr-published" checked class="mr-2"> Published</label>
                 </div>
                 <div class="flex justify-end space-x-2 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
                 </div>
             </form>
         `;
@@ -876,7 +902,7 @@
         const isEdit = !!id;
         document.getElementById('modal-title').textContent = isEdit ? 'Edit Event' : 'New Event';
         document.getElementById('modal-content').innerHTML = `
-            <form id="event-form" class="space-y-4">
+            <form id="event-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-bold text-gray-700">Title *</label>
                     <input type="text" id="ev-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
@@ -911,8 +937,8 @@
                     <label class="flex items-center"><input type="checkbox" id="ev-published" checked class="mr-2"> Published</label>
                 </div>
                 <div class="flex justify-end space-x-2 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
                 </div>
             </form>
         `;
@@ -1003,7 +1029,7 @@
         const isEdit = !!id;
         document.getElementById('modal-title').textContent = isEdit ? 'Edit News Post' : 'New News Post';
         document.getElementById('modal-content').innerHTML = `
-            <form id="news-form" class="space-y-4">
+            <form id="news-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-bold text-gray-700">Title *</label>
                     <input type="text" id="nw-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
@@ -1038,8 +1064,8 @@
                     <input type="url" id="nw-image-url" maxlength="2000" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
                 </div>
                 <div class="flex justify-end space-x-2 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
                 </div>
             </form>
         `;
