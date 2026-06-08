@@ -18,5 +18,8 @@ Thumbs.db
 # Build artifacts
 dist/
 
+# Tailwind source file (not linked directly — built output is used)
+# css/tailwind-src.css is tracked for reproducibility
+
 # Deprecated (kept in repo for reference, but not deployed)
 # _deprecated/ is intentionally tracked in git

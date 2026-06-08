@@ -1,0 +1,30 @@
+# MURA — Cloudflare Pages Headers
+# https://developers.cloudflare.com/pages/configuration/serving-pages/#headers
+
+# Built CSS — immutable, cache aggressively
+/css/tailwind.min.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Shared CSS — versioned via content hash
+/css/common.css
+  Cache-Control: public, max-age=86400
+
+# Self-hosted fonts — immutable, cache aggressively
+/fonts/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# Shared JS
+/js/*.js
+  Cache-Control: public, max-age=86400
+
+# Static HTML pages — short cache (content may change)
+/*.html
+  Cache-Control: public, max-age=3600
+
+# Favicon
+/favicon.ico
+  Cache-Control: public, max-age=86400
+
+# API routes — no cache (dynamic data)
+/api/*
+  Cache-Control: no-store

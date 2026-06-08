@@ -1,0 +1,39 @@
+/* MURA — Self-hosted Inter Font
+ * Inter is the primary Latin font. Noto Sans JP (CJK) stays on Google Fonts
+ * because they provide automatic unicode-range subsetting (~6MB font → only
+ * the glyphs actually used are downloaded).
+ *
+ * This file replaces the Google Fonts request for Inter, saving an extra
+ * DNS lookup + connection and enabling reliable preloading.
+ */
+
+/* 1. Preload hints are added in HTML <head> for the Regular weight
+ *    since it's the most common and blocks text rendering.
+ *
+ * 2. font-display: swap ensures text is visible immediately with
+ *    a system fallback, then swaps when Inter finishes loading.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/Inter-Black.woff2') format('woff2');
+}

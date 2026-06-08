@@ -1,0 +1,17 @@
+{
+  "name": "murauma",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Malayan Umamusume Racing Association — fan community site on Cloudflare Pages + D1",
+  "scripts": {
+    "build:css": "NODE_ENV=production npx tailwindcss -i ./css/tailwind-src.css -o ./css/tailwind.min.css --minify",
+    "build": "npm run build:css",
+    "watch:css": "npx tailwindcss -i ./css/tailwind-src.css -o ./css/tailwind.min.css --watch"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "cssnano": "^7.1.9",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.19"
+  }
+}

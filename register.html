@@ -26,12 +26,14 @@
 
     <!-- Favicon Link -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <!-- Tailwind CSS for rapid UI development -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for custom typography -->
+    <!-- Tailwind CSS (built) -->
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
     <!-- hCaptcha for bot prevention -->
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     <link rel="stylesheet" href="/css/common.css">
@@ -183,6 +185,38 @@
     </footer>
     
     <script>
+        /**
+         * Resize an image file to a max dimension using canvas.
+         * Returns a Promise resolving to { dataUrl, mimeType }.
+         * - If the image is smaller than maxDim, it is returned as-is (just re-encoded).
+         * - Output is JPEG for photos (smaller), PNG for transparency.
+         */
+        function resizeImage(file, maxDim = 256) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Only scale down, never up
+                    let w = img.width, h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        const ratio = Math.min(maxDim / w, maxDim / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    // Use JPEG for smaller size (acceptable for profile pics)
+                    const mimeType = 'image/jpeg';
+                    const dataUrl = canvas.toDataURL(mimeType, 0.85);
+                    resolve({ dataUrl, mimeType });
+                };
+                img.onerror = () => reject(new Error('Failed to load image for resizing.'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // --- Form Submission Logic ---
             const form = document.getElementById('member-form');
@@ -193,7 +227,7 @@
             const apiUrl = '/api/register';
 
             if (form) {
-                form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault(); 
                     
                     submitButton.disabled = true;
@@ -203,10 +237,9 @@
                     const file = document.getElementById('profilePicture').files[0];
                     
                     if (file) {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(file);
-                        reader.onload = () => {
-                            const base64Image = reader.result;
+                        try {
+                            // Resize image client-side before upload (max 256x256, JPEG)
+                            const { dataUrl: base64Image, mimeType } = await resizeImage(file, 256);
                             
                             // Verify hCaptcha before submitting
                             const hCaptchaResponse = document.querySelector('[name="h-captcha-response"]');
@@ -220,56 +253,47 @@
                             captchaError.classList.add('hidden');
 
                             const formData = {
-                                formType: 'memberRegistration', // This tells our script which function to run
+                                formType: 'memberRegistration',
                                 memberName: document.getElementById('memberName').value,
                                 trainerID: document.getElementById('trainerID').value,
                                 favoriteUma: document.getElementById('favoriteUma').value,
                                 bio: document.getElementById('bio').value,
                                 profilePicture: base64Image,
                                 fileName: file.name,
-                                mimeType: file.type,
-                                hCaptchaToken: hCaptchaResponse.value // Include CAPTCHA token for server verification
+                                mimeType: mimeType, // Use resized image MIME (JPEG)
+                                hCaptchaToken: hCaptchaResponse.value
                             };
 
-                            fetch(apiUrl, {
-                                method: 'POST',
-                                body: JSON.stringify(formData),
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                            })
-                            .then(response => {
+                            try {
+                                const response = await fetch(apiUrl, {
+                                    method: 'POST',
+                                    body: JSON.stringify(formData),
+                                    headers: { 'Content-Type': 'application/json' },
+                                });
                                 if (!response.ok && response.status !== 400) {
                                     throw new Error(`Server error (${response.status})`);
                                 }
-                                return response.json();
-                            })
-                            .then(data => {
+                                const data = await response.json();
                                 if (data.result === 'success') {
                                     statusMessage.innerHTML = `<p class="text-green-600 font-bold">${data.message}</p>`;
                                     form.reset();
-                                    // Reset hCaptcha widget after successful submission
                                     if (typeof hcaptcha !== 'undefined') hcaptcha.reset();
                                 } else {
                                     throw new Error(data.message || 'An unknown error occurred.');
                                 }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                statusMessage.innerHTML = `<p class="text-red-600 font-bold">An error occurred: ${error.message}</p>`;
-                            })
-                            .finally(() => {
+                            } catch (fetchError) {
+                                console.error('Error:', fetchError);
+                                statusMessage.innerHTML = `<p class="text-red-600 font-bold">An error occurred: ${fetchError.message}</p>`;
+                            } finally {
                                 submitButton.disabled = false;
                                 submitButton.textContent = 'Submit Registration';
-                            });
-                        };
-                        
-                        reader.onerror = (error) => {
-                            console.error('Error reading file:', error);
-                            statusMessage.innerHTML = `<p class="text-red-600 font-bold">Could not read the image file. Please try a different image.</p>`;
+                            }
+                        } catch (resizeError) {
+                            console.error('Image resize error:', resizeError);
+                            statusMessage.innerHTML = `<p class="text-red-600 font-bold">Could not process the image. Please try a different image.</p>`;
                             submitButton.disabled = false;
                             submitButton.textContent = 'Submit Registration';
-                        };
+                        }
 
                     } else {
                         statusMessage.innerHTML = `<p class="text-red-600 font-bold">Please select a profile picture.</p>`;

@@ -6,16 +6,18 @@
     <title>Writings - MURA</title>
     <!-- Favicon for the website tab -->
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
-    <!-- Tailwind CSS for rapid UI development -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS (built) -->
+    <link rel="stylesheet" href="../css/tailwind.min.css">
     <!-- Showdown.js for Markdown to HTML conversion -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <!-- DOMPurify for XSS prevention on user-submitted content -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
-    <!-- Google Fonts for custom typography -->
+    <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="../fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="../css/fonts.css">
     <link rel="stylesheet" href="../css/common.css">
     <style>
         .prose img { margin-top: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; }

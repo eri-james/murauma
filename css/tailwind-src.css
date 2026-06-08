@@ -1,0 +1,8 @@
+/* MURA — Tailwind Source File
+ * This is the input file for the Tailwind CSS build.
+ * Do NOT link this file directly in HTML — use the built output instead.
+ * Build command: npm run build:css
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

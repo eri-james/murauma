@@ -6,7 +6,7 @@
 
 /* --- Base Font & Background --- */
 body {
-  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
   background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
   background-attachment: fixed;
   background-size: cover;
