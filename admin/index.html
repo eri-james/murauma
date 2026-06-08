@@ -16,113 +16,252 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <link rel="stylesheet" href="/css/common.css">
     <style>
-        body { background: #f3f4f6; }
-        /* Sidebar */
-        .sidebar { width: 260px; min-height: 100vh; }
-        .sidebar-link { display: flex; align-items: center; padding: 0.625rem 1rem; font-size: 0.875rem; font-weight: 600; color: #d1d5db; border-radius: 0.375rem; transition: all 0.15s; cursor: pointer; }
-        .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
-        .sidebar-link.active { background: rgba(139,92,246,0.25); color: #c4b5fd; }
-        /* Main area */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1e3a5f 0%, #1a1a2e 100%);
+            border-right: 3px solid #3B82F6;
+        }
+        .sidebar-brand {
+            border-bottom: 2px solid rgba(59,130,246,0.4);
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        .sidebar-link:hover {
+            background: rgba(59,130,246,0.15);
+            color: #fff;
+        }
+        .sidebar-link.active {
+            background: linear-gradient(90deg, rgba(59,130,246,0.35), rgba(139,92,246,0.2));
+            color: #93c5fd;
+            border-left: 3px solid #3B82F6;
+        }
+        .sidebar-link.active .sidebar-icon {
+            color: #3B82F6;
+        }
+
+        /* ========== CONTENT AREA ========== */
         .admin-section { display: none; }
         .admin-section.active { display: block; }
-        /* Tables */
+
+        /* ========== STAT CARDS ========== */
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        .stat-card-yellow { border-color: #F59E0B; }
+        .stat-card-blue { border-color: #3B82F6; }
+        .stat-card-pink { border-color: #EC4899; }
+        .stat-card-purple { border-color: #8B5CF6; }
+        .stat-number { font-size: 2rem; font-weight: 900; }
+
+        /* ========== TABLES ========== */
         .admin-table { width: 100%; border-collapse: collapse; }
-        .admin-table th { background: #f9fafb; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #e5e7eb; }
-        .admin-table td { padding: 0.625rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.875rem; }
-        .admin-table tr:hover { background: #f9fafb; }
-        /* Badges */
-        .badge { display: inline-block; padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 9999px; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-approved { background: #d1fae5; color: #065f46; }
-        .badge-rejected { background: #fee2e2; color: #991b1b; }
-        .badge-draft { background: #e0e7ff; color: #3730a3; }
-        .badge-published { background: #d1fae5; color: #065f46; }
-        .badge-event { background: #fce7f3; color: #9d174d; }
-        .badge-community { background: #dbeafe; color: #1e40af; }
-        .badge-update { background: #fef3c7; color: #92400e; }
-        /* Stat cards */
-        .stat-card { background: white; border-radius: 0.5rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .stat-number { font-size: 1.875rem; font-weight: 800; }
-        /* Quill editor in modal */
+        .admin-table th {
+            background: rgba(59,130,246,0.08);
+            padding: 0.625rem 0.75rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #3B82F6;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 2px solid #3B82F6;
+        }
+        .admin-table td {
+            padding: 0.625rem 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        .admin-table tr:hover td { background: rgba(59,130,246,0.03); }
+
+        /* ========== BADGES ========== */
+        .badge {
+            display: inline-block;
+            padding: 0.125rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border-radius: 9999px;
+            letter-spacing: 0.03em;
+        }
+        .badge-pending { background: #FEF3C7; color: #92400E; }
+        .badge-approved { background: #D1FAE5; color: #065F46; }
+        .badge-rejected { background: #FEE2E2; color: #991B1B; }
+        .badge-draft { background: #E0E7FF; color: #3730A3; }
+        .badge-published { background: #D1FAE5; color: #065F46; }
+        .badge-event { background: #FCE7F3; color: #9D174D; }
+        .badge-community { background: #DBEAFE; color: #1E40AF; }
+        .badge-update { background: #FEF3C7; color: #92400E; }
+
+        /* ========== BUTTONS ========== */
+        .btn-sm {
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.375rem;
+            transition: all 0.15s;
+        }
+
+        /* ========== CONTENT CARDS (matching landing page style) ========== */
+        .admin-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* ========== QUICK ACTION CARDS ========== */
+        .quick-action {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 0.5rem;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+        }
+        .quick-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* ========== QUILL EDITOR IN MODAL ========== */
         .modal-quill-container { height: 300px; }
         @media (min-width: 768px) { .modal-quill-container { height: 400px; } }
         .ql-toolbar.ql-snow { white-space: normal; }
-        /* Action buttons */
-        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem; }
-        /* Modal — hidden by default via display:none; .modal-open toggles to flex */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 50; padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
         .modal-overlay.modal-open { display: flex; }
-        .modal-box { background: white; border-radius: 0.5rem; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; }
+        .modal-box {
+            background: white;
+            border-radius: 0.75rem;
+            width: 100%; max-width: 720px;
+            max-height: 90vh; overflow-y: auto;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        /* ========== MOBILE ========== */
+        .mobile-header {
+            background: linear-gradient(90deg, #1e3a5f, #1a1a2e);
+            border-bottom: 2px solid #3B82F6;
+        }
     </style>
 </head>
 <body>
     <!-- Not authorized notice -->
-    <div id="not-authorized" class="hidden min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
-            <h1 class="text-2xl font-extrabold text-red-600 mb-4">Access Denied</h1>
+    <div id="not-authorized" class="hidden min-h-screen flex items-center justify-center" style="background:rgba(0,0,0,0.5); backdrop-filter:blur(6px);">
+        <div class="bg-white p-10 rounded-xl shadow-2xl text-center max-w-md border-2 border-red-500">
+            <h1 class="text-3xl font-extrabold text-red-600 mb-4">Access Denied</h1>
             <p class="text-gray-600 mb-6">You must be logged in as an admin to access this page.</p>
-            <a href="/login.html" class="bg-blue-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-blue-700">Log In</a>
+            <a href="/login.html" class="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">Log In</a>
         </div>
     </div>
 
     <!-- Admin Dashboard -->
     <div id="admin-app" class="hidden flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="sidebar bg-gray-900 text-white flex-shrink-0 p-4 space-y-1">
-            <div class="px-3 py-4 mb-4 border-b border-gray-700">
-                <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
-                <p class="text-xs text-gray-400 mt-1">Dashboard</p>
+        <aside class="sidebar text-white flex-shrink-0 p-4 space-y-1">
+            <div class="sidebar-brand px-3 py-4 mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center font-black text-sm">M</div>
+                    <div>
+                        <h1 class="font-extrabold text-sm tracking-wider leading-tight">MURA</h1>
+                        <p class="text-xs text-blue-300 font-semibold tracking-widest">ADMIN</p>
+                    </div>
+                </div>
             </div>
             <div class="sidebar-link active" data-section="overview">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Overview
             </div>
             <div class="sidebar-link" data-section="members">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 Members
             </div>
             <div class="sidebar-link" data-section="writings">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                 Writings
             </div>
             <div class="sidebar-link" data-section="fan-media">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 Fan Media
             </div>
             <div class="sidebar-link" data-section="guides">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 Guides
             </div>
             <div class="sidebar-link" data-section="weekly-races">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 Weekly Races
             </div>
             <div class="sidebar-link" data-section="events">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 Events
             </div>
             <div class="sidebar-link" data-section="news">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
                 News
             </div>
-            <div class="mt-8 pt-4 border-t border-gray-700">
+            <div class="mt-8 pt-4 border-t border-blue-800">
                 <a href="/" class="sidebar-link">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <svg class="w-4 h-4 mr-2.5 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     Back to Site
                 </a>
             </div>
         </aside>
 
         <!-- Mobile header -->
-        <div class="md:hidden fixed top-0 left-0 right-0 bg-gray-900 text-white z-40 flex items-center justify-between px-4 py-3">
-            <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
+        <div class="md:hidden fixed top-0 left-0 right-0 mobile-header text-white z-40 flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-2">
+                <div class="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center font-black text-xs">M</div>
+                <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
+            </div>
             <button id="mobile-menu-toggle" class="text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
             </button>
         </div>
-        <div id="mobile-sidebar" class="md:hidden hidden fixed inset-0 z-50 bg-gray-900 text-white p-4 overflow-y-auto">
+        <div id="mobile-sidebar" class="md:hidden hidden fixed inset-0 z-50 sidebar text-white p-4 overflow-y-auto" style="min-width:100%;">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
+                <div class="flex items-center space-x-2">
+                    <div class="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center font-black text-xs">M</div>
+                    <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
+                </div>
                 <button id="mobile-menu-close" class="text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div id="mobile-sidebar-links"></div>
@@ -132,34 +271,34 @@
         <main class="flex-1 p-4 md:p-8 mt-14 md:mt-0 overflow-x-auto">
             <!-- ========== OVERVIEW ========== -->
             <div id="section-overview" class="admin-section active">
-                <h2 class="text-2xl font-extrabold text-gray-800 mb-6">Dashboard Overview</h2>
+                <h2 class="header-skew header-skew-blue mb-6" style="background-color:#3B82F6;">Dashboard Overview</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold text-gray-500 uppercase">Pending Members</p>
-                        <p id="stat-members" class="stat-number text-yellow-600">-</p>
+                    <div class="stat-card stat-card-yellow">
+                        <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Pending Members</p>
+                        <p id="stat-members" class="stat-number text-amber-600">-</p>
                     </div>
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold text-gray-500 uppercase">Pending Writings</p>
-                        <p id="stat-writings" class="stat-number text-yellow-600">-</p>
+                    <div class="stat-card stat-card-blue">
+                        <p class="text-xs font-bold text-blue-700 uppercase tracking-wider">Pending Writings</p>
+                        <p id="stat-writings" class="stat-number text-blue-600">-</p>
                     </div>
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold text-gray-500 uppercase">Pending Fan Media</p>
-                        <p id="stat-fan-media" class="stat-number text-yellow-600">-</p>
+                    <div class="stat-card stat-card-pink">
+                        <p class="text-xs font-bold text-pink-700 uppercase tracking-wider">Pending Fan Media</p>
+                        <p id="stat-fan-media" class="stat-number text-pink-600">-</p>
                     </div>
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold text-gray-500 uppercase">Pending Guides</p>
-                        <p id="stat-guides" class="stat-number text-yellow-600">-</p>
+                    <div class="stat-card stat-card-purple">
+                        <p class="text-xs font-bold text-purple-700 uppercase tracking-wider">Pending Guides</p>
+                        <p id="stat-guides" class="stat-number text-purple-600">-</p>
                     </div>
                 </div>
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="font-bold text-lg text-gray-700 mb-4">Quick Actions</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <button onclick="switchSection('members')" class="bg-yellow-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-yellow-600 text-sm">Review Members</button>
-                        <button onclick="switchSection('writings')" class="bg-blue-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">Review Writings</button>
-                        <button onclick="switchSection('guides')" class="bg-purple-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-purple-600 text-sm">Review Guides</button>
-                        <button onclick="switchSection('weekly-races')" class="bg-green-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-600 text-sm">Manage Races</button>
-                        <button onclick="switchSection('events')" class="bg-red-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-red-600 text-sm">Manage Events</button>
-                        <button onclick="switchSection('news')" class="bg-pink-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-pink-600 text-sm">Manage News</button>
+                <div class="admin-card p-6 border-2 border-green-500">
+                    <h3 class="header-skew header-skew-green mb-5">Quick Actions</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <button onclick="switchSection('members')" class="quick-action bg-amber-500 text-white p-4 text-sm">Review Members</button>
+                        <button onclick="switchSection('writings')" class="quick-action bg-blue-500 text-white p-4 text-sm">Review Writings</button>
+                        <button onclick="switchSection('guides')" class="quick-action bg-purple-500 text-white p-4 text-sm">Review Guides</button>
+                        <button onclick="switchSection('weekly-races')" class="quick-action bg-green-500 text-white p-4 text-sm">Manage Races</button>
+                        <button onclick="switchSection('events')" class="quick-action bg-red-500 text-white p-4 text-sm">Manage Events</button>
+                        <button onclick="switchSection('news')" class="quick-action bg-pink-500 text-white p-4 text-sm">Manage News</button>
                     </div>
                 </div>
             </div>
@@ -167,14 +306,14 @@
             <!-- ========== MEMBERS ========== -->
             <div id="section-members" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Members</h2>
-                    <select id="members-status-filter" class="border rounded-lg px-3 py-2 text-sm">
+                    <h2 class="header-skew" style="background-color:#F59E0B;">Members</h2>
+                    <select id="members-status-filter" class="border-2 border-amber-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-amber-400 focus:border-amber-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-amber-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
                         <tbody id="members-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -185,14 +324,14 @@
             <!-- ========== WRITINGS ========== -->
             <div id="section-writings" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Writings</h2>
-                    <select id="writings-status-filter" class="border rounded-lg px-3 py-2 text-sm">
+                    <h2 class="header-skew">Writings</h2>
+                    <select id="writings-status-filter" class="border-2 border-blue-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-blue-400 focus:border-blue-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-blue-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
                         <tbody id="writings-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -203,14 +342,14 @@
             <!-- ========== FAN MEDIA ========== -->
             <div id="section-fan-media" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Fan Media</h2>
-                    <select id="fan-media-status-filter" class="border rounded-lg px-3 py-2 text-sm">
+                    <h2 class="header-skew header-skew-pink">Fan Media</h2>
+                    <select id="fan-media-status-filter" class="border-2 border-pink-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-pink-400 focus:border-pink-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-pink-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Type</th><th>Title</th><th>Author</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="fan-media-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -221,14 +360,14 @@
             <!-- ========== GUIDES ========== -->
             <div id="section-guides" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Guides</h2>
-                    <select id="guides-status-filter" class="border rounded-lg px-3 py-2 text-sm">
+                    <h2 class="header-skew header-skew-purple">Guides</h2>
+                    <select id="guides-status-filter" class="border-2 border-purple-400 rounded-lg px-3 py-2 text-sm font-bold bg-white focus:ring-purple-400 focus:border-purple-400">
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-purple-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Votes</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="guides-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -239,10 +378,10 @@
             <!-- ========== WEEKLY RACES ========== -->
             <div id="section-weekly-races" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Weekly Races</h2>
-                    <button onclick="openWeeklyRaceForm()" class="bg-green-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-700 text-sm">+ New Race</button>
+                    <h2 class="header-skew">Weekly Races</h2>
+                    <button onclick="openWeeklyRaceForm()" class="bg-green-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-green-600 text-sm transition-colors">+ New Race</button>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-blue-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Track</th><th>Deadline</th><th>Active</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="weekly-races-table-body"><tr><td colspan="7" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -253,10 +392,10 @@
             <!-- ========== EVENTS ========== -->
             <div id="section-events" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">Events</h2>
-                    <button onclick="openEventForm()" class="bg-red-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-red-700 text-sm">+ New Event</button>
+                    <h2 class="header-skew header-skew-red">Events</h2>
+                    <button onclick="openEventForm()" class="bg-red-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-red-600 text-sm transition-colors">+ New Event</button>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-red-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Slug</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="events-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -267,10 +406,10 @@
             <!-- ========== NEWS ========== -->
             <div id="section-news" class="admin-section">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-800">News</h2>
-                    <button onclick="openNewsForm()" class="bg-pink-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-pink-700 text-sm">+ New Post</button>
+                    <h2 class="header-skew header-skew-pink">News</h2>
+                    <button onclick="openNewsForm()" class="bg-pink-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-pink-600 text-sm transition-colors">+ New Post</button>
                 </div>
-                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <div class="admin-card border-2 border-pink-400 overflow-x-auto">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Slug</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="news-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
@@ -285,7 +424,7 @@
         <div class="modal-box">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="modal-title" class="text-lg font-extrabold text-gray-800"></h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div id="modal-content"></div>
         </div>
@@ -427,14 +566,14 @@
             tbody.innerHTML = data.items.map(m => `
                 <tr>
                     <td>${m.id}</td>
-                    <td class="font-semibold">${DOMPurify.sanitize(m.name)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(m.name)}</td>
                     <td>${DOMPurify.sanitize(m.username || '-')}</td>
                     <td><span class="badge badge-${m.status}">${m.status}</span></td>
                     <td>${new Date(m.createdAt).toLocaleDateString()}</td>
                     <td class="space-x-1">
-                        ${m.status === 'pending' ? `<button onclick="approveMember(${m.id})" class="btn-sm bg-green-600 text-white hover:bg-green-700">Approve</button><button onclick="rejectMember(${m.id})" class="btn-sm bg-red-600 text-white hover:bg-red-700">Reject</button>` : ''}
-                        ${m.status === 'rejected' ? `<button onclick="approveMember(${m.id})" class="btn-sm bg-green-600 text-white hover:bg-green-700">Approve</button>` : ''}
-                        ${m.status === 'approved' ? `<button onclick="rejectMember(${m.id})" class="btn-sm bg-red-600 text-white hover:bg-red-700">Reject</button>` : ''}
+                        ${m.status === 'pending' ? `<button onclick="approveMember(${m.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button><button onclick="rejectMember(${m.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
+                        ${m.status === 'rejected' ? `<button onclick="approveMember(${m.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
+                        ${m.status === 'approved' ? `<button onclick="rejectMember(${m.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -468,13 +607,13 @@
             tbody.innerHTML = data.items.map(w => `
                 <tr>
                     <td>${w.id}</td>
-                    <td class="font-semibold">${DOMPurify.sanitize(w.title)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(w.title)}</td>
                     <td>${DOMPurify.sanitize(w.authorName || '-')}</td>
                     <td><span class="badge badge-${w.status}">${w.status}</span></td>
                     <td>${new Date(w.createdAt).toLocaleDateString()}</td>
                     <td class="space-x-1">
-                        ${w.status !== 'approved' ? `<button onclick="approveWriting(${w.id})" class="btn-sm bg-green-600 text-white hover:bg-green-700">Approve</button>` : ''}
-                        ${w.status !== 'rejected' ? `<button onclick="rejectWriting(${w.id})" class="btn-sm bg-red-600 text-white hover:bg-red-700">Reject</button>` : ''}
+                        ${w.status !== 'approved' ? `<button onclick="approveWriting(${w.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
+                        ${w.status !== 'rejected' ? `<button onclick="rejectWriting(${w.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -500,12 +639,12 @@
                 <tr>
                     <td>${f.id}</td>
                     <td><span class="badge badge-${f.type === 'art' ? 'community' : f.type === 'video' ? 'event' : 'update'}">${f.type}</span></td>
-                    <td class="font-semibold">${DOMPurify.sanitize(f.title)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(f.title)}</td>
                     <td>${DOMPurify.sanitize(f.authorName || '-')}</td>
                     <td><span class="badge badge-${f.status}">${f.status}</span></td>
                     <td class="space-x-1">
-                        ${f.status !== 'approved' ? `<button onclick="approveFanMedia(${f.id})" class="btn-sm bg-green-600 text-white hover:bg-green-700">Approve</button>` : ''}
-                        ${f.status !== 'rejected' ? `<button onclick="rejectFanMedia(${f.id})" class="btn-sm bg-red-600 text-white hover:bg-red-700">Reject</button>` : ''}
+                        ${f.status !== 'approved' ? `<button onclick="approveFanMedia(${f.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
+                        ${f.status !== 'rejected' ? `<button onclick="rejectFanMedia(${f.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                         <button onclick="deleteFanMedia(${f.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
                     </td>
                 </tr>
@@ -532,13 +671,13 @@
             tbody.innerHTML = data.items.map(g => `
                 <tr>
                     <td>${g.id}</td>
-                    <td class="font-semibold">${DOMPurify.sanitize(g.title)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(g.title)}</td>
                     <td>${DOMPurify.sanitize(g.authorName || '-')}</td>
                     <td>-</td>
                     <td><span class="badge badge-${g.status}">${g.status}</span></td>
                     <td class="space-x-1">
-                        ${g.status !== 'approved' ? `<button onclick="approveGuide(${g.id})" class="btn-sm bg-green-600 text-white hover:bg-green-700">Approve</button>` : ''}
-                        ${g.status !== 'rejected' ? `<button onclick="rejectGuide(${g.id})" class="btn-sm bg-red-600 text-white hover:bg-red-700">Reject</button>` : ''}
+                        ${g.status !== 'approved' ? `<button onclick="approveGuide(${g.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
+                        ${g.status !== 'rejected' ? `<button onclick="rejectGuide(${g.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                         <button onclick="deleteGuide(${g.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
                     </td>
                 </tr>
@@ -564,13 +703,13 @@
             tbody.innerHTML = data.items.map(r => `
                 <tr>
                     <td>${r.id}</td>
-                    <td class="font-semibold">${DOMPurify.sanitize(r.title)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(r.title)}</td>
                     <td>${DOMPurify.sanitize(r.track)}</td>
                     <td>${DOMPurify.sanitize(r.deadline)}</td>
-                    <td>${r.isActive ? '<span class="text-green-600 font-bold">Yes</span>' : '<span class="text-gray-400">No</span>'}</td>
+                    <td>${r.isActive ? '<span class="text-green-600 font-extrabold">Yes</span>' : '<span class="text-gray-400">No</span>'}</td>
                     <td><span class="badge badge-${r.status}">${r.status}</span></td>
                     <td class="space-x-1">
-                        <button onclick="openWeeklyRaceForm(${r.id})" class="btn-sm bg-blue-600 text-white hover:bg-blue-700">Edit</button>
+                        <button onclick="openWeeklyRaceForm(${r.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         <button onclick="deleteWeeklyRace(${r.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
                     </td>
                 </tr>
@@ -584,23 +723,23 @@
         document.getElementById('modal-content').innerHTML = `
             <form id="weekly-race-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Title *</label>
+                    <label class="block text-sm font-bold text-gray-700">Title *</label>
                     <input type="text" id="wr-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Track *</label>
+                    <label class="block text-sm font-bold text-gray-700">Track *</label>
                     <input type="text" id="wr-track" required maxlength="200" placeholder="e.g. Tokyo Turf 1600m" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Deadline *</label>
+                    <label class="block text-sm font-bold text-gray-700">Deadline *</label>
                     <input type="text" id="wr-deadline" required maxlength="100" placeholder="e.g. Saturday, 11:59 PM" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <label class="block text-sm font-bold text-gray-700">Description</label>
                     <textarea id="wr-description" maxlength="2000" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Image URL</label>
+                    <label class="block text-sm font-bold text-gray-700">Image URL</label>
                     <input type="url" id="wr-image-url" maxlength="2000" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                 </div>
                 <div class="flex items-center space-x-4">
@@ -608,14 +747,13 @@
                     <label class="flex items-center"><input type="checkbox" id="wr-published" checked class="mr-2"> Published</label>
                 </div>
                 <div class="flex justify-end space-x-2 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
                 </div>
             </form>
         `;
         document.getElementById('modal').classList.add('modal-open');
 
-        // If editing, load existing data
         if (isEdit) {
             loadWeeklyRaceForEdit(id);
         }
@@ -627,14 +765,13 @@
                 track: document.getElementById('wr-track').value.trim(),
                 deadline: document.getElementById('wr-deadline').value.trim(),
                 description: document.getElementById('wr-description').value.trim(),
-                imageUrl: document.getElementById('wr-image-url').value.trim() || null,
+                image_url: document.getElementById('wr-image-url').value.trim() || null,
                 isActive: document.getElementById('wr-active').checked,
                 status: document.getElementById('wr-published').checked ? 'published' : 'draft',
             };
             try {
                 if (isEdit) {
-                    payload.id = id;
-                    await api('POST', '/api/admin/weekly-races/update', payload);
+                    await api('PUT', '/api/admin/weekly-races', { ...payload, id });
                 } else {
                     await api('POST', '/api/admin/weekly-races', payload);
                 }
@@ -647,15 +784,15 @@
     async function loadWeeklyRaceForEdit(id) {
         try {
             const data = await api('GET', '/api/admin/weekly-races');
-            const race = data.items.find(r => r.id === id);
-            if (race) {
-                document.getElementById('wr-title').value = race.title;
-                document.getElementById('wr-track').value = race.track;
-                document.getElementById('wr-deadline').value = race.deadline;
-                document.getElementById('wr-description').value = race.description;
-                document.getElementById('wr-image-url').value = race.imageUrl;
-                document.getElementById('wr-active').checked = race.isActive;
-                document.getElementById('wr-published').checked = race.status === 'published';
+            const item = data.items?.find(r => r.id === id);
+            if (item) {
+                document.getElementById('wr-title').value = item.title || '';
+                document.getElementById('wr-track').value = item.track || '';
+                document.getElementById('wr-deadline').value = item.deadline || '';
+                document.getElementById('wr-description').value = item.description || '';
+                document.getElementById('wr-image-url').value = item.imageUrl || '';
+                document.getElementById('wr-active').checked = item.isActive !== false;
+                document.getElementById('wr-published').checked = item.status === 'published';
             }
         } catch (err) { console.error('Load race for edit error:', err); }
     }
@@ -680,12 +817,12 @@
             tbody.innerHTML = data.items.map(e => `
                 <tr>
                     <td>${e.id}</td>
-                    <td class="font-semibold">${DOMPurify.sanitize(e.title)}</td>
-                    <td class="text-gray-400 text-xs">${e.slug}</td>
-                    <td>${DOMPurify.sanitize(e.startDate)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(e.title)}</td>
+                    <td class="text-gray-500 text-xs">${DOMPurify.sanitize(e.slug)}</td>
+                    <td>${DOMPurify.sanitize(e.startDate || '-')}</td>
                     <td><span class="badge badge-${e.status}">${e.status}</span></td>
                     <td class="space-x-1">
-                        <button onclick="openEventForm(${e.id})" class="btn-sm bg-blue-600 text-white hover:bg-blue-700">Edit</button>
+                        <button onclick="openEventForm(${e.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         <button onclick="deleteEvent(${e.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
                     </td>
                 </tr>
@@ -699,77 +836,68 @@
         document.getElementById('modal-content').innerHTML = `
             <form id="event-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Title *</label>
+                    <label class="block text-sm font-bold text-gray-700">Title *</label>
                     <input type="text" id="ev-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Slug</label>
-                    <input type="text" id="ev-slug" maxlength="120" placeholder="auto-generated from title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                    <label class="block text-sm font-bold text-gray-700">Slug *</label>
+                    <input type="text" id="ev-slug" required maxlength="120" placeholder="merdeka-cup-2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Description *</label>
-                    <textarea id="ev-description" maxlength="2000" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"></textarea>
+                    <label class="block text-sm font-bold text-gray-700">Description</label>
+                    <textarea id="ev-description" maxlength="500" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Content (HTML)</label>
-                    <div id="ev-quill-container" class="modal-quill-container rounded-md border border-gray-300"></div>
+                    <label class="block text-sm font-bold text-gray-700">Content (Rich Text)</label>
+                    <div id="ev-quill" class="modal-quill-container"></div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Image URL</label>
+                    <label class="block text-sm font-bold text-gray-700">Image URL</label>
                     <input type="url" id="ev-image-url" maxlength="2000" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Start Date *</label>
-                        <input type="text" id="ev-start-date" required maxlength="50" placeholder="e.g. August 31, 2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                        <label class="block text-sm font-bold text-gray-700">Start Date *</label>
+                        <input type="text" id="ev-start-date" required maxlength="50" placeholder="August 31, 2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">End Date</label>
-                        <input type="text" id="ev-end-date" maxlength="50" placeholder="Optional" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                        <label class="block text-sm font-bold text-gray-700">End Date</label>
+                        <input type="text" id="ev-end-date" maxlength="50" placeholder="September 2, 2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                     </div>
                 </div>
-                <label class="flex items-center"><input type="checkbox" id="ev-published" checked class="mr-2"> Published</label>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center"><input type="checkbox" id="ev-published" checked class="mr-2"> Published</label>
+                </div>
                 <div class="flex justify-end space-x-2 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
                 </div>
             </form>
         `;
         document.getElementById('modal').classList.add('modal-open');
 
         // Initialize Quill
-        currentQuill = new Quill('#ev-quill-container', {
-            theme: 'snow',
-            placeholder: 'Write event details here...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                    ['link', 'image'],
-                    ['clean']
-                ]
-            }
-        });
+        currentQuill = new Quill('#ev-quill', { theme: 'snow', placeholder: 'Write event content...' });
 
-        if (isEdit) loadEventForEdit(id);
+        if (isEdit) {
+            loadEventForEdit(id);
+        }
 
         document.getElementById('event-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
                 title: document.getElementById('ev-title').value.trim(),
-                slug: document.getElementById('ev-slug').value.trim() || undefined,
+                slug: document.getElementById('ev-slug').value.trim(),
                 description: document.getElementById('ev-description').value.trim(),
                 content: currentQuill ? currentQuill.root.innerHTML : '',
-                imageUrl: document.getElementById('ev-image-url').value.trim() || null,
-                startDate: document.getElementById('ev-start-date').value.trim(),
-                endDate: document.getElementById('ev-end-date').value.trim() || null,
+                image_url: document.getElementById('ev-image-url').value.trim() || null,
+                start_date: document.getElementById('ev-start-date').value.trim(),
+                end_date: document.getElementById('ev-end-date').value.trim() || null,
                 status: document.getElementById('ev-published').checked ? 'published' : 'draft',
             };
             try {
                 if (isEdit) {
-                    payload.id = id;
-                    await api('POST', '/api/admin/events/update', payload);
+                    await api('PUT', '/api/admin/events', { ...payload, id });
                 } else {
                     await api('POST', '/api/admin/events', payload);
                 }
@@ -782,20 +910,16 @@
     async function loadEventForEdit(id) {
         try {
             const data = await api('GET', '/api/admin/events');
-            const event = data.items.find(e => e.id === id);
-            if (event) {
-                document.getElementById('ev-title').value = event.title;
-                document.getElementById('ev-slug').value = event.slug;
-                document.getElementById('ev-description').value = event.description;
-                document.getElementById('ev-image-url').value = event.imageUrl;
-                document.getElementById('ev-start-date').value = event.startDate;
-                document.getElementById('ev-end-date').value = event.endDate;
-                document.getElementById('ev-published').checked = event.status === 'published';
-                // Load content into Quill — need to fetch full event
-                const fullData = await api('GET', `/api/events?slug=${event.slug}`);
-                if (fullData.event && currentQuill) {
-                    currentQuill.root.innerHTML = fullData.event.content || '';
-                }
+            const item = data.items?.find(e => e.id === id);
+            if (item && currentQuill) {
+                document.getElementById('ev-title').value = item.title || '';
+                document.getElementById('ev-slug').value = item.slug || '';
+                document.getElementById('ev-description').value = item.description || '';
+                document.getElementById('ev-image-url').value = item.imageUrl || '';
+                document.getElementById('ev-start-date').value = item.startDate || '';
+                document.getElementById('ev-end-date').value = item.endDate || '';
+                document.getElementById('ev-published').checked = item.status === 'published';
+                currentQuill.root.innerHTML = item.content || '';
             }
         } catch (err) { console.error('Load event for edit error:', err); }
     }
@@ -814,18 +938,18 @@
             const data = await api('GET', '/api/admin/news');
             const tbody = document.getElementById('news-table-body');
             if (!data.items || data.items.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-400">No news posts found. Create one!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-400">No news found. Create one!</td></tr>';
                 return;
             }
             tbody.innerHTML = data.items.map(n => `
                 <tr>
                     <td>${n.id}</td>
-                    <td class="font-semibold">${DOMPurify.sanitize(n.title)}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(n.title)}</td>
                     <td><span class="badge badge-${n.category}">${n.category}</span></td>
-                    <td class="text-gray-400 text-xs">${n.slug}</td>
+                    <td class="text-gray-500 text-xs">${DOMPurify.sanitize(n.slug)}</td>
                     <td><span class="badge badge-${n.status}">${n.status}</span></td>
                     <td class="space-x-1">
-                        <button onclick="openNewsForm(${n.id})" class="btn-sm bg-blue-600 text-white hover:bg-blue-700">Edit</button>
+                        <button onclick="openNewsForm(${n.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         <button onclick="deleteNews(${n.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
                     </td>
                 </tr>
@@ -839,74 +963,67 @@
         document.getElementById('modal-content').innerHTML = `
             <form id="news-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Title *</label>
+                    <label class="block text-sm font-bold text-gray-700">Title *</label>
                     <input type="text" id="nw-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Slug</label>
-                    <input type="text" id="nw-slug" maxlength="120" placeholder="auto-generated from title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
+                    <label class="block text-sm font-bold text-gray-700">Slug *</label>
+                    <input type="text" id="nw-slug" required maxlength="120" placeholder="website-launch" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Category *</label>
+                        <select id="nw-category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
+                            <option value="event">Event</option>
+                            <option value="community">Community</option>
+                            <option value="update">Update</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <label class="flex items-center"><input type="checkbox" id="nw-published" checked class="mr-2"> Published</label>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Category *</label>
-                    <select id="nw-category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
-                        <option value="community">Community</option>
-                        <option value="event">Event</option>
-                        <option value="update">Update</option>
-                    </select>
+                    <label class="block text-sm font-bold text-gray-700">Description</label>
+                    <textarea id="nw-description" maxlength="500" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Description *</label>
-                    <textarea id="nw-description" maxlength="2000" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm"></textarea>
+                    <label class="block text-sm font-bold text-gray-700">Content (Rich Text)</label>
+                    <div id="nw-quill" class="modal-quill-container"></div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Content (HTML)</label>
-                    <div id="nw-quill-container" class="modal-quill-container rounded-md border border-gray-300"></div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Image URL</label>
+                    <label class="block text-sm font-bold text-gray-700">Image URL</label>
                     <input type="url" id="nw-image-url" maxlength="2000" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
                 </div>
-                <label class="flex items-center"><input type="checkbox" id="nw-published" checked class="mr-2"> Published</label>
                 <div class="flex justify-end space-x-2 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-pink-600 text-white font-bold rounded-lg hover:bg-pink-700 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
                 </div>
             </form>
         `;
         document.getElementById('modal').classList.add('modal-open');
 
         // Initialize Quill
-        currentQuill = new Quill('#nw-quill-container', {
-            theme: 'snow',
-            placeholder: 'Write news content here...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                    ['link', 'image'],
-                    ['clean']
-                ]
-            }
-        });
+        currentQuill = new Quill('#nw-quill', { theme: 'snow', placeholder: 'Write news content...' });
 
-        if (isEdit) loadNewsForEdit(id);
+        if (isEdit) {
+            loadNewsForEdit(id);
+        }
 
         document.getElementById('news-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
                 title: document.getElementById('nw-title').value.trim(),
-                slug: document.getElementById('nw-slug').value.trim() || undefined,
+                slug: document.getElementById('nw-slug').value.trim(),
                 category: document.getElementById('nw-category').value,
                 description: document.getElementById('nw-description').value.trim(),
                 content: currentQuill ? currentQuill.root.innerHTML : '',
-                imageUrl: document.getElementById('nw-image-url').value.trim() || null,
+                image_url: document.getElementById('nw-image-url').value.trim() || null,
                 status: document.getElementById('nw-published').checked ? 'published' : 'draft',
             };
             try {
                 if (isEdit) {
-                    payload.id = id;
-                    await api('POST', '/api/admin/news/update', payload);
+                    await api('PUT', '/api/admin/news', { ...payload, id });
                 } else {
                     await api('POST', '/api/admin/news', payload);
                 }
@@ -919,19 +1036,15 @@
     async function loadNewsForEdit(id) {
         try {
             const data = await api('GET', '/api/admin/news');
-            const item = data.items.find(n => n.id === id);
-            if (item) {
-                document.getElementById('nw-title').value = item.title;
-                document.getElementById('nw-slug').value = item.slug;
-                document.getElementById('nw-category').value = item.category;
-                document.getElementById('nw-description').value = item.description;
-                document.getElementById('nw-image-url').value = item.imageUrl;
+            const item = data.items?.find(n => n.id === id);
+            if (item && currentQuill) {
+                document.getElementById('nw-title').value = item.title || '';
+                document.getElementById('nw-slug').value = item.slug || '';
+                document.getElementById('nw-category').value = item.category || 'community';
+                document.getElementById('nw-description').value = item.description || '';
+                document.getElementById('nw-image-url').value = item.imageUrl || '';
                 document.getElementById('nw-published').checked = item.status === 'published';
-                // Load full content
-                const fullData = await api('GET', `/api/news?slug=${item.slug}`);
-                if (fullData.news && currentQuill) {
-                    currentQuill.root.innerHTML = fullData.news.content || '';
-                }
+                currentQuill.root.innerHTML = item.content || '';
             }
         } catch (err) { console.error('Load news for edit error:', err); }
     }
@@ -961,17 +1074,14 @@
     // ============================================================
     // STATUS FILTER LISTENERS
     // ============================================================
-    document.addEventListener('DOMContentLoaded', () => {
-        const filters = [
-            { id: 'members-status-filter', fn: loadMembers },
-            { id: 'writings-status-filter', fn: loadWritings },
-            { id: 'fan-media-status-filter', fn: loadFanMedia },
-            { id: 'guides-status-filter', fn: loadGuides },
-        ];
-        filters.forEach(({ id, fn }) => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('change', fn);
-        });
+    ['members', 'writings', 'fan-media', 'guides'].forEach(section => {
+        const filter = document.getElementById(`${section}-status-filter`);
+        if (filter) {
+            filter.addEventListener('change', () => {
+                const fnName = 'load' + section.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+                if (typeof window[fnName] === 'function') window[fnName]();
+            });
+        }
     });
     </script>
 </body>
