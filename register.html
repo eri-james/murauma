@@ -34,28 +34,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
     <!-- hCaptcha for bot prevention -->
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-    <style>
-        /* --- Custom CSS for unique styling beyond Tailwind --- */
-        body {
-            font-family: 'Noto Sans JP', 'Inter', sans-serif;
-            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-        }
-        .header-skew {
-            position: relative;
-            background-color: #8B5CF6; /* Purple-500 for Members */
-            color: white;
-            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
-            display: inline-block;
-            font-weight: 900;
-            font-size: 1.5rem;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
-            margin-left: -1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/common.css">
 </head>
 <body>
 
@@ -205,20 +184,6 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Mobile Menu Logic ---
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const openIcon = document.getElementById('menu-open-icon');
-            const closeIcon = document.getElementById('menu-close-icon');
-
-            if (mobileMenuButton && mobileMenu && openIcon && closeIcon) {
-                mobileMenuButton.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                    openIcon.classList.toggle('hidden');
-                    closeIcon.classList.toggle('hidden');
-                });
-            }
-
             // --- Form Submission Logic ---
             const form = document.getElementById('member-form');
             const submitButton = document.getElementById('submit-button');
@@ -315,5 +280,6 @@
             }
         });
     </script>
+    <script src="/js/mobile-menu.js"></script>
 </body>
 </html>

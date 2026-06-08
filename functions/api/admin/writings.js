@@ -1,42 +1,23 @@
 /**
  * Admin API — Writing Management (List + Delete)
  *
- * Requires the X-Admin-Secret header for authentication.
- *
- * Endpoints:
- *   GET    /api/admin/writings?status=pending  — List writings by status
- *   POST   /api/admin/writings/approve         — (see writings/approve.js)
- *   POST   /api/admin/writings/reject          — (see writings/reject.js)
- *   DELETE /api/admin/writings                 — Delete a writing by ID
+ * GET    /api/admin/writings?status=pending  — List writings by status
+ * POST   /api/admin/writings/approve         — (see writings/approve.js)
+ * POST   /api/admin/writings/reject          — (see writings/reject.js)
+ * DELETE /api/admin/writings                 — Delete a writing by ID
  */
 import {
   errorResponse,
   successResponse,
+  authenticateAdmin,
+  adminPreflightResponse,
 } from '../../_shared/utils.js';
 
-/**
- * Timing-safe admin authentication.
- */
-function authenticate(request, env) {
-  const secret = request.headers.get('X-Admin-Secret');
-  if (!secret || !env.ADMIN_SECRET) return false;
-  if (secret.length !== env.ADMIN_SECRET.length) return false;
-  let result = 0;
-  for (let i = 0; i < secret.length; i++) {
-    result |= secret.charCodeAt(i) ^ env.ADMIN_SECRET.charCodeAt(i);
-  }
-  return result === 0;
-}
-
-/**
- * GET /api/admin/writings — List writings by status
- * Query params: status (pending|approved|rejected), default: pending
- */
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticate(request, env)) {
+  if (!authenticateAdmin(request, env)) {
     return errorResponse('Unauthorized.', 401);
   }
 
@@ -77,15 +58,11 @@ export async function onRequestGet(context) {
   }
 }
 
-/**
- * DELETE /api/admin/writings — Permanently delete a writing
- * Body: { id: 123 }
- */
 export async function onRequestDelete(context) {
   const { request, env } = context;
   const db = env.DB;
 
-  if (!authenticate(request, env)) {
+  if (!authenticateAdmin(request, env)) {
     return errorResponse('Unauthorized.', 401);
   }
 
@@ -118,15 +95,6 @@ export async function onRequestDelete(context) {
   }
 }
 
-/**
- * Handle CORS preflight requests.
- */
 export function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': 'https://murauma.pages.dev',
-      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Secret',
-    },
-  });
+  return adminPreflightResponse(['GET', 'DELETE', 'OPTIONS']);
 }

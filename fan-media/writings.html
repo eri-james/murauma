@@ -16,10 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/common.css">
     <style>
-        /* --- Custom CSS for unique styling beyond Tailwind --- */
-        body { font-family: 'Noto Sans JP', 'Inter', sans-serif; background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg'); background-attachment: fixed; background-size: cover; background-position: center center; background-repeat: no-repeat; }
-        .header-skew { position: relative; background-color: #3B82F6; color: white; padding: 0.5rem 1.5rem 0.5rem 2.5rem; display: inline-block; font-weight: 900; font-size: 1.5rem; clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%); margin-left: -1rem; }
         .prose img { margin-top: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; }
         .modal { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out; }
@@ -57,10 +55,10 @@
             <div class="flex justify-between items-center mb-6">
                 <h1 class="header-skew">Writings Library</h1>
                 <div class="flex items-center space-x-2">
-                     <!--<a href="../submit-writing.html" class="bg-blue-600 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center md:space-x-2">-->
-                        <!--<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>-->
-                        <!--<span class="hidden md:inline">Write</span>-->
-                    <!--</a>-->
+                    <a href="../submit-writing.html" class="bg-blue-600 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center md:space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                        <span class="hidden md:inline">Write</span>
+                    </a>
                     <button onclick="history.back()" class="bg-gray-600 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center md:space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
                         <span class="hidden md:inline">Back</span>
@@ -97,20 +95,6 @@
     <!-- =================================================================== -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Mobile Menu Logic ---
-            const mobileMenuButton = document.getElementById("mobile-menu-button");
-            const mobileMenu = document.getElementById("mobile-menu");
-            const openIcon = document.getElementById("menu-open-icon");
-            const closeIcon = document.getElementById("menu-close-icon");
-
-            if (mobileMenuButton && mobileMenu && openIcon && closeIcon) {
-                mobileMenuButton.addEventListener("click", () => {
-                    mobileMenu.classList.toggle("hidden");
-                    openIcon.classList.toggle("hidden");
-                    closeIcon.classList.toggle("hidden");
-                });
-            }
-
             // --- Writings Gallery Logic ---
             const writingsList = document.getElementById('writings-list');
             const loadingMessage = document.getElementById('loading-message');
@@ -205,5 +189,6 @@
             fetchWritings();
         });
     </script>
+    <script src="../js/mobile-menu.js"></script>
 </body>
 </html>

@@ -1,0 +1,119 @@
+/* ============================================================
+   MURA — Shared Styles
+   Used on every page. Include in <head>:
+     <link rel="stylesheet" href="/css/common.css">
+   ============================================================ */
+
+/* --- Base Font & Background --- */
+body {
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* --- Skewed Section Headers --- */
+.header-skew {
+  position: relative;
+  background-color: #3B82F6; /* Blue-500 (Default) */
+  color: white;
+  padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+  display: inline-block;
+  font-weight: 900;
+  font-size: 1.5rem;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  margin-left: -1rem;
+}
+
+.header-skew-green {
+  background-color: #10B981; /* Emerald-500 */
+  clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
+  margin-left: 0;
+  padding-left: 1.5rem;
+}
+
+.header-skew-pink {
+  background-color: #EC4899; /* Pink-500 */
+}
+
+.header-skew-orange {
+  background-color: #F97316; /* Orange-500 */
+  clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
+  margin-left: 0;
+  padding-left: 1.5rem;
+}
+
+.header-skew-yellow {
+  background-color: #F59E0B; /* Amber-500 */
+}
+
+.header-skew-red {
+  background-color: #EF4444; /* Red-500 */
+}
+
+.header-skew-purple {
+  background-color: #8B5CF6; /* Violet-500 */
+}
+
+/* --- News Items --- */
+.news-item {
+  border-left: 4px solid #F59E0B; /* Amber-500 */
+}
+
+/* --- Content Cards (Community Hub) --- */
+.content-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Scrollbar Hiding (Carousel) --- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* --- Fade-in on Scroll --- */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(2rem);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Page Transitions --- */
+.page-view {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.is-hiding {
+  opacity: 0;
+}
+
+/* --- Modals --- */
+.modal {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.modal-content {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* --- Writings Prose --- */
+.prose img {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}

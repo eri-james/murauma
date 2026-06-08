@@ -287,6 +287,53 @@ async function verifyHcaptcha(token, secret) {
 }
 
 // ============================================================
+// ADMIN AUTHENTICATION
+// ============================================================
+
+/**
+ * Allowed origin for admin CORS headers.
+ */
+const ADMIN_ORIGIN = 'https://murauma.pages.dev';
+
+/**
+ * Validates the admin secret from the X-Admin-Secret header.
+ * Uses timing-safe comparison to prevent timing attacks.
+ * Returns true if authenticated, false otherwise.
+ */
+function authenticateAdmin(request, env) {
+  const secret = request.headers.get('X-Admin-Secret');
+  if (!secret || !env.ADMIN_SECRET) return false;
+  // Timing-safe comparison: XOR all chars, result must be 0
+  if (secret.length !== env.ADMIN_SECRET.length) return false;
+  let result = 0;
+  for (let i = 0; i < secret.length; i++) {
+    result |= secret.charCodeAt(i) ^ env.ADMIN_SECRET.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+/**
+ * Creates CORS preflight response headers for admin endpoints.
+ * Restricts origin to the production site only.
+ * @param {string[]} methods - Allowed HTTP methods
+ */
+function adminCorsHeaders(methods) {
+  return {
+    'Access-Control-Allow-Origin': ADMIN_ORIGIN,
+    'Access-Control-Allow-Methods': methods.join(', '),
+    'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Secret',
+  };
+}
+
+/**
+ * Creates a CORS preflight Response for admin endpoints.
+ * @param {string[]} methods - Allowed HTTP methods
+ */
+function adminPreflightResponse(methods) {
+  return new Response(null, { headers: adminCorsHeaders(methods) });
+}
+
+// ============================================================
 // EXPORTS
 // ============================================================
 
@@ -310,4 +357,7 @@ export {
   checkRateLimit,
   getClientKey,
   verifyHcaptcha,
+  authenticateAdmin,
+  adminCorsHeaders,
+  adminPreflightResponse,
 };

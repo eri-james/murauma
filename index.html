@@ -33,124 +33,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
     <!-- DOMPurify for XSS prevention on user-submitted content -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
-    <style>
-        /* --- Custom CSS for unique styling beyond Tailwind --- */
-
-        /* Sets the base font and the new fixed background for the entire page */
-        body {
-            font-family: 'Noto Sans JP', 'Inter', sans-serif;
-            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-        }
-
-        /* Creates the skewed, banner-like header style for section titles */
-        .header-skew {
-            position: relative;
-            background-color: #3B82F6; /* Blue-500 (Default) */
-            color: white;
-            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
-            display: inline-block;
-            font-weight: 900;
-            font-size: 1.5rem;
-            /* clip-path creates the custom polygon shape */
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
-            margin-left: -1rem; /* Negative margin to make it bleed off the container edge slightly */
-        }
-
-        /* A green variation of the skewed header */
-        .header-skew-green {
-            background-color: #10B981; /* Emerald-500 */
-             clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
-             margin-left: 0;
-             padding-left: 1.5rem;
-        }
-        
-        /* A pink variation of the skewed header */
-        .header-skew-pink {
-            background-color: #EC4899; /* Pink-500 */
-        }
-
-        /* An orange variation of the skewed header */
-        .header-skew-orange {
-            background-color: #F97316; /* Orange-500 */
-            clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
-            margin-left: 0;
-            padding-left: 1.5rem;
-        }
-        
-        /* A yellow variation of the skewed header */
-        .header-skew-yellow {
-            background-color: #F59E0B; /* Amber-500 */
-        }
-        
-        /* A red variation of the skewed header */
-        .header-skew-red {
-            background-color: #EF4444; /* Red-500 */
-        }
-
-        /* A purple variation of the skewed header */
-        .header-skew-purple {
-            background-color: #8B5CF6; /* Violet-500 */
-        }
-
-        /* Adds a colored left border to news items for visual separation */
-        .news-item {
-            border-left: 4px solid #F59E0B; /* Amber-500 */
-        }
-
-        /* Adds hover effects to the content cards in the Community Hub */
-        .content-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .content-card:hover {
-            transform: translateY(-5px); /* Lifts the card up slightly on hover */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Hides the default browser scrollbar for our custom carousel */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none; /* For Chrome, Safari, and Opera */
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* For IE and Edge */
-            scrollbar-width: none;  /* For Firefox */
-        }
-        
-        /* --- Styles for the fade-in-on-scroll animation --- */
-        
-        /* Initial state of the sections: hidden and slightly moved down */
-        .fade-in-section {
-            opacity: 0;
-            transform: translateY(2rem);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-
-        /* The state when the section becomes visible: fully opaque and in its original position */
-        .fade-in-section.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* --- Styles for page transitions --- */
-        .page-view {
-            transition: opacity 0.3s ease-in-out;
-        }
-        .is-hiding {
-            opacity: 0;
-        }
-        
-        /* --- Styles for Member Modal --- */
-        .modal {
-            transition: opacity 0.3s ease-in-out;
-        }
-        .modal-content {
-            transition: transform 0.3s ease-in-out;
-        }
-    </style>
+    <!-- Shared site-wide styles -->
+    <link rel="stylesheet" href="/css/common.css">
 </head>
 <body>
 
@@ -443,20 +327,6 @@
     <script>
         // This script runs after the HTML document has been fully loaded.
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- Mobile Menu Logic ---
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const openIcon = document.getElementById('menu-open-icon');
-            const closeIcon = document.getElementById('menu-close-icon');
-
-            if (mobileMenuButton && mobileMenu && openIcon && closeIcon) {
-                mobileMenuButton.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                    openIcon.classList.toggle('hidden');
-                    closeIcon.classList.toggle('hidden');
-                });
-            }
             
             // --- Page Navigation Logic ---
             const pageHome = document.getElementById('page-home');
@@ -887,6 +757,8 @@
         });
     </script>
 
+    <!-- Shared mobile menu logic -->
+    <script src="/js/mobile-menu.js"></script>
 </body>
 </html>
 
