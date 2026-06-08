@@ -12,7 +12,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/css/fonts.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <link rel="stylesheet" href="/css/common.css">
@@ -50,8 +49,9 @@
         .ql-toolbar.ql-snow { white-space: normal; }
         /* Action buttons */
         .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.25rem; }
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+        /* Modal — hidden by default via display:none; .modal-open toggles to flex */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; padding: 1rem; }
+        .modal-overlay.modal-open { display: flex; }
         .modal-box { background: white; border-radius: 0.5rem; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; }
     </style>
 </head>
@@ -281,7 +281,7 @@
     </div>
 
     <!-- Modal for creating/editing content -->
-    <div id="modal" class="modal-overlay hidden">
+    <div id="modal" class="modal-overlay">
         <div class="modal-box">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="modal-title" class="text-lg font-extrabold text-gray-800"></h3>
@@ -613,7 +613,7 @@
                 </div>
             </form>
         `;
-        document.getElementById('modal').classList.remove('hidden');
+        document.getElementById('modal').classList.add('modal-open');
 
         // If editing, load existing data
         if (isEdit) {
@@ -735,7 +735,7 @@
                 </div>
             </form>
         `;
-        document.getElementById('modal').classList.remove('hidden');
+        document.getElementById('modal').classList.add('modal-open');
 
         // Initialize Quill
         currentQuill = new Quill('#ev-quill-container', {
@@ -873,7 +873,7 @@
                 </div>
             </form>
         `;
-        document.getElementById('modal').classList.remove('hidden');
+        document.getElementById('modal').classList.add('modal-open');
 
         // Initialize Quill
         currentQuill = new Quill('#nw-quill-container', {
@@ -946,7 +946,7 @@
     // MODAL
     // ============================================================
     function closeModal() {
-        document.getElementById('modal').classList.add('hidden');
+        document.getElementById('modal').classList.remove('modal-open');
         document.getElementById('modal-content').innerHTML = '';
         currentQuill = null;
     }
@@ -955,6 +955,8 @@
     document.getElementById('modal').addEventListener('click', (e) => {
         if (e.target === document.getElementById('modal')) closeModal();
     });
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
     // ============================================================
     // STATUS FILTER LISTENERS
