@@ -31,7 +31,7 @@
         .guide-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
         .guide-content th, .guide-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
         .guide-content th { background: #f9fafb; font-weight: 700; }
-        .guide-content iframe { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+        .guide-content iframe, .guide-content .ql-video { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; aspect-ratio: 16/9; width: 100%; }
         /* Vote buttons */
         .vote-btn { transition: transform 0.15s ease, color 0.15s ease; }
         .vote-btn:hover { transform: scale(1.2); }
@@ -193,8 +193,8 @@
                 document.title = `${guide.title} - MURA`;
 
                 // Fill in content
-                document.getElementById('guide-title').textContent = guide.title;
-                document.getElementById('guide-author').textContent = guide.author;
+                document.getElementById('guide-title').textContent = decodeHTMLEntities(guide.title);
+                document.getElementById('guide-author').textContent = decodeHTMLEntities(guide.author);
                 document.getElementById('guide-date').textContent = new Date(guide.createdAt).toLocaleDateString();
                 document.getElementById('guide-body').innerHTML = DOMPurify.sanitize(guide.content);
                 voteScore.textContent = guide.voteScore || 0;
@@ -257,6 +257,14 @@
     </script>
     <script src="/js/auth.js"></script>
     <script>
+        // Decode HTML entities from server-side sanitizeText() for existing data
+        function decodeHTMLEntities(text) {
+            if (!text || typeof text !== 'string') return text;
+            const el = document.createElement('textarea');
+            el.innerHTML = text;
+            return el.value;
+        }
+
         // Pill nav overlay toggle
         const navBurgerBtn = document.getElementById('nav-burger-btn');
         const navOverlay = document.getElementById('nav-overlay');

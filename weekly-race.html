@@ -35,7 +35,7 @@
         .race-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
         .race-content th, .race-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
         .race-content th { background: #f9fafb; font-weight: 700; }
-        .race-content iframe { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+        .race-content iframe, .race-content .ql-video { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; aspect-ratio: 16/9; width: 100%; }
 
         /* Discord CTA */
         .discord-cta {
@@ -220,6 +220,14 @@
 
     <script src="/js/auth.js"></script>
     <script>
+        // Decode HTML entities from server-side sanitizeText() for existing data
+        function decodeHTMLEntities(text) {
+            if (!text || typeof text !== 'string') return text;
+            const el = document.createElement('textarea');
+            el.innerHTML = text;
+            return el.value;
+        }
+
         // Pill nav overlay toggle
         const navBurgerBtn = document.getElementById('nav-burger-btn');
         const navOverlay = document.getElementById('nav-overlay');
@@ -285,8 +293,8 @@
                 document.title = `${race.title || 'Weekly Race'} - MURA`;
 
                 // Fill header
-                document.getElementById('race-title').textContent = race.title || 'Weekly Race';
-                document.getElementById('race-subtitle').textContent = race.track ? `Track: ${race.track}` : 'Get ready for the race!';
+                document.getElementById('race-title').textContent = decodeHTMLEntities(race.title) || 'Weekly Race';
+                document.getElementById('race-subtitle').textContent = race.track ? `Track: ${decodeHTMLEntities(race.track)}` : 'Get ready for the race!';
 
                 // Banner image
                 if (race.imageUrl) {
@@ -300,16 +308,16 @@
                 // Detail badges
                 const detailsList = document.getElementById('race-details-list');
                 if (race.track) {
-                    detailsList.innerHTML += `<span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Track: ${DOMPurify.sanitize(race.track)}</span>`;
+                    detailsList.innerHTML += `<span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Track: ${DOMPurify.sanitize(decodeHTMLEntities(race.track))}</span>`;
                 }
                 if (race.deadline) {
-                    detailsList.innerHTML += `<span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Deadline: ${DOMPurify.sanitize(race.deadline)}</span>`;
+                    detailsList.innerHTML += `<span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Deadline: ${DOMPurify.sanitize(decodeHTMLEntities(race.deadline))}</span>`;
                 }
 
                 // Description (short summary)
                 const descEl = document.getElementById('race-description');
                 if (race.description) {
-                    descEl.textContent = race.description;
+                    descEl.textContent = decodeHTMLEntities(race.description);
                     descEl.classList.remove('hidden');
                 }
 

@@ -9,7 +9,6 @@ import {
   successResponse,
   validateField,
   validateOptionalField,
-  sanitizeText,
   sanitizeRichHtml,
   generateSlug,
   requireAdmin,
@@ -46,7 +45,7 @@ export async function onRequestPost(context) {
       const result = validateField(data.title, 200, 'Title');
       if (!result.valid) return errorResponse(result.error);
       updates.push('title = ?');
-      values.push(sanitizeText(result.value));
+      values.push(result.value);
     }
 
     if (data.slug !== undefined) {
@@ -66,7 +65,7 @@ export async function onRequestPost(context) {
       const result = validateOptionalField(data.description, 2000, 'Description');
       if (!result.valid) return errorResponse(result.error);
       updates.push('description = ?');
-      values.push(result.value ? sanitizeText(result.value) : '');
+      values.push(result.value || '');
     }
 
     if (data.content !== undefined) {
@@ -88,14 +87,14 @@ export async function onRequestPost(context) {
       const result = validateField(data.startDate, 50, 'Start date');
       if (!result.valid) return errorResponse(result.error);
       updates.push('start_date = ?');
-      values.push(sanitizeText(result.value));
+      values.push(result.value);
     }
 
     if (data.endDate !== undefined) {
       const result = validateOptionalField(data.endDate, 50, 'End date');
       if (!result.valid) return errorResponse(result.error);
       updates.push('end_date = ?');
-      values.push(result.value ? sanitizeText(result.value) : null);
+      values.push(result.value || null);
     }
 
     if (data.status !== undefined) {

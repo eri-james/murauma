@@ -800,6 +800,14 @@
     <!-- Shared mobile menu logic -->
     <script src="/js/auth.js"></script>
     <script>
+    // Decode HTML entities from server-side sanitizeText() for existing data
+    function decodeHTMLEntities(text) {
+        if (!text || typeof text !== 'string') return text;
+        const el = document.createElement('textarea');
+        el.innerHTML = text;
+        return el.value;
+    }
+
     // --- Dynamic Content Loading (Phase 4D) ---
     // Loads News, Weekly Races, and Events from the API.
     // If the API returns data, it replaces the static/hardcoded content.
@@ -858,13 +866,13 @@
                     const racesSection = document.querySelector('#events .grid');
                     if (racesSection) {
                         racesSection.innerHTML = data.races.map(r => {
-                            const desc = DOMPurify.sanitize(r.description || 'No description available.');
-                            const img = r.imageUrl ? `<img src="${DOMPurify.sanitize(r.imageUrl)}" alt="${DOMPurify.sanitize(r.title)}" class="w-full rounded-lg mb-3 object-cover aspect-video" loading="lazy" onerror="this.style.display='none'">` : '';
+                            const desc = DOMPurify.sanitize(decodeHTMLEntities(r.description) || 'No description available.');
+                            const img = r.imageUrl ? `<img src="${DOMPurify.sanitize(r.imageUrl)}" alt="${DOMPurify.sanitize(decodeHTMLEntities(r.title))}" class="w-full rounded-lg mb-3 object-cover aspect-video" loading="lazy" onerror="this.style.display='none'">` : '';
                             return `<div class="bg-gray-100 p-4 rounded-lg">
                                 ${img}
-                                <h3 class="font-bold text-xl text-blue-600">${DOMPurify.sanitize(r.title)}</h3>
-                                <p class="text-gray-700 mt-2"><strong>Track:</strong> ${DOMPurify.sanitize(r.track)}</p>
-                                <p class="text-gray-700"><strong>Deadline:</strong> ${DOMPurify.sanitize(r.deadline)}</p>
+                                <h3 class="font-bold text-xl text-blue-600">${DOMPurify.sanitize(decodeHTMLEntities(r.title))}</h3>
+                                <p class="text-gray-700 mt-2"><strong>Track:</strong> ${DOMPurify.sanitize(decodeHTMLEntities(r.track))}</p>
+                                <p class="text-gray-700"><strong>Deadline:</strong> ${DOMPurify.sanitize(decodeHTMLEntities(r.deadline))}</p>
                                 <p class="mt-4 text-sm text-gray-600">${desc}</p>
                                 <a href="weekly-race.html?slug=${encodeURIComponent(r.slug || r.id)}" class="mt-4 w-full text-center block bg-green-500 text-white font-bold py-2 rounded-lg hover:bg-green-600 transition-colors">More Info</a>
                             </div>`;

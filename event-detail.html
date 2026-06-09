@@ -31,7 +31,7 @@
         .event-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
         .event-content th, .event-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
         .event-content th { background: #f9fafb; font-weight: 700; }
-        .event-content iframe { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+        .event-content iframe, .event-content .ql-video { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; aspect-ratio: 16/9; width: 100%; }
     </style>
 </head>
 <body class="has-pill-nav">
@@ -146,6 +146,14 @@
     </footer>
 
     <script>
+        // Decode HTML entities from server-side sanitizeText() for existing data
+        function decodeHTMLEntities(text) {
+            if (!text || typeof text !== 'string') return text;
+            const el = document.createElement('textarea');
+            el.innerHTML = text;
+            return el.value;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const slug = urlParams.get('slug');
@@ -168,8 +176,8 @@
                 document.title = `${event.title} - MURA`;
 
                 // Fill in content
-                document.getElementById('event-title').textContent = event.title;
-                document.getElementById('event-description').textContent = event.description || '';
+                document.getElementById('event-title').textContent = decodeHTMLEntities(event.title);
+                document.getElementById('event-description').textContent = decodeHTMLEntities(event.description) || '';
 
                 // Format dates
                 if (event.startDate) {

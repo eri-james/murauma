@@ -264,6 +264,7 @@ const RICH_ALLOWED_TAGS = new Set([
   'blockquote', 'pre', 'code',
   'a', 'img',
   'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'colgroup', 'col', // For Quill better-table column widths
   'sup', 'sub',
   'span', 'div',
   'iframe', // For embedded YouTube/Spotify (restricted below)
@@ -276,8 +277,12 @@ const RICH_ALLOWED_TAGS = new Set([
 const RICH_ALLOWED_ATTRS = {
   a: new Set(['href', 'title', 'target', 'rel']),
   img: new Set(['src', 'alt', 'title', 'width', 'height', 'class', 'style']),
-  td: new Set(['align', 'colspan', 'rowspan']),
-  th: new Set(['align', 'colspan', 'rowspan']),
+  td: new Set(['align', 'colspan', 'rowspan', 'class', 'style']),
+  th: new Set(['align', 'colspan', 'rowspan', 'class', 'style']),
+  table: new Set(['class', 'style', 'cellpadding', 'cellspacing', 'border']),
+  colgroup: new Set(['span']),
+  col: new Set(['span', 'style', 'width']),
+  tr: new Set(['class', 'style']),
   iframe: new Set(['src', 'title', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'loading']),
   span: new Set(['class', 'style']),
   div: new Set(['class', 'style']),

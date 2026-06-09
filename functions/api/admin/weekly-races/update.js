@@ -9,7 +9,6 @@ import {
   successResponse,
   validateField,
   validateOptionalField,
-  sanitizeText,
   sanitizeRichHtml,
   requireAdmin,
   adminPreflightResponse,
@@ -46,7 +45,7 @@ export async function onRequestPost(context) {
       const result = validateField(data.title, 200, 'Title');
       if (!result.valid) return errorResponse(result.error);
       updates.push('title = ?');
-      values.push(sanitizeText(result.value));
+      values.push(result.value);
     }
 
     if (data.slug !== undefined) {
@@ -66,21 +65,21 @@ export async function onRequestPost(context) {
       const result = validateField(data.track, 200, 'Track');
       if (!result.valid) return errorResponse(result.error);
       updates.push('track = ?');
-      values.push(sanitizeText(result.value));
+      values.push(result.value);
     }
 
     if (data.deadline !== undefined) {
       const result = validateField(data.deadline, 100, 'Deadline');
       if (!result.valid) return errorResponse(result.error);
       updates.push('deadline = ?');
-      values.push(sanitizeText(result.value));
+      values.push(result.value);
     }
 
     if (data.description !== undefined) {
       const result = validateOptionalField(data.description, 2000, 'Description');
       if (!result.valid) return errorResponse(result.error);
       updates.push('description = ?');
-      values.push(result.value ? sanitizeText(result.value) : '');
+      values.push(result.value || '');
     }
 
     if (data.content !== undefined) {

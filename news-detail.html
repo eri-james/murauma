@@ -31,7 +31,7 @@
         .news-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
         .news-content th, .news-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
         .news-content th { background: #f9fafb; font-weight: 700; }
-        .news-content iframe { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+        .news-content iframe, .news-content .ql-video { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; aspect-ratio: 16/9; width: 100%; }
     </style>
 </head>
 <body class="has-pill-nav">
@@ -144,6 +144,14 @@
     </footer>
 
     <script>
+        // Decode HTML entities from server-side sanitizeText() for existing data
+        function decodeHTMLEntities(text) {
+            if (!text || typeof text !== 'string') return text;
+            const el = document.createElement('textarea');
+            el.innerHTML = text;
+            return el.value;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const slug = urlParams.get('slug');
@@ -166,9 +174,9 @@
                 document.title = `${news.title} - MURA`;
 
                 // Fill in content
-                document.getElementById('news-title').textContent = news.title;
-                document.getElementById('news-category').textContent = news.category;
-                document.getElementById('news-description').textContent = news.description || '';
+                document.getElementById('news-title').textContent = decodeHTMLEntities(news.title);
+                document.getElementById('news-category').textContent = decodeHTMLEntities(news.category);
+                document.getElementById('news-description').textContent = decodeHTMLEntities(news.description) || '';
                 document.getElementById('news-date').textContent = new Date(news.createdAt).toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' });
                 document.getElementById('news-body').innerHTML = DOMPurify.sanitize(news.content || '');
 

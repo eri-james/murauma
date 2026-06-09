@@ -10,7 +10,6 @@ import {
   successResponse,
   validateField,
   validateOptionalField,
-  sanitizeText,
   sanitizeRichHtml,
   generateSlug,
   requireAdmin,
@@ -123,13 +122,13 @@ export async function onRequestPost(context) {
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
-        sanitizeText(titleResult.value),
+        titleResult.value,
         slug,
-        descResult.value ? sanitizeText(descResult.value) : '',
+        descResult.value || '',
         sanitizedContent,
         imageUrlResult.value || null,
-        sanitizeText(startDateResult.value),
-        endDateResult.value ? sanitizeText(endDateResult.value) : null,
+        startDateResult.value,
+        endDateResult.value || null,
         status
       )
       .run();
