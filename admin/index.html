@@ -451,8 +451,8 @@
                 </div>
                 <div class="admin-card border-2 border-blue-400 overflow-x-auto">
                     <table class="admin-table">
-                        <thead><tr><th>ID</th><th>Title</th><th>Track</th><th>Deadline</th><th>Active</th><th>Status</th><th>Actions</th></tr></thead>
-                        <tbody id="weekly-races-table-body"><tr><td colspan="7" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
+                        <thead><tr><th>ID</th><th>Title</th><th>Slug</th><th>Track</th><th>Deadline</th><th>Active</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="weekly-races-table-body"><tr><td colspan="8" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -765,13 +765,14 @@
             const data = await api('GET', '/api/admin/weekly-races');
             const tbody = document.getElementById('weekly-races-table-body');
             if (!data.items || data.items.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-400">No weekly races found. Create one!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-400">No weekly races found. Create one!</td></tr>';
                 return;
             }
             tbody.innerHTML = data.items.map(r => `
                 <tr>
                     <td>${r.id}</td>
                     <td class="font-bold">${DOMPurify.sanitize(r.title)}</td>
+                    <td class="text-xs text-gray-500">${DOMPurify.sanitize(r.slug || '-')}</td>
                     <td>${DOMPurify.sanitize(r.track)}</td>
                     <td>${DOMPurify.sanitize(r.deadline)}</td>
                     <td>${r.isActive ? '<span class="text-green-600 font-extrabold">Yes</span>' : '<span class="text-gray-400">No</span>'}</td>
@@ -795,6 +796,11 @@
                     <input type="text" id="wr-title" required maxlength="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                 </div>
                 <div>
+                    <label class="block text-sm font-bold text-gray-700">Slug *</label>
+                    <input type="text" id="wr-slug" required maxlength="120" placeholder="merdeka-cup-2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
+                    <p class="text-xs text-gray-400 mt-1">Auto-generated from title. Used in the URL: weekly-race.html?slug=...</p>
+                </div>
+                <div>
                     <label class="block text-sm font-bold text-gray-700">Track *</label>
                     <input type="text" id="wr-track" required maxlength="200" placeholder="e.g. Tokyo Turf 1600m" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                 </div>
@@ -804,7 +810,12 @@
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700">Description</label>
-                    <textarea id="wr-description" maxlength="2000" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"></textarea>
+                    <textarea id="wr-description" maxlength="2000" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm" placeholder="Short summary shown on the homepage card..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Content (Rich Text)</label>
+                    <div id="wr-quill" class="modal-quill-container"></div>
+                    <p class="text-xs text-gray-400 mt-1">Full race details: track info, recommended skills, strategies, categories, conditions, etc.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-gray-700">Image URL</label>
@@ -822,6 +833,27 @@
         `;
         document.getElementById('modal').classList.add('modal-open');
 
+        // Initialize Quill
+        currentQuill = new Quill('#wr-quill', { theme: 'snow', placeholder: 'Write race details: track info, strategies, categories, conditions...' });
+
+        // Auto-generate slug from title
+        const titleInput = document.getElementById('wr-title');
+        const slugInput = document.getElementById('wr-slug');
+        let slugManuallyEdited = isEdit; // Don't auto-generate when editing
+
+        titleInput.addEventListener('input', () => {
+            if (!slugManuallyEdited) {
+                slugInput.value = titleInput.value
+                    .toLowerCase()
+                    .replace(/[^\w\s-]/g, '')
+                    .replace(/[\s_]+/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-+|-+$/g, '')
+                    .substring(0, 120);
+            }
+        });
+        slugInput.addEventListener('input', () => { slugManuallyEdited = true; });
+
         if (isEdit) {
             loadWeeklyRaceForEdit(id);
         }
@@ -830,9 +862,11 @@
             e.preventDefault();
             const payload = {
                 title: document.getElementById('wr-title').value.trim(),
+                slug: document.getElementById('wr-slug').value.trim(),
                 track: document.getElementById('wr-track').value.trim(),
                 deadline: document.getElementById('wr-deadline').value.trim(),
                 description: document.getElementById('wr-description').value.trim(),
+                content: currentQuill ? currentQuill.root.innerHTML : '',
                 imageUrl: document.getElementById('wr-image-url').value.trim() || null,
                 isActive: document.getElementById('wr-active').checked,
                 status: document.getElementById('wr-published').checked ? 'published' : 'draft',
@@ -851,16 +885,24 @@
 
     async function loadWeeklyRaceForEdit(id) {
         try {
-            const data = await api('GET', '/api/admin/weekly-races');
-            const item = data.items?.find(r => r.id === id);
-            if (item) {
+            // Get slug from admin list API
+            const listData = await api('GET', '/api/admin/weekly-races');
+            const listItem = listData.items?.find(r => r.id === id);
+            if (!listItem) { console.error('Race not found'); return; }
+
+            // Fetch full content using public single-race API
+            const fullData = await api('GET', `/api/weekly-races?slug=${encodeURIComponent(listItem.slug)}`);
+            const item = fullData.race;
+            if (item && currentQuill) {
                 document.getElementById('wr-title').value = item.title || '';
+                document.getElementById('wr-slug').value = item.slug || '';
                 document.getElementById('wr-track').value = item.track || '';
                 document.getElementById('wr-deadline').value = item.deadline || '';
                 document.getElementById('wr-description').value = item.description || '';
                 document.getElementById('wr-image-url').value = item.imageUrl || '';
                 document.getElementById('wr-active').checked = item.isActive !== false;
                 document.getElementById('wr-published').checked = item.status === 'published';
+                currentQuill.root.innerHTML = item.content || '';
             }
         } catch (err) { console.error('Load race for edit error:', err); }
     }

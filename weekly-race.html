@@ -8,6 +8,8 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <!-- Tailwind CSS (built) -->
     <link rel="stylesheet" href="/css/tailwind.min.css">
+    <!-- DOMPurify for safe HTML rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
     <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +17,57 @@
     <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/css/fonts.css">
     <link rel="stylesheet" href="/css/common.css">
+    <style>
+        /* Race content styling (Quill output) */
+        .race-content h1 { font-size: 2rem; font-weight: 800; margin: 1.5rem 0 0.75rem; }
+        .race-content h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.5rem; }
+        .race-content h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+        .race-content p { margin: 0.75rem 0; line-height: 1.7; }
+        .race-content ul, .race-content ol { margin: 0.75rem 0; padding-left: 1.5rem; }
+        .race-content li { margin: 0.25rem 0; line-height: 1.6; }
+        .race-content blockquote { border-left: 4px solid #22c55e; padding: 0.5rem 1rem; margin: 1rem 0; background: #f0fdf4; border-radius: 0.25rem; }
+        .race-content pre { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; }
+        .race-content code { background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
+        .race-content pre code { background: none; padding: 0; }
+        .race-content img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+        .race-content a { color: #22c55e; text-decoration: underline; }
+        .race-content a:hover { color: #16a34a; }
+        .race-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .race-content th, .race-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
+        .race-content th { background: #f9fafb; font-weight: 700; }
+        .race-content iframe { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+
+        /* Discord CTA */
+        .discord-cta {
+            background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .discord-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
+        }
+        .discord-cta svg {
+            width: 2.5rem;
+            height: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        /* How to Participate collapsible */
+        .participate-section {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+    </style>
 </head>
 <body class="has-pill-nav">
 
@@ -82,55 +135,71 @@
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
 
-        <!-- Race Info Box -->
-        <div id="race-container" class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-blue-500 max-w-2xl mx-auto">
-            
-            <!-- Loading State -->
-            <div id="race-loading" class="text-center py-8">
+        <!-- Loading State -->
+        <div id="race-loading" class="max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-green-500">
+            <div class="text-center py-8">
                 <p class="text-gray-400">Loading race information...</p>
             </div>
+        </div>
 
-            <!-- Error State -->
-            <div id="race-error" class="text-center py-8 hidden">
-                <p class="text-gray-500 mb-4">Could not load race information.</p>
+        <!-- Error State -->
+        <div id="race-error" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
+            <div class="text-center py-8">
+                <p class="text-red-600 font-bold text-lg mb-4">Could not load race information.</p>
                 <a href="index.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
                     <span>Back to Main Site</span>
                 </a>
             </div>
+        </div>
 
-            <!-- Race Content (populated by JS) -->
-            <div id="race-content" class="hidden">
-                <!-- Page Header -->
-                <h1 id="race-title" class="text-4xl font-extrabold text-gray-800 mb-2"></h1>
-                <p id="race-subtitle" class="text-md text-gray-500 mb-8"></p>
+        <!-- Race Content (populated by JS) -->
+        <div id="race-content" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-green-500">
 
-                <!-- Race Banner Image -->
-                <img id="race-image" alt="Race Banner" class="w-full rounded-lg shadow-md my-8 hidden" fetchpriority="high">
-
-                <!-- Race Details -->
-                <div class="prose max-w-none text-justify space-y-4">
-                    <div id="race-description"></div>
-                    
-                    <h2 class="text-2xl font-bold mt-8 mb-4">Race Details</h2>
-                    <ul id="race-details-list" class="list-none space-y-3">
-                    </ul>
-
-                    <div id="race-how-to-participate" class="hidden">
-                        <h2 class="text-2xl font-bold mt-8 mb-4">How to Participate</h2>
-                        <p>Joining is simple! The room will be opened on the event day. Please keep an eye on the <b>#♣️-club-announcement</b> channel in our Discord for the Room ID and password. Simply join the room in-game before the deadline.</p>
-                        <p>Good luck to all participating trainers!</p>
-                    </div>
+            <!-- Page Header -->
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 id="race-title" class="text-3xl md:text-4xl font-extrabold text-gray-800"></h1>
+                    <p id="race-subtitle" class="text-md text-gray-500 mt-2"></p>
                 </div>
-
-                <!-- Back Button -->
-                <div class="mt-12 text-center">
-                     <a href="index.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                        <span>Back to Main Site</span>
-                    </a>
-                </div>
+                <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span class="hidden md:inline">Back</span>
+                </button>
             </div>
+
+            <!-- Race Banner Image -->
+            <div id="race-image-container" class="hidden mb-6">
+                <img id="race-image" alt="Race Banner" class="w-full rounded-lg shadow-md" fetchpriority="high">
+            </div>
+
+            <!-- Race Details Badges -->
+            <div id="race-details-list" class="flex flex-wrap gap-2 mb-6">
+            </div>
+
+            <!-- Description (short summary) -->
+            <p id="race-description" class="text-lg text-gray-600 font-medium mb-6 leading-relaxed hidden"></p>
+
+            <!-- Race body (rich content from Quill) -->
+            <div id="race-body" class="race-content"></div>
+
+            <!-- How to Participate (default section — shown only if content is empty or minimal) -->
+            <div id="race-how-to-participate" class="participate-section hidden">
+                <h2 class="text-xl font-bold text-green-800 mb-3">How to Participate</h2>
+                <p class="text-green-900">Joining is simple! The room will be opened on the event day. Please keep an eye on the <b>#club-announcement</b> channel in our Discord for the Room ID and password. Simply join the room in-game before the deadline.</p>
+                <p class="text-green-900 mt-2">Good luck to all participating trainers!</p>
+            </div>
+
+            <!-- Discord CTA -->
+            <a id="discord-cta" href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="discord-cta">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.14 96.36" fill="currentColor">
+                    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.79,0a72.19,72.19,0,0,0-3.36,6.87,97.68,97.68,0,0,0-29.72,0A72.19,72.19,0,0,0,45.35,0,105.15,105.15,0,0,0,19.44,8.07C3.55,31.57-.86,54.49.15,77.06v.15A105.75,105.75,0,0,0,32.21,96.36,79.58,79.58,0,0,0,39,84.06a68.42,68.42,0,0,1-10.71-5.15c.9-.66,1.78-1.35,2.63-2.05a75.57,75.57,0,0,0,64.32,0c.86.71,1.74,1.39,2.64,2.05A68.42,68.42,0,0,1,87.36,84.06,79.58,79.58,0,0,0,94.6,96.36,105.75,105.75,0,0,0,126.69,77.21v-.15C127.86,51.53,121.29,28.72,107.7,8.07ZM42.45,62.59c-6.27,0-11.42-5.81-11.42-12.89S35.93,36.81,42.45,36.81,53.94,42.62,53.87,49.7C53.87,56.78,48.72,62.59,42.45,62.59Zm42.24,0c-6.27,0-11.42-5.81-11.42-12.89S77.91,36.81,84.69,36.81,96.18,42.62,96.11,49.7C96.11,56.78,91,62.59,84.69,62.59Z"/>
+                </svg>
+                <div>
+                    <p class="font-extrabold text-lg">Join our Discord</p>
+                    <p class="text-sm text-indigo-200">Get the Room ID, password, and discuss strategies with fellow trainers!</p>
+                </div>
+            </a>
 
         </div>
 
@@ -148,7 +217,7 @@
             </div>
         </div>
     </footer>
-    
+
     <script src="/js/auth.js"></script>
     <script>
         // Pill nav overlay toggle
@@ -177,15 +246,25 @@
         // Dynamic race loading
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
             const raceId = params.get('id');
 
             const loadingEl = document.getElementById('race-loading');
             const errorEl = document.getElementById('race-error');
             const contentEl = document.getElementById('race-content');
 
+            // Need either slug or id
+            if (!slug && !raceId) {
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
             try {
                 let apiUrl = '/api/weekly-races';
-                if (raceId) {
+                if (slug) {
+                    apiUrl += '?slug=' + encodeURIComponent(slug);
+                } else if (raceId) {
                     apiUrl += '?id=' + encodeURIComponent(raceId);
                 }
 
@@ -196,50 +275,56 @@
                     throw new Error(data.message || 'Failed to load race');
                 }
 
-                // Handle single race or first race from list
-                const race = data.race || (data.races && data.races.length > 0 ? data.races[0] : null);
+                const race = data.race;
 
                 if (!race) {
                     throw new Error('No race found');
                 }
 
-                // Populate the page
+                // Update page title
+                document.title = `${race.title || 'Weekly Race'} - MURA`;
+
+                // Fill header
                 document.getElementById('race-title').textContent = race.title || 'Weekly Race';
                 document.getElementById('race-subtitle').textContent = race.track ? `Track: ${race.track}` : 'Get ready for the race!';
 
-                // Description
-                const descEl = document.getElementById('race-description');
-                if (race.description) {
-                    descEl.innerHTML = DOMPurify.sanitize(race.description);
-                } else {
-                    descEl.textContent = 'Join this week\'s race and compete with fellow trainers!';
+                // Banner image
+                if (race.imageUrl) {
+                    const imgEl = document.getElementById('race-image');
+                    imgEl.src = race.imageUrl;
+                    imgEl.alt = race.title || 'Race Banner';
+                    document.getElementById('race-image-container').classList.remove('hidden');
+                    imgEl.onerror = function() { document.getElementById('race-image-container').classList.add('hidden'); };
                 }
 
-                // Race details list
+                // Detail badges
                 const detailsList = document.getElementById('race-details-list');
-                if (race.title) {
-                    detailsList.innerHTML += `<li class="flex items-center"><span class="bg-blue-200 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Race</span> ${DOMPurify.sanitize(race.title)}</li>`;
-                }
                 if (race.track) {
-                    detailsList.innerHTML += `<li class="flex items-center"><span class="bg-green-200 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Track</span> ${DOMPurify.sanitize(race.track)}</li>`;
+                    detailsList.innerHTML += `<span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Track: ${DOMPurify.sanitize(race.track)}</span>`;
                 }
                 if (race.deadline) {
-                    detailsList.innerHTML += `<li class="flex items-center"><span class="bg-red-200 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Deadline</span> ${DOMPurify.sanitize(race.deadline)}</li>`;
+                    detailsList.innerHTML += `<span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Deadline: ${DOMPurify.sanitize(race.deadline)}</span>`;
                 }
 
-                // Show "How to Participate" if there's race data
-                document.getElementById('race-how-to-participate').classList.remove('hidden');
-
-                // Banner image
-                const imgEl = document.getElementById('race-image');
-                if (race.imageUrl) {
-                    imgEl.src = race.imageUrl;
-                    imgEl.classList.remove('hidden');
-                    imgEl.onerror = function() { this.classList.add('hidden'); };
+                // Description (short summary)
+                const descEl = document.getElementById('race-description');
+                if (race.description) {
+                    descEl.textContent = race.description;
+                    descEl.classList.remove('hidden');
                 }
 
-                // Update page title
-                document.title = `MURA Weekly Race: ${race.title || 'Information'}`;
+                // Rich content body
+                const bodyEl = document.getElementById('race-body');
+                const hasContent = race.content && race.content.trim().length > 0 && race.content.trim() !== '<p><br></p>';
+                if (hasContent) {
+                    bodyEl.innerHTML = DOMPurify.sanitize(race.content);
+                }
+
+                // Show "How to Participate" only if there's no rich content
+                // (if the admin wrote detailed participation instructions in content, this would be redundant)
+                if (!hasContent) {
+                    document.getElementById('race-how-to-participate').classList.remove('hidden');
+                }
 
                 // Show content, hide loading
                 loadingEl.classList.add('hidden');

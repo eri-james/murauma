@@ -2,7 +2,7 @@
  * POST /api/admin/weekly-races/update — Update a weekly race by ID
  *
  * Request body (JSON):
- *   { id, title?, track?, deadline?, description?, imageUrl?, isActive?, status? }
+ *   { id, title?, slug?, track?, deadline?, description?, content?, imageUrl?, isActive?, status? }
  */
 import {
   errorResponse,
@@ -10,6 +10,7 @@ import {
   validateField,
   validateOptionalField,
   sanitizeText,
+  sanitizeRichHtml,
   requireAdmin,
   adminPreflightResponse,
 } from '../../../_shared/utils.js';
@@ -29,7 +30,7 @@ export async function onRequestPost(context) {
     }
 
     const existing = await db
-      .prepare('SELECT id FROM weekly_races WHERE id = ?')
+      .prepare('SELECT id, slug FROM weekly_races WHERE id = ?')
       .bind(data.id)
       .first();
 
@@ -46,6 +47,19 @@ export async function onRequestPost(context) {
       if (!result.valid) return errorResponse(result.error);
       updates.push('title = ?');
       values.push(sanitizeText(result.value));
+    }
+
+    if (data.slug !== undefined) {
+      let newSlug = data.slug.trim().toLowerCase();
+      if (!newSlug) return errorResponse('Slug cannot be empty.');
+      // Check slug uniqueness (exclude current race)
+      const slugCheck = await db
+        .prepare('SELECT id FROM weekly_races WHERE slug = ? AND id != ?')
+        .bind(newSlug, data.id)
+        .first();
+      if (slugCheck) return errorResponse('Slug is already taken.');
+      updates.push('slug = ?');
+      values.push(newSlug);
     }
 
     if (data.track !== undefined) {
@@ -67,6 +81,14 @@ export async function onRequestPost(context) {
       if (!result.valid) return errorResponse(result.error);
       updates.push('description = ?');
       values.push(result.value ? sanitizeText(result.value) : '');
+    }
+
+    if (data.content !== undefined) {
+      if (data.content && data.content.length > 500000) {
+        return errorResponse('Content must be 500KB or less.');
+      }
+      updates.push('content = ?');
+      values.push(sanitizeRichHtml(data.content || ''));
     }
 
     if (data.imageUrl !== undefined) {
