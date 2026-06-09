@@ -178,7 +178,8 @@
                 document.getElementById('news-category').textContent = decodeHTMLEntities(news.category);
                 document.getElementById('news-description').textContent = decodeHTMLEntities(news.description) || '';
                 document.getElementById('news-date').textContent = new Date(news.createdAt).toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' });
-                document.getElementById('news-body').innerHTML = DOMPurify.sanitize(news.content || '');
+                // Sanitize then decode apostrophe entities that DOMPurify may encode
+                document.getElementById('news-body').innerHTML = DOMPurify.sanitize(news.content || '').replace(/&#x27;|&#39;/g, "'");
 
                 // Gracefully hide any broken images embedded in the rich text body
                 document.querySelectorAll('#news-body img').forEach(img => {

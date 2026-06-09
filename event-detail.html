@@ -188,7 +188,8 @@
                     document.getElementById('event-end-date-wrap').classList.remove('hidden');
                 }
 
-                document.getElementById('event-body').innerHTML = DOMPurify.sanitize(event.content || '');
+                // Sanitize then decode apostrophe entities that DOMPurify may encode
+                document.getElementById('event-body').innerHTML = DOMPurify.sanitize(event.content || '').replace(/&#x27;|&#39;/g, "'");
 
                 // Gracefully hide any broken images embedded in the rich text body
                 document.querySelectorAll('#event-body img').forEach(img => {

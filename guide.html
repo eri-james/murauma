@@ -196,7 +196,8 @@
                 document.getElementById('guide-title').textContent = decodeHTMLEntities(guide.title);
                 document.getElementById('guide-author').textContent = decodeHTMLEntities(guide.author);
                 document.getElementById('guide-date').textContent = new Date(guide.createdAt).toLocaleDateString();
-                document.getElementById('guide-body').innerHTML = DOMPurify.sanitize(guide.content);
+                // Sanitize then decode apostrophe entities that DOMPurify may encode
+                document.getElementById('guide-body').innerHTML = DOMPurify.sanitize(guide.content).replace(/&#x27;|&#39;/g, "'");
                 voteScore.textContent = guide.voteScore || 0;
 
                 // Show/hide elements

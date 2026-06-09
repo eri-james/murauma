@@ -325,7 +325,8 @@
                 const bodyEl = document.getElementById('race-body');
                 const hasContent = race.content && race.content.trim().length > 0 && race.content.trim() !== '<p><br></p>';
                 if (hasContent) {
-                    bodyEl.innerHTML = DOMPurify.sanitize(race.content);
+                    // Sanitize then decode apostrophe entities that DOMPurify may encode
+                    bodyEl.innerHTML = DOMPurify.sanitize(race.content).replace(/&#x27;|&#39;/g, "'");
                 }
 
                 // Show "How to Participate" only if there's no rich content

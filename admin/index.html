@@ -26,41 +26,7 @@
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
-        }
-
-        /* ========== SIDEBAR ========== */
-        .sidebar {
-            width: 200px;
-            min-height: 100vh;
-            background: linear-gradient(180deg, #1e3a5f 0%, #1a1a2e 100%);
-            border-right: 3px solid #3B82F6;
-        }
-        .sidebar-brand {
-            border-bottom: 2px solid rgba(59,130,246,0.4);
-        }
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #cbd5e1;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            cursor: pointer;
-            position: relative;
-        }
-        .sidebar-link:hover {
-            background: rgba(59,130,246,0.15);
-            color: #fff;
-        }
-        .sidebar-link.active {
-            background: linear-gradient(90deg, rgba(59,130,246,0.35), rgba(139,92,246,0.2));
-            color: #93c5fd;
-            border-left: 3px solid #3B82F6;
-        }
-        .sidebar-link.active .sidebar-icon {
-            color: #3B82F6;
+            padding-top: 5rem;
         }
 
         /* ========== CONTENT AREA ========== */
@@ -136,13 +102,14 @@
             margin: 0.125rem;
         }
 
-        /* ========== CONTENT CARDS (matching landing page style) ========== */
+        /* ========== CONTENT CARDS ========== */
         .admin-card {
             background: rgba(255,255,255,0.97);
             border-radius: 0.75rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             overflow: hidden;
             padding: 1.25rem;
+            width: 100%;
         }
 
         /* ========== QUICK ACTION CARDS ========== */
@@ -161,9 +128,7 @@
         /* ========== QUILL EDITOR IN MODAL ========== */
         .modal-quill-container { height: 300px; }
         @media (min-width: 768px) { .modal-quill-container { height: 400px; } }
-        /* Quill custom video embed styling */
         .ql-video { max-width: 100%; border-radius: 0.5rem; margin: 0.5rem 0; }
-        /* Quill better table toolbar styling */
         .ql-better-table-wrapper { overflow-x: auto; }
         .ql-better-table { border-collapse: collapse; width: 100%; }
         .ql-better-table td, .ql-better-table th { border: 1px solid #d1d5db; padding: 6px 10px; min-width: 80px; }
@@ -187,12 +152,6 @@
             max-height: 90vh; overflow-y: auto;
             padding: 2rem;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        /* ========== MOBILE ========== */
-        .mobile-header {
-            background: linear-gradient(90deg, #1e3a5f, #1a1a2e);
-            border-bottom: 2px solid #3B82F6;
         }
 
         /* ========== MISSING TAILWIND CLASSES (not in built CSS) ========== */
@@ -229,16 +188,143 @@
             color: #374151;
         }
 
+        /* ========== ADMIN PILL NAV (reuses .nav-pill from common.css) ========== */
+        .admin-pill-link {
+            position: relative;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: color 0.25s, background 0.25s;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .admin-pill-link:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.1);
+        }
+        .admin-pill-link.active {
+            color: #ffffff;
+            background: rgba(59,130,246,0.45);
+        }
+
+        /* ========== ADMIN OVERLAY (mobile) ========== */
+        .admin-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1001;
+            background: rgba(2, 6, 23, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .admin-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .admin-overlay-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .admin-overlay-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .admin-overlay-close svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        .admin-overlay-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .admin-overlay-link {
+            display: inline-block;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.75rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: color 0.25s, transform 0.25s;
+            position: relative;
+            cursor: pointer;
+        }
+        .admin-overlay-link:hover {
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+        .admin-overlay-link.active {
+            color: #93c5fd;
+        }
+        .admin-overlay-link::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 1.5rem;
+            right: 1.5rem;
+            height: 3px;
+            background: #3B82F6;
+            border-radius: 2px;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s ease;
+        }
+        .admin-overlay-link:hover::after {
+            transform: scaleX(1);
+        }
+        .admin-overlay-link.active::after {
+            transform: scaleX(1);
+        }
+        .admin-overlay-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            border: none;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-overlay-back:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+        }
+
         /* ========== FULL WIDTH LAYOUT ========== */
         #admin-app {
-            width: 100%;
-        }
-        #admin-app > main {
-            flex: 1 1 0%;
-            min-width: 0;
-            width: 100%;
-        }
-        .admin-card {
             width: 100%;
         }
     </style>
@@ -253,82 +339,59 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
-    <div id="admin-app" class="hidden flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="sidebar text-white flex-shrink-0 p-3 space-y-0.5">
-            <div class="sidebar-brand px-2 py-3 mb-3">
-                <div class="flex items-center space-x-2">
-                    <div class="w-7 h-7 bg-blue-500 rounded flex items-center justify-center font-black text-xs">M</div>
-                    <div>
-                        <h1 class="font-extrabold text-xs tracking-wider leading-tight">MURA</h1>
-                        <p class="text-[10px] text-blue-300 font-semibold tracking-widest">ADMIN</p>
-                    </div>
-                </div>
-            </div>
-            <div class="sidebar-link active" data-section="overview">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                Overview
-            </div>
-            <div class="sidebar-link" data-section="members">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                Members
-            </div>
-            <div class="sidebar-link" data-section="writings">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                Writings
-            </div>
-            <div class="sidebar-link" data-section="fan-media">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Fan Media
-            </div>
-            <div class="sidebar-link" data-section="guides">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                Guides
-            </div>
-            <div class="sidebar-link" data-section="weekly-races">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                Weekly Races
-            </div>
-            <div class="sidebar-link" data-section="events">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Events
-            </div>
-            <div class="sidebar-link" data-section="news">
-                <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-                News
-            </div>
-            <div class="mt-6 pt-3 border-t border-blue-800">
-                <a href="/" class="sidebar-link">
-                    <svg class="w-3.5 h-3.5 mr-2 sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    Back to Site
-                </a>
-            </div>
-        </aside>
+    <!-- Admin Pill Navigation Bar -->
+    <div class="nav-pill">
+        <div class="nav-pill-inner">
+            <!-- Logo -->
+            <a href="#" id="admin-logo-link" class="nav-pill-logo">
+                <span class="logo-title">MURA</span>
+                <span class="logo-sub">ADMIN</span>
+            </a>
 
-        <!-- Mobile header -->
-        <div class="md:hidden fixed top-0 left-0 right-0 mobile-header text-white z-40 flex items-center justify-between px-4 py-3">
-            <div class="flex items-center space-x-2">
-                <div class="w-7 h-7 bg-blue-500 rounded flex items-center justify-center font-black text-xs">M</div>
-                <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
-            </div>
-            <button id="mobile-menu-toggle" class="text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+            <!-- Desktop links (visible on md+) -->
+            <nav id="admin-nav" class="nav-pill-links">
+                <a class="admin-pill-link active" data-section="overview">Overview</a>
+                <a class="admin-pill-link" data-section="members">Members</a>
+                <a class="admin-pill-link" data-section="writings">Writings</a>
+                <a class="admin-pill-link" data-section="fan-media">Fan Media</a>
+                <a class="admin-pill-link" data-section="guides">Guides</a>
+                <a class="admin-pill-link" data-section="weekly-races">Races</a>
+                <a class="admin-pill-link" data-section="events">Events</a>
+                <a class="admin-pill-link" data-section="news">News</a>
+            </nav>
+
+            <!-- Burger button (mobile) -->
+            <button id="admin-burger-btn" class="nav-pill-burger" aria-label="Open menu">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
             </button>
         </div>
-        <div id="mobile-sidebar" class="md:hidden hidden fixed inset-0 z-50 sidebar text-white p-4 overflow-y-auto" style="min-width:100%;">
-            <div class="flex justify-between items-center mb-4">
-                <div class="flex items-center space-x-2">
-                    <div class="w-7 h-7 bg-blue-500 rounded flex items-center justify-center font-black text-xs">M</div>
-                    <h1 class="font-extrabold text-sm tracking-wider">MURA ADMIN</h1>
-                </div>
-                <button id="mobile-menu-close" class="text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-            </div>
-            <div id="mobile-sidebar-links"></div>
-        </div>
+    </div>
 
+    <!-- Mobile Overlay Menu -->
+    <div id="admin-overlay" class="admin-overlay">
+        <button id="admin-overlay-close" class="admin-overlay-close" aria-label="Close menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <ul class="admin-overlay-menu">
+            <li><a class="admin-overlay-link active" data-section="overview">Overview</a></li>
+            <li><a class="admin-overlay-link" data-section="members">Members</a></li>
+            <li><a class="admin-overlay-link" data-section="writings">Writings</a></li>
+            <li><a class="admin-overlay-link" data-section="fan-media">Fan Media</a></li>
+            <li><a class="admin-overlay-link" data-section="guides">Guides</a></li>
+            <li><a class="admin-overlay-link" data-section="weekly-races">Races</a></li>
+            <li><a class="admin-overlay-link" data-section="events">Events</a></li>
+            <li><a class="admin-overlay-link" data-section="news">News</a></li>
+        </ul>
+        <a href="/" class="admin-overlay-back">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Site
+        </a>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-app" class="hidden">
         <!-- Main Content -->
-        <main class="flex-1 p-6 md:p-10 mt-14 md:mt-0 overflow-x-auto">
+        <main class="container mx-auto px-4 py-6 md:p-10">
             <!-- ========== OVERVIEW ========== -->
             <div id="section-overview" class="admin-section active">
                 <h2 class="header-skew header-skew-blue mb-6" style="background-color:#3B82F6;">Dashboard Overview</h2>
@@ -619,7 +682,7 @@
                 currentUser = data.user;
                 document.getElementById('admin-app').classList.remove('hidden');
                 document.getElementById('not-authorized').classList.add('hidden');
-                initSidebar();
+                initAdminNav();
                 loadOverview();
             } else {
                 document.getElementById('admin-app').classList.add('hidden');
@@ -632,41 +695,83 @@
     });
 
     // ============================================================
-    // SIDEBAR NAVIGATION
+    // PILL NAVIGATION
     // ============================================================
-    function initSidebar() {
-        const links = document.querySelectorAll('.sidebar-link[data-section]');
-        links.forEach(link => {
-            link.addEventListener('click', () => switchSection(link.dataset.section));
-        });
-        // Clone sidebar links for mobile
-        const mobileSidebar = document.getElementById('mobile-sidebar-links');
-        if (mobileSidebar) {
-            mobileSidebar.innerHTML = '';
-            links.forEach(link => {
-                const clone = link.cloneNode(true);
-                clone.addEventListener('click', () => {
-                    switchSection(link.dataset.section);
-                    document.getElementById('mobile-sidebar').classList.add('hidden');
-                });
-                mobileSidebar.appendChild(clone);
+    function initAdminNav() {
+        // Desktop pill links
+        const pillLinks = document.querySelectorAll('.admin-pill-link[data-section]');
+        pillLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchSection(link.dataset.section);
             });
-        }
-        // Mobile menu toggle
-        const mobileToggle = document.getElementById('mobile-menu-toggle');
-        const mobileClose = document.getElementById('mobile-menu-close');
-        if (mobileToggle) mobileToggle.addEventListener('click', () => document.getElementById('mobile-sidebar').classList.remove('hidden'));
-        if (mobileClose) mobileClose.addEventListener('click', () => document.getElementById('mobile-sidebar').classList.add('hidden'));
+        });
+
+        // Mobile overlay links
+        const overlayLinks = document.querySelectorAll('.admin-overlay-link[data-section]');
+        overlayLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                switchSection(link.dataset.section);
+                closeAdminOverlay();
+            });
+        });
+
+        // Burger button
+        const burgerBtn = document.getElementById('admin-burger-btn');
+        if (burgerBtn) burgerBtn.addEventListener('click', openAdminOverlay);
+
+        // Overlay close button
+        const overlayClose = document.getElementById('admin-overlay-close');
+        if (overlayClose) overlayClose.addEventListener('click', closeAdminOverlay);
+
+        // Close overlay on background click
+        const overlay = document.getElementById('admin-overlay');
+        if (overlay) overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeAdminOverlay();
+        });
+
+        // Close overlay on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAdminOverlay();
+        });
+
+        // Logo click goes to overview
+        const logoLink = document.getElementById('admin-logo-link');
+        if (logoLink) logoLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection('overview');
+        });
+    }
+
+    function openAdminOverlay() {
+        const overlay = document.getElementById('admin-overlay');
+        if (overlay) overlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAdminOverlay() {
+        const overlay = document.getElementById('admin-overlay');
+        if (overlay) overlay.classList.remove('is-open');
+        document.body.style.overflow = '';
     }
 
     function switchSection(sectionId) {
-        // Update sidebar
-        document.querySelectorAll('.sidebar-link[data-section]').forEach(l => l.classList.remove('active'));
-        document.querySelectorAll(`.sidebar-link[data-section="${sectionId}"]`).forEach(l => l.classList.add('active'));
+        // Update pill nav (desktop)
+        document.querySelectorAll('.admin-pill-link[data-section]').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll(`.admin-pill-link[data-section="${sectionId}"]`).forEach(l => l.classList.add('active'));
+
+        // Update overlay nav (mobile)
+        document.querySelectorAll('.admin-overlay-link[data-section]').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll(`.admin-overlay-link[data-section="${sectionId}"]`).forEach(l => l.classList.add('active'));
+
         // Update sections
         document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
         const section = document.getElementById(`section-${sectionId}`);
         if (section) section.classList.add('active');
+
+        // Scroll to top of main content
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
         // Load data
         loadSection(sectionId);
     }
