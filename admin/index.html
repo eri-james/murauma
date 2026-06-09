@@ -646,7 +646,7 @@
 
     // Shared Quill modules config
     function getQuillModules(placeholder) {
-        return {
+        const modules = {
             toolbar: {
                 container: QUILL_TOOLBAR,
                 handlers: {
@@ -655,21 +655,33 @@
                 },
             },
             table: false, // disable default table
-            'better-table': {
+        };
+        // Only add better-table module if the plugin loaded successfully
+        if (typeof QuillBetterTable !== 'undefined') {
+            modules['better-table'] = {
                 operationMenu: {
                     items: {
                         unmergeCells: { text: 'Unmerge cells' },
                     },
                 },
-            },
-            keyboard: {
+            };
+            modules.keyboard = {
                 bindings: QuillBetterTable.keyboardBindings,
-            },
-        };
+            };
+        }
+        return modules;
     }
 
-    // Register Quill Better Table module
-    Quill.register({ 'modules/better-table': QuillBetterTable }, true);
+    // Register Quill Better Table module (guarded — if CDN fails, page still loads)
+    try {
+        if (typeof QuillBetterTable !== 'undefined') {
+            Quill.register({ 'modules/better-table': QuillBetterTable }, true);
+        } else {
+            console.warn('QuillBetterTable not loaded — table editing disabled');
+        }
+    } catch (e) {
+        console.warn('QuillBetterTable registration failed:', e);
+    }
 
     // ============================================================
     // AUTH CHECK

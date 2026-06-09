@@ -189,6 +189,9 @@ body {
   .nav-pill-links {
     display: flex;
   }
+  .nav-pill-burger {
+    display: none;
+  }
 }
 
 .nav-pill-link {
