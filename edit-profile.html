@@ -74,17 +74,8 @@
         </div>
     </div>
 
-    <!-- Pending Approval State -->
-    <div id="pending-state" class="container mx-auto px-4 py-8 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-md border-2 border-yellow-400 max-w-md mx-auto text-center">
-            <h1 class="text-2xl font-bold text-gray-800 mb-4">Registration Pending</h1>
-            <p class="text-gray-600 mb-2">Your registration is still waiting for admin approval.</p>
-            <p class="text-sm text-gray-500">You'll be able to edit your profile once approved. Check back soon!</p>
-            <div class="mt-6">
-                <a href="index.html" class="text-blue-700 hover:text-blue-800 font-medium">Back to Main Site</a>
-            </div>
-        </div>
-    </div>
+    <!-- Pending Approval Info Banner (shown as a banner above the form, not a blocking state) -->
+    <!-- This is now injected dynamically inside the profile form container -->
 
     <!-- Profile Edit Form (hidden until loaded) -->
     <main id="profile-form-container" class="container mx-auto px-4 py-8 hidden">
@@ -96,6 +87,12 @@
                     <h1 class="text-3xl font-extrabold text-gray-800">Edit Profile</h1>
                     <p class="text-sm text-gray-500">Logged in as <span id="display-username" class="font-medium text-purple-600"></span></p>
                 </div>
+            </div>
+
+            <!-- Pending Approval Info Banner (dynamically shown for pending users) -->
+            <div id="pending-notice" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded hidden">
+                <p class="text-sm text-blue-800 font-medium">Your membership is pending approval</p>
+                <p class="text-sm text-blue-700 mt-1">You can explore the site and edit your profile. Once an admin approves your membership, you'll also be able to submit fan content, guides, and writings.</p>
             </div>
 
             <form id="profile-form" class="space-y-6">
@@ -227,7 +224,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const loadingState = document.getElementById('loading-state');
             const notLoggedIn = document.getElementById('not-logged-in');
-            const pendingState = document.getElementById('pending-state');
+            const pendingNotice = document.getElementById('pending-notice');
             const profileForm = document.getElementById('profile-form-container');
             const navUsername = document.getElementById('nav-username');
             const displayUsername = document.getElementById('display-username');
@@ -256,11 +253,9 @@
                 // Show avatar
                 currentAvatar.src = user.avatarUrl;
 
-                // Check if pending
+                // Show pending notice if not yet approved (but don't block profile editing)
                 if (user.status === 'pending') {
-                    loadingState.classList.add('hidden');
-                    pendingState.classList.remove('hidden');
-                    return;
+                    pendingNotice.classList.remove('hidden');
                 }
 
                 // Fill form with current data

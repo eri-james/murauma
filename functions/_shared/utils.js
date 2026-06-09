@@ -33,7 +33,7 @@ const JWT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
 const SESSION_COOKIE_NAME = 'mura_session';
 
 // Allowed MIME types for profile picture uploads
-const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 // ============================================================

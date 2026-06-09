@@ -93,6 +93,12 @@
                 <p class="text-sm text-yellow-800">You're not logged in. Please <a href="login.html" class="font-medium text-blue-600 hover:underline">log in</a> or <a href="register.html" class="font-medium text-blue-600 hover:underline">register</a> to submit writings.</p>
             </div>
 
+            <!-- Pending approval notice -->
+            <div id="pending-approval-notice" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded hidden">
+                <p class="text-sm text-blue-800 font-medium">Your membership is pending approval</p>
+                <p class="text-sm text-blue-700 mt-1">You need to be approved by an admin before you can submit writings. You can still <a href="edit-profile.html" class="font-medium text-blue-600 hover:underline">edit your profile</a> in the meantime.</p>
+            </div>
+
             <!-- Submission Form -->
             <form id="writing-form" class="space-y-6">
                 
@@ -161,6 +167,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // --- Check auth state ---
             let isLoggedIn = false;
+            let isPending = false;
             try {
                 const meResp = await fetch('/api/me');
                 const meData = await meResp.json();
@@ -168,6 +175,12 @@
                     isLoggedIn = true;
                     // Hide trainer ID field when logged in
                     document.getElementById('trainer-id-field').style.display = 'none';
+                    // Check if user is pending approval
+                    if (meData.user.status === 'pending') {
+                        isPending = true;
+                        document.getElementById('pending-approval-notice').classList.remove('hidden');
+                        document.getElementById('writing-form').style.display = 'none';
+                    }
                 } else {
                     // Show notice for non-logged-in users
                     document.getElementById('not-logged-in-notice').classList.remove('hidden');

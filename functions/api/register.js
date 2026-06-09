@@ -7,7 +7,10 @@
  * Request body (JSON):
  *   { username, password, memberName, trainerID, favoriteUma, bio, profilePicture, mimeType, hCaptchaToken }
  * 
- * trainer_id, favorite_uma, and bio are now optional.
+ * trainer_id, favorite_uma, bio, and profilePicture are now optional.
+ * If no profile picture is provided, a default placeholder avatar is generated.
+ * Users start with "pending" status — they can log in and edit their profile immediately,
+ * but need admin approval before submitting fan content or guides.
  */
 import {
   errorResponse,
@@ -30,6 +33,50 @@ import {
 
 // Maximum JSON body size: 10MB (profile pictures up to 5MB + overhead)
 const MAX_BODY_SIZE = 10 * 1024 * 1024;
+
+/**
+ * Generates a default placeholder avatar as a base64-encoded PNG.
+ * Uses the display name's first letter (or "?" if empty) on a colored background.
+ * The background color is deterministically picked from a palette based on the name.
+ *
+ * @param {string} displayName — The sanitized display name (may contain HTML entities)
+ * @returns {{ base64Data: string, mimeType: string }}
+ */
+function generateDefaultAvatar(displayName) {
+  // Decode HTML entities to get a usable character for the initial
+  const decodedName = displayName
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'");
+
+  const initial = (decodedName || '?').charAt(0).toUpperCase();
+
+  // Deterministic color from the name (simple hash)
+  const palette = [
+    '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+    '#ec4899', '#f43f5e', '#ef4444', '#f97316',
+    '#eab308', '#22c55e', '#14b8a6', '#06b6d4',
+    '#3b82f6', '#2563eb', '#7c3aed', '#9333ea',
+  ];
+  let hash = 0;
+  for (let i = 0; i < decodedName.length; i++) {
+    hash = decodedName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const bgColor = palette[Math.abs(hash) % palette.length];
+
+  // Generate a 256x256 SVG avatar
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="128" fill="${bgColor}"/>
+  <text x="128" y="128" text-anchor="middle" dy=".35em" font-family="Inter, Arial, sans-serif" font-size="128" font-weight="700" fill="white">${initial}</text>
+</svg>`;
+
+  // Convert SVG to base64
+  const base64Data = btoa(unescape(encodeURIComponent(svg)));
+
+  return { base64Data, mimeType: 'image/svg+xml' };
+}
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -101,29 +148,36 @@ export async function onRequestPost(context) {
       }
     }
 
-    // --- Validate Profile Picture ---
-    if (!data.profilePicture || !data.mimeType) {
-      return errorResponse('Profile picture is required.');
-    }
-
-    if (!ALLOWED_MIME_TYPES.includes(data.mimeType)) {
-      return errorResponse('Invalid image format. Allowed: PNG, JPEG, GIF, WebP.');
-    }
-
-    // Extract base64 data (strip data URL prefix if present)
+    // --- Validate Profile Picture (optional) ---
     let base64Data;
-    try {
-      base64Data = data.profilePicture.includes(',')
-        ? data.profilePicture.split(',')[1]
-        : data.profilePicture;
+    let profilePictureMime;
 
-      // Validate that it's real base64 by decoding
-      const decoded = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-      if (decoded.length > MAX_IMAGE_SIZE_BYTES) {
-        return errorResponse('Image file too large. Maximum size is 5MB.');
+    if (data.profilePicture && data.mimeType) {
+      // User provided a profile picture
+      if (!ALLOWED_MIME_TYPES.includes(data.mimeType)) {
+        return errorResponse('Invalid image format. Allowed: PNG, JPEG, GIF, WebP.');
       }
-    } catch {
-      return errorResponse('Invalid image data.');
+
+      // Extract base64 data (strip data URL prefix if present)
+      try {
+        base64Data = data.profilePicture.includes(',')
+          ? data.profilePicture.split(',')[1]
+          : data.profilePicture;
+
+        // Validate that it's real base64 by decoding
+        const decoded = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        if (decoded.length > MAX_IMAGE_SIZE_BYTES) {
+          return errorResponse('Image file too large. Maximum size is 5MB.');
+        }
+        profilePictureMime = data.mimeType;
+      } catch {
+        return errorResponse('Invalid image data.');
+      }
+    } else {
+      // No profile picture provided — generate a default placeholder avatar
+      const placeholder = generateDefaultAvatar(sanitizeText(nameResult.value));
+      base64Data = placeholder.base64Data;
+      profilePictureMime = placeholder.mimeType;
     }
 
     // --- Hash Password ---
@@ -149,7 +203,7 @@ export async function onRequestPost(context) {
           sanitizedFavUma,
           sanitizedBio,
           base64Data,
-          data.mimeType
+          profilePictureMime
         )
         .run();
     } catch (dbError) {
@@ -178,7 +232,7 @@ export async function onRequestPost(context) {
       responseHeaders['Set-Cookie'] = cookieHeader;
     }
     return jsonResponse(
-      { result: 'success', message: 'Registration submitted successfully! Please wait for an admin to approve your entry.' },
+      { result: 'success', message: 'Account created! You can now explore the site and edit your profile. To submit fan content or guides, an admin will need to approve your membership first.' },
       200,
       responseHeaders
     );

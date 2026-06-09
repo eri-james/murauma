@@ -67,6 +67,24 @@
             }
         });
 
+        // Show pending notice elements for pending users only
+        document.querySelectorAll('[data-auth="pending"]').forEach(el => {
+            if (user && user.status === 'pending') {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+
+        // Show elements only for approved members
+        document.querySelectorAll('[data-auth="approved"]').forEach(el => {
+            if (user && user.status === 'approved') {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+
         // Show/hide logout buttons and attach click handlers
         document.querySelectorAll('[data-auth="logout"]').forEach(btn => {
             if (user) {
@@ -101,8 +119,11 @@
             if (data.result === 'success' && data.user) {
                 window.muraCurrentUser = data.user;
                 updateNav(data.user);
+                // Expose status globally for other scripts to check
+                window.muraUserStatus = data.user.status || null;
             } else {
                 window.muraCurrentUser = null;
+                window.muraUserStatus = null;
                 updateNav(null);
             }
         } catch (err) {

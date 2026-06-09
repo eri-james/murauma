@@ -85,6 +85,12 @@
                 <p class="text-sm text-yellow-800">You must be logged in to submit fan media. Please <a href="login.html" class="font-medium text-blue-600 hover:underline">log in</a> or <a href="register.html" class="font-medium text-blue-600 hover:underline">register</a> first.</p>
             </div>
 
+            <!-- Pending approval notice -->
+            <div id="pending-approval-notice" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded hidden">
+                <p class="text-sm text-blue-800 font-medium">Your membership is pending approval</p>
+                <p class="text-sm text-blue-700 mt-1">You need to be approved by an admin before you can submit fan media. You can still <a href="edit-profile.html" class="font-medium text-blue-600 hover:underline">edit your profile</a> in the meantime.</p>
+            </div>
+
             <!-- Submission Form -->
             <form id="fan-media-form" class="space-y-6">
                 
@@ -182,11 +188,18 @@
         document.addEventListener('DOMContentLoaded', async () => {
             // --- Check auth state ---
             let isLoggedIn = false;
+            let isPending = false;
             try {
                 const meResp = await fetch('/api/me');
                 const meData = await meResp.json();
                 if (meData.result === 'success' && meData.user) {
                     isLoggedIn = true;
+                    // Check if user is pending approval
+                    if (meData.user.status === 'pending') {
+                        isPending = true;
+                        document.getElementById('pending-approval-notice').classList.remove('hidden');
+                        document.getElementById('fan-media-form').style.display = 'none';
+                    }
                 } else {
                     document.getElementById('not-logged-in-notice').classList.remove('hidden');
                     document.getElementById('fan-media-form').style.display = 'none';
