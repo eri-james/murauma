@@ -29,8 +29,13 @@
             padding-top: 5rem;
         }
 
+        /* ========== GLOBAL MOBILE FIX ========== */
+        *, *::before, *::after { box-sizing: border-box; }
+        body { overflow-x: hidden; }
+        #admin-app { overflow-x: hidden; max-width: 100vw; }
+
         /* ========== CONTENT AREA ========== */
-        .admin-section { display: none; }
+        .admin-section { display: none; overflow-x: hidden; }
         .admin-section.active { display: block; }
 
         /* ========== STAT CARDS ========== */
@@ -53,7 +58,8 @@
         .stat-number { font-size: 2rem; font-weight: 900; }
 
         /* ========== TABLES ========== */
-        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .admin-table { width: 100%; border-collapse: collapse; min-width: 600px; }
         .admin-table th {
             background: rgba(59,130,246,0.08);
             padding: 0.75rem 1rem;
@@ -64,12 +70,14 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
             border-bottom: 2px solid #3B82F6;
+            white-space: nowrap;
         }
         .admin-table td {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid #e5e7eb;
             font-size: 0.875rem;
             color: #374151;
+            white-space: nowrap;
         }
         .admin-table tr:hover td { background: rgba(59,130,246,0.03); }
         .admin-table td:last-child { white-space: nowrap; }
@@ -153,6 +161,10 @@
             padding: 2rem;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
+        @media (max-width: 767px) {
+            .modal-box { padding: 1rem; max-height: 95vh; }
+            .modal-overlay { padding: 0.5rem; }
+        }
 
         /* ========== MISSING TAILWIND CLASSES (not in built CSS) ========== */
         .md\:p-6 { padding: 1.5rem; }
@@ -163,6 +175,22 @@
             .md\:p-6, .md\:p-10 { padding: 1rem; }
             .md\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .md\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        /* ========== MOBILE SECTION HEADER ========== */
+        @media (max-width: 767px) {
+            .section-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.75rem;
+            }
+            .section-header .header-skew {
+                font-size: 1.25rem;
+                margin-left: -0.5rem;
+            }
+            .stat-number { font-size: 1.5rem; }
+            .stat-card { padding: 1rem; }
+            .admin-card { padding: 0.75rem; }
         }
 
         /* ========== FORM INPUTS IN MODALS ========== */
@@ -394,7 +422,7 @@
         <main class="container mx-auto px-4 py-6 md:p-10">
             <!-- ========== OVERVIEW ========== -->
             <div id="section-overview" class="admin-section active">
-                <h2 class="header-skew header-skew-blue mb-6" style="background-color:#3B82F6;">Dashboard Overview</h2>
+                <h2 class="header-skew header-skew-blue mb-6" style="background-color:#3B82F6; font-size:1.25rem;">Dashboard Overview</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div class="stat-card stat-card-yellow">
                         <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Pending Members</p>
@@ -446,7 +474,7 @@
 
             <!-- ========== MEMBERS ========== -->
             <div id="section-members" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew" style="background-color:#F59E0B;">Members</h2>
                     <select id="members-status-filter" class="border-2 border-amber-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-amber-400 focus:border-amber-400">
                         <option value="pending">Pending</option>
@@ -464,7 +492,7 @@
 
             <!-- ========== WRITINGS ========== -->
             <div id="section-writings" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew">Writings</h2>
                     <select id="writings-status-filter" class="border-2 border-blue-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-blue-400 focus:border-blue-400">
                         <option value="pending">Pending</option>
@@ -482,7 +510,7 @@
 
             <!-- ========== FAN MEDIA ========== -->
             <div id="section-fan-media" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew header-skew-pink">Fan Media</h2>
                     <select id="fan-media-status-filter" class="border-2 border-pink-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-pink-400 focus:border-pink-400">
                         <option value="pending">Pending</option>
@@ -500,7 +528,7 @@
 
             <!-- ========== GUIDES ========== -->
             <div id="section-guides" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew header-skew-purple">Guides</h2>
                     <select id="guides-status-filter" class="border-2 border-purple-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-purple-400 focus:border-purple-400">
                         <option value="pending">Pending</option>
@@ -518,12 +546,12 @@
 
             <!-- ========== WEEKLY RACES ========== -->
             <div id="section-weekly-races" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew">Weekly Races</h2>
                     <button onclick="openWeeklyRaceForm()" class="bg-green-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-green-600 text-sm transition-colors">+ New Race</button>
                 </div>
                 <div class="admin-card border-2 border-blue-400 overflow-x-auto">
-                    <table class="admin-table">
+                    <table class="admin-table" style="min-width:750px;">
                         <thead><tr><th>ID</th><th>Title</th><th>Slug</th><th>Track</th><th>Deadline</th><th>Active</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="weekly-races-table-body"><tr><td colspan="8" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
                     </table>
@@ -532,7 +560,7 @@
 
             <!-- ========== EVENTS ========== -->
             <div id="section-events" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew header-skew-red">Events</h2>
                     <button onclick="openEventForm()" class="bg-red-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-red-600 text-sm transition-colors">+ New Event</button>
                 </div>
@@ -546,7 +574,7 @@
 
             <!-- ========== NEWS ========== -->
             <div id="section-news" class="admin-section">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew header-skew-pink">News</h2>
                     <button onclick="openNewsForm()" class="bg-pink-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-pink-600 text-sm transition-colors">+ New Post</button>
                 </div>
