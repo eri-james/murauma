@@ -117,3 +117,308 @@ body {
   margin-bottom: 1rem;
   border-radius: 0.5rem;
 }
+
+/* ============================================================
+   MURA — Pill Navigation Bar
+   ============================================================ */
+
+/* Pill container — floats at the top center of the page */
+.nav-pill {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  pointer-events: none;
+}
+
+.nav-pill-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 64rem;
+  background: rgba(15, 23, 42, 0.85); /* slate-900/85 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 9999px;
+  padding: 0.5rem 0.75rem;
+  pointer-events: auto;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Logo inside pill */
+.nav-pill-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+  text-decoration: none;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  transition: background 0.2s;
+}
+.nav-pill-logo:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.nav-pill-logo .logo-title {
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.nav-pill-logo .logo-sub {
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+/* Desktop links (hidden on mobile) */
+.nav-pill-links {
+  display: none;
+  align-items: center;
+  gap: 0;
+}
+
+@media (min-width: 768px) {
+  .nav-pill-links {
+    display: flex;
+  }
+}
+
+.nav-pill-link {
+  position: relative;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  transition: color 0.25s;
+  white-space: nowrap;
+}
+.nav-pill-link:hover {
+  color: #ffffff;
+}
+
+/* Blue line hover indicator */
+.nav-pill-link::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #3B82F6; /* blue-500 */
+  border-radius: 1px;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+.nav-pill-link:hover::after {
+  width: 60%;
+  left: 20%;
+}
+.nav-pill-link.active::after {
+  width: 60%;
+  left: 20%;
+}
+
+/* Burger button */
+.nav-pill-burger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.nav-pill-burger:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.nav-pill-burger svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* --- Full-Page Overlay Menu --- */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background: rgba(2, 6, 23, 0.95); /* slate-950/95 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+.nav-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Close button in overlay */
+.nav-overlay-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+.nav-overlay-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.nav-overlay-close svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Overlay menu items */
+.nav-overlay-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-overlay-item {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-overlay-link {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.75rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: color 0.25s, transform 0.25s;
+  position: relative;
+}
+.nav-overlay-link:hover {
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+/* Blue line hover on overlay items */
+.nav-overlay-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 3px;
+  background: #3B82F6;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.nav-overlay-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Auth links inside overlay */
+.nav-overlay-auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-overlay-auth a,
+.nav-overlay-auth button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  border: none;
+}
+.nav-overlay-auth a:hover,
+.nav-overlay-auth button:hover {
+  transform: scale(1.03);
+}
+
+.nav-overlay-auth .btn-join {
+  background: #1D4ED8; /* blue-700 */
+  color: white;
+}
+.nav-overlay-auth .btn-join:hover {
+  background: #1E40AF;
+}
+
+.nav-overlay-auth .btn-login {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.nav-overlay-auth .btn-login:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.nav-overlay-auth .btn-profile {
+  background: #7C3AED; /* violet-600 */
+  color: white;
+}
+.nav-overlay-auth .btn-profile:hover {
+  background: #6D28D9;
+}
+
+.nav-overlay-auth .btn-admin {
+  background: #DC2626; /* red-600 */
+  color: white;
+}
+.nav-overlay-auth .btn-admin:hover {
+  background: #B91C1C;
+}
+
+.nav-overlay-auth .btn-logout {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.nav-overlay-auth .btn-logout:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+/* Body offset for fixed navbar */
+body.has-pill-nav {
+  padding-top: 4.5rem;
+}
