@@ -182,10 +182,19 @@
 
                 document.getElementById('event-body').innerHTML = DOMPurify.sanitize(event.content || '');
 
+                // Gracefully hide any broken images embedded in the rich text body
+                document.querySelectorAll('#event-body img').forEach(img => {
+                    img.onerror = function() { this.style.display = 'none'; };
+                });
+
                 // Show hero image if available
                 if (event.imageUrl) {
-                    document.getElementById('event-image').src = event.imageUrl;
-                    document.getElementById('event-image').alt = event.title;
+                    const imgEl = document.getElementById('event-image');
+                    imgEl.src = event.imageUrl;
+                    imgEl.alt = event.title;
+                    imgEl.onerror = function() {
+                        document.getElementById('event-image-container').classList.add('hidden');
+                    };
                     document.getElementById('event-image-container').classList.remove('hidden');
                 }
 

@@ -128,11 +128,22 @@
 
             /**
              * Checks if a URL points to a direct image file.
+             * Accepts URLs ending with image extensions OR any HTTPS URL that
+             * looks like it could serve an image (e.g. CDN/proxy URLs without
+             * file extensions like Notion, Discord, Imgur, etc.).
+             * The browser will fall back via onerror if it can't render it.
              */
             function isDirectImageUrl(url) {
                 try {
-                    const pathname = new URL(url).pathname.toLowerCase();
-                    return /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(pathname);
+                    const u = new URL(url);
+                    // Must be HTTP(S)
+                    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+                    // Check if the pathname ends with a known image extension
+                    const pathname = u.pathname.toLowerCase();
+                    if (/\.(jpg|jpeg|png|gif|webp|bmp|svg|avif|ico|tiff|tif)(\?.*)?$/i.test(pathname)) return true;
+                    // For other HTTPS URLs without file extensions, try as an image —
+                    // the browser will fall back via onerror if it can't render it
+                    return u.protocol === 'https:';
                 } catch {
                     return false;
                 }
@@ -140,6 +151,9 @@
 
             /**
              * Tries to extract a direct image URL from common platforms.
+             * With the updated isDirectImageUrl, most HTTPS URLs are treated
+             * as potential images. This function still handles special cases
+             * like Imgur page URLs that need conversion.
              */
             function getThumbnailUrl(url) {
                 // Direct image URL — use as-is
@@ -156,7 +170,7 @@
                     }
                 } catch {}
 
-                // For non-image URLs, return null (will show as link card)
+                // For non-HTTPS or invalid URLs, return null (will show as link card)
                 return null;
             }
 

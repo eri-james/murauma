@@ -885,7 +885,7 @@
                     const eventsGrid = document.querySelector('#page-events .grid');
                     if (eventsGrid) {
                         eventsGrid.innerHTML = data.events.map(e => {
-                            const img = e.imageUrl ? `<div class="relative overflow-hidden"><img src="${DOMPurify.sanitize(e.imageUrl)}" alt="${DOMPurify.sanitize(e.title)}" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy"></div>` : '';
+                            const img = e.imageUrl ? `<div class="relative overflow-hidden"><img src="${DOMPurify.sanitize(e.imageUrl)}" alt="${DOMPurify.sanitize(e.title)}" class="w-full object-cover aspect-video group-hover:scale-110 transition-transform duration-300" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : '';
                             const link = e.slug ? `./event-detail.html?slug=${encodeURIComponent(e.slug)}` : '#';
                             return `<a href="${link}" class="group block rounded-lg overflow-hidden shadow-lg">
                                 ${img}

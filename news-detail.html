@@ -172,10 +172,20 @@
                 document.getElementById('news-date').textContent = new Date(news.createdAt).toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' });
                 document.getElementById('news-body').innerHTML = DOMPurify.sanitize(news.content || '');
 
+                // Gracefully hide any broken images embedded in the rich text body
+                document.querySelectorAll('#news-body img').forEach(img => {
+                    img.onerror = function() { this.style.display = 'none'; };
+                });
+
                 // Show hero image if available
                 if (news.imageUrl) {
-                    document.getElementById('news-image').src = news.imageUrl;
-                    document.getElementById('news-image').alt = news.title;
+                    const imgEl = document.getElementById('news-image');
+                    imgEl.src = news.imageUrl;
+                    imgEl.alt = news.title;
+                    imgEl.onerror = function() {
+                        // Hide the broken image container gracefully
+                        document.getElementById('news-image-container').classList.add('hidden');
+                    };
                     document.getElementById('news-image-container').classList.remove('hidden');
                 }
 
