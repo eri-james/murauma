@@ -353,6 +353,17 @@ function sanitizeRichHtml(html) {
         if (lowerTag === 'iframe' && attrName === 'src') {
           const isAllowed = ALLOWED_IFRAME_SRC.some(pattern => value.startsWith(pattern));
           if (!isAllowed) continue;
+        } else if (lowerTag === 'img' && attrName === 'src') {
+          // Allow data:image/ URLs in img src (for Quill.js base64 images in guides)
+          // but block other data: schemes and javascript:/vbscript:
+          const trimmedVal = value.trim();
+          if (DANGEROUS_URL_SCHEMES.test(trimmedVal) && !/^data:image\//i.test(trimmedVal)) {
+            continue;
+          }
+          // Also validate data:image/ URLs have a reasonable length (max 2MB inline)
+          if (/^data:image\//i.test(trimmedVal) && trimmedVal.length > 2 * 1024 * 1024) {
+            continue;
+          }
         } else if (DANGEROUS_URL_SCHEMES.test(value.trim())) {
           continue;
         }
@@ -418,7 +429,7 @@ function sanitizeText(text) {
  * Checks and enforces rate limiting using D1.
  * Returns true if the request is allowed, false if rate-limited.
  */
-async function checkRateLimit(db, clientKey) {
+async function checkRateLimit(db, clientKey, maxRequests = RATE_LIMIT_MAX) {
   // Clean up expired entries first
   const cutoff = new Date(Date.now() - RATE_LIMIT_WINDOW_SEC * 1000).toISOString();
   await db.prepare('DELETE FROM rate_limits WHERE window_start < ?').bind(cutoff).run();
@@ -434,7 +445,7 @@ async function checkRateLimit(db, clientKey) {
     const now = new Date();
     const elapsed = (now - windowStart) / 1000;
 
-    if (elapsed < RATE_LIMIT_WINDOW_SEC && existing.request_count >= RATE_LIMIT_MAX) {
+    if (elapsed < RATE_LIMIT_WINDOW_SEC && existing.request_count >= maxRequests) {
       return false; // Rate limit exceeded
     }
 
@@ -798,12 +809,34 @@ async function requireAuth(request, env) {
 /**
  * Requires admin authentication — returns user or error response.
  * Accepts both JWT (with admin role) and X-Admin-Secret header.
+ * Re-verifies admin role from database to prevent stale JWT privileges.
  */
 async function requireAdmin(request, env) {
   const { user } = await getAuthenticatedUser(request, env);
   if (!user || user.role !== 'admin') {
     return { user: null, error: errorResponse('Admin access required.', 403) };
   }
+
+  // Re-verify admin role from database for JWT-based sessions
+  // (X-Admin-Secret user has userId=0 and is always valid while secret is correct)
+  if (user.userId && user.userId !== 0 && env.DB) {
+    try {
+      const dbUser = await env.DB
+        .prepare('SELECT role FROM members WHERE id = ?')
+        .bind(user.userId)
+        .first();
+      if (!dbUser || dbUser.role !== 'admin') {
+        return { user: null, error: errorResponse('Admin access required.', 403) };
+      }
+      // Update the role in case it changed (e.g., admin -> member)
+      user.role = dbUser.role;
+    } catch (err) {
+      console.error('Admin role re-verification failed:', err.message);
+      // Fail closed — if DB check fails, deny access
+      return { user: null, error: errorResponse('Admin access verification failed.', 500) };
+    }
+  }
+
   return { user, error: null };
 }
 

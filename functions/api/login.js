@@ -15,7 +15,12 @@ import {
   verifyPassword,
   createJWT,
   sessionCookieValue,
+  checkRateLimit,
+  getClientKey,
 } from '../_shared/utils.js';
+
+// Login has a more generous rate limit than submissions: 10 attempts per 10 min
+const LOGIN_RATE_LIMIT_MAX = 10;
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -25,6 +30,13 @@ export async function onRequestPost(context) {
     if (!env.JWT_SECRET) {
       console.error('JWT_SECRET not configured.');
       return errorResponse('Server configuration error.', 500);
+    }
+
+    // --- Rate Limiting ---
+    const clientKey = 'login:' + getClientKey(request);
+    const allowed = await checkRateLimit(db, clientKey, LOGIN_RATE_LIMIT_MAX);
+    if (!allowed) {
+      return errorResponse('Too many login attempts. Please try again later.', 429);
     }
 
     const data = await request.json();
