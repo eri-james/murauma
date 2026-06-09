@@ -833,13 +833,13 @@
                 track: document.getElementById('wr-track').value.trim(),
                 deadline: document.getElementById('wr-deadline').value.trim(),
                 description: document.getElementById('wr-description').value.trim(),
-                image_url: document.getElementById('wr-image-url').value.trim() || null,
+                imageUrl: document.getElementById('wr-image-url').value.trim() || null,
                 isActive: document.getElementById('wr-active').checked,
                 status: document.getElementById('wr-published').checked ? 'published' : 'draft',
             };
             try {
                 if (isEdit) {
-                    await api('PUT', '/api/admin/weekly-races', { ...payload, id });
+                    await api('POST', '/api/admin/weekly-races/update', { ...payload, id });
                 } else {
                     await api('POST', '/api/admin/weekly-races', payload);
                 }
@@ -958,14 +958,14 @@
                 slug: document.getElementById('ev-slug').value.trim(),
                 description: document.getElementById('ev-description').value.trim(),
                 content: currentQuill ? currentQuill.root.innerHTML : '',
-                image_url: document.getElementById('ev-image-url').value.trim() || null,
-                start_date: document.getElementById('ev-start-date').value.trim(),
-                end_date: document.getElementById('ev-end-date').value.trim() || null,
+                imageUrl: document.getElementById('ev-image-url').value.trim() || null,
+                startDate: document.getElementById('ev-start-date').value.trim(),
+                endDate: document.getElementById('ev-end-date').value.trim() || null,
                 status: document.getElementById('ev-published').checked ? 'published' : 'draft',
             };
             try {
                 if (isEdit) {
-                    await api('PUT', '/api/admin/events', { ...payload, id });
+                    await api('POST', '/api/admin/events/update', { ...payload, id });
                 } else {
                     await api('POST', '/api/admin/events', payload);
                 }
@@ -977,8 +977,14 @@
 
     async function loadEventForEdit(id) {
         try {
-            const data = await api('GET', '/api/admin/events');
-            const item = data.items?.find(e => e.id === id);
+            // Get slug from admin list API
+            const listData = await api('GET', '/api/admin/events');
+            const listItem = listData.items?.find(e => e.id === id);
+            if (!listItem) { console.error('Event not found'); return; }
+
+            // Fetch full content using public single-event API
+            const fullData = await api('GET', `/api/events?slug=${encodeURIComponent(listItem.slug)}`);
+            const item = fullData.event;
             if (item && currentQuill) {
                 document.getElementById('ev-title').value = item.title || '';
                 document.getElementById('ev-slug').value = item.slug || '';
@@ -1086,12 +1092,12 @@
                 category: document.getElementById('nw-category').value,
                 description: document.getElementById('nw-description').value.trim(),
                 content: currentQuill ? currentQuill.root.innerHTML : '',
-                image_url: document.getElementById('nw-image-url').value.trim() || null,
+                imageUrl: document.getElementById('nw-image-url').value.trim() || null,
                 status: document.getElementById('nw-published').checked ? 'published' : 'draft',
             };
             try {
                 if (isEdit) {
-                    await api('PUT', '/api/admin/news', { ...payload, id });
+                    await api('POST', '/api/admin/news/update', { ...payload, id });
                 } else {
                     await api('POST', '/api/admin/news', payload);
                 }
@@ -1103,8 +1109,14 @@
 
     async function loadNewsForEdit(id) {
         try {
-            const data = await api('GET', '/api/admin/news');
-            const item = data.items?.find(n => n.id === id);
+            // First get slug from admin list API
+            const listData = await api('GET', '/api/admin/news');
+            const listItem = listData.items?.find(n => n.id === id);
+            if (!listItem) { console.error('News item not found'); return; }
+
+            // Fetch full content using public single-news API
+            const fullData = await api('GET', `/api/news?slug=${encodeURIComponent(listItem.slug)}`);
+            const item = fullData.news;
             if (item && currentQuill) {
                 document.getElementById('nw-title').value = item.title || '';
                 document.getElementById('nw-slug').value = item.slug || '';
