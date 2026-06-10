@@ -476,16 +476,19 @@
             <div id="section-members" class="admin-section">
                 <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew" style="background-color:#F59E0B;">Members</h2>
-                    <select id="members-status-filter" class="border-2 border-amber-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-amber-400 focus:border-amber-400">
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <select id="members-status-filter" class="border-2 border-amber-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-amber-400 focus:border-amber-400">
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button onclick="openMemberForm()" class="bg-amber-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-amber-600 text-sm transition-colors">+ Add Member</button>
+                    </div>
                 </div>
                 <div class="admin-card border-2 border-amber-400 overflow-x-auto">
                     <table class="admin-table">
-                        <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-                        <tbody id="members-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
+                        <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+                        <tbody id="members-table-body"><tr><td colspan="7" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -512,11 +515,14 @@
             <div id="section-fan-media" class="admin-section">
                 <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew header-skew-pink">Fan Media</h2>
-                    <select id="fan-media-status-filter" class="border-2 border-pink-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-pink-400 focus:border-pink-400">
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <select id="fan-media-status-filter" class="border-2 border-pink-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-pink-400 focus:border-pink-400">
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button onclick="openFanMediaForm()" class="bg-pink-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-pink-600 text-sm transition-colors">+ Add Media</button>
+                    </div>
                 </div>
                 <div class="admin-card border-2 border-pink-400 overflow-x-auto">
                     <table class="admin-table">
@@ -530,11 +536,14 @@
             <div id="section-guides" class="admin-section">
                 <div class="flex justify-between items-center mb-6 section-header">
                     <h2 class="header-skew header-skew-purple">Guides</h2>
-                    <select id="guides-status-filter" class="border-2 border-purple-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-purple-400 focus:border-purple-400">
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <select id="guides-status-filter" class="border-2 border-purple-400 rounded-lg px-4 py-2.5 text-sm font-bold bg-white focus:ring-purple-400 focus:border-purple-400">
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <button onclick="openGuideForm()" class="bg-purple-500 text-white font-bold px-5 py-2.5 rounded-lg hover:bg-purple-600 text-sm transition-colors">+ Add Guide</button>
+                    </div>
                 </div>
                 <div class="admin-card border-2 border-purple-400 overflow-x-auto">
                     <table class="admin-table">
@@ -876,7 +885,7 @@
             const data = await api('GET', `/api/admin/members?status=${status}`);
             const tbody = document.getElementById('members-table-body');
             if (!data.items || data.items.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-400">No members found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-400">No members found.</td></tr>';
                 return;
             }
             tbody.innerHTML = data.items.map(m => `
@@ -884,12 +893,15 @@
                     <td>${m.id}</td>
                     <td class="font-bold">${DOMPurify.sanitize(m.name)}</td>
                     <td>${DOMPurify.sanitize(m.username || '-')}</td>
+                    <td><span class="badge ${m.role === 'admin' ? 'badge-approved' : 'badge-draft'}">${m.role || 'member'}</span></td>
                     <td><span class="badge badge-${m.status}">${m.status}</span></td>
                     <td>${new Date(m.createdAt).toLocaleDateString()}</td>
                     <td class="space-x-1">
+                        <button onclick="openMemberForm(${m.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         ${m.status === 'pending' ? `<button onclick="approveMember(${m.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button><button onclick="rejectMember(${m.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                         ${m.status === 'rejected' ? `<button onclick="approveMember(${m.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
                         ${m.status === 'approved' ? `<button onclick="rejectMember(${m.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
+                        <button onclick="deleteMember(${m.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -899,13 +911,129 @@
     }
 
     async function approveMember(id) {
-        try { await api('POST', '/api/admin/members/approve', { id }); loadMembers(); loadOverview(); }
+        try { await api('POST', '/api/admin/members/approve', { memberId: id }); loadMembers(); loadOverview(); }
         catch (err) { alert('Error: ' + err.message); }
     }
 
     async function rejectMember(id) {
-        try { await api('POST', '/api/admin/members/reject', { id }); loadMembers(); loadOverview(); }
+        try { await api('POST', '/api/admin/members/reject', { memberId: id }); loadMembers(); loadOverview(); }
         catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function deleteMember(id) {
+        if (!confirm('Delete this member permanently? This will also remove all their writings, guides, fan media, and votes.')) return;
+        try { await api('DELETE', '/api/admin/members', { id }); loadMembers(); loadOverview(); }
+        catch (err) { alert('Error: ' + err.message); }
+    }
+
+    function openMemberForm(id = null) {
+        const isEdit = !!id;
+        document.getElementById('modal-title').textContent = isEdit ? 'Edit Member' : 'Add Member';
+        document.getElementById('modal-content').innerHTML = `
+            <form id="member-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Name *</label>
+                    <input type="text" id="mb-name" required maxlength="50" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Username *</label>
+                    <input type="text" id="mb-username" required maxlength="30" minlength="3" class="mt-1 block w-full">
+                </div>
+                ${!isEdit ? `<div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Password *</label>
+                    <input type="password" id="mb-password" required maxlength="100" minlength="8" class="mt-1 block w-full">
+                    <p class="text-xs text-gray-400 mt-1">Minimum 8 characters</p>
+                </div>` : ''}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Trainer ID</label>
+                    <input type="text" id="mb-trainer-id" maxlength="12" placeholder="12-digit trainer ID" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Favorite Uma</label>
+                    <input type="text" id="mb-favorite-uma" maxlength="50" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Bio</label>
+                    <textarea id="mb-bio" maxlength="500" rows="3" class="mt-1 block w-full"></textarea>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Role</label>
+                        <select id="mb-role" class="mt-1 block w-full">
+                            <option value="member">Member</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Status</label>
+                        <select id="mb-status" class="mt-1 block w-full">
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-600 text-sm">${isEdit ? 'Update' : 'Add Member'}</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('modal').classList.add('modal-open');
+
+        // If editing, load current data
+        if (isEdit) {
+            (async () => {
+                try {
+                    const data = await api('GET', '/api/admin/members?status=approved');
+                    // Try all 3 statuses to find the member
+                    let member = data.items?.find(m => m.id === id);
+                    if (!member) {
+                        const data2 = await api('GET', '/api/admin/members?status=pending');
+                        member = data2.items?.find(m => m.id === id);
+                    }
+                    if (!member) {
+                        const data3 = await api('GET', '/api/admin/members?status=rejected');
+                        member = data3.items?.find(m => m.id === id);
+                    }
+                    if (member) {
+                        document.getElementById('mb-name').value = member.name || '';
+                        document.getElementById('mb-username').value = member.username || '';
+                        document.getElementById('mb-trainer-id').value = member.trainerId || '';
+                        document.getElementById('mb-favorite-uma').value = member.favoriteUma || '';
+                        document.getElementById('mb-bio').value = member.bio || '';
+                        document.getElementById('mb-role').value = member.role || 'member';
+                        document.getElementById('mb-status').value = member.status || 'approved';
+                    }
+                } catch (err) { console.error('Load member for edit:', err); }
+            })();
+        }
+
+        // Form submit
+        document.getElementById('member-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('mb-name').value.trim(),
+                username: document.getElementById('mb-username').value.trim(),
+                trainerId: document.getElementById('mb-trainer-id').value.trim() || '',
+                favoriteUma: document.getElementById('mb-favorite-uma').value.trim(),
+                bio: document.getElementById('mb-bio').value.trim(),
+                role: document.getElementById('mb-role').value,
+                status: document.getElementById('mb-status').value,
+            };
+            try {
+                if (isEdit) {
+                    payload.memberId = id;
+                    await api('POST', '/api/admin/members/update', payload);
+                } else {
+                    payload.password = document.getElementById('mb-password').value;
+                    await api('POST', '/api/admin/members/add', payload);
+                }
+                closeModal();
+                loadMembers();
+                loadOverview();
+            } catch (err) { alert('Error: ' + err.message); }
+        });
     }
 
     // ============================================================
@@ -959,6 +1087,7 @@
                     <td>${DOMPurify.sanitize(f.authorName || '-')}</td>
                     <td><span class="badge badge-${f.status}">${f.status}</span></td>
                     <td class="space-x-1">
+                        <button onclick="openFanMediaForm(${f.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         ${f.status !== 'approved' ? `<button onclick="approveFanMedia(${f.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
                         ${f.status !== 'rejected' ? `<button onclick="rejectFanMedia(${f.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                         <button onclick="deleteFanMedia(${f.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
@@ -970,7 +1099,92 @@
 
     async function approveFanMedia(id) { try { await api('POST', '/api/admin/fan-media/approve', { id }); loadFanMedia(); loadOverview(); } catch (err) { alert('Error: ' + err.message); } }
     async function rejectFanMedia(id) { try { await api('POST', '/api/admin/fan-media/reject', { id }); loadFanMedia(); loadOverview(); } catch (err) { alert('Error: ' + err.message); } }
-    async function deleteFanMedia(id) { if (!confirm('Delete this fan media permanently?')) return; try { await api('DELETE', '/api/admin/fan-media', { id }); loadFanMedia(); } catch (err) { alert('Error: ' + err.message); } }
+    async function deleteFanMedia(id) { if (!confirm('Delete this fan media permanently?')) return; try { await api('DELETE', '/api/admin/fan-media', { id }); loadFanMedia(); loadOverview(); } catch (err) { alert('Error: ' + err.message); } }
+
+    function openFanMediaForm(id = null) {
+        const isEdit = !!id;
+        document.getElementById('modal-title').textContent = isEdit ? 'Edit Fan Media' : 'Add Fan Media';
+        document.getElementById('modal-content').innerHTML = `
+            <form id="fan-media-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Type *</label>
+                    <select id="fm-type" required class="mt-1 block w-full">
+                        <option value="art">Art</option>
+                        <option value="video">Video</option>
+                        <option value="music">Music</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Title *</label>
+                    <input type="text" id="fm-title" required maxlength="200" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">URL *</label>
+                    <input type="url" id="fm-url" required maxlength="2000" placeholder="https://..." class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Author Name *</label>
+                    <input type="text" id="fm-author" required maxlength="100" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
+                    <textarea id="fm-description" maxlength="500" rows="3" class="mt-1 block w-full"></textarea>
+                </div>
+                ${isEdit ? `<div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Status</label>
+                    <select id="fm-status" class="mt-1 block w-full">
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>` : ''}
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-pink-500 text-white font-bold rounded-lg hover:bg-pink-600 text-sm">${isEdit ? 'Update' : 'Add Media'}</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('modal').classList.add('modal-open');
+
+        // If editing, load current data from the table
+        if (isEdit) {
+            // Find the item from the currently loaded list
+            const rows = document.querySelectorAll('#fan-media-table-body tr');
+            rows.forEach(row => {
+                const editBtn = row.querySelector(`button[onclick="openFanMediaForm(${id})"]`);
+                if (editBtn) {
+                    const cells = row.querySelectorAll('td');
+                    document.getElementById('fm-type').value = cells[1].textContent.trim().toLowerCase();
+                    document.getElementById('fm-title').value = cells[2].textContent.trim();
+                    document.getElementById('fm-author').value = cells[3].textContent.trim();
+                }
+            });
+        }
+
+        document.getElementById('fan-media-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                type: document.getElementById('fm-type').value,
+                title: document.getElementById('fm-title').value.trim(),
+                url: document.getElementById('fm-url').value.trim(),
+                authorName: document.getElementById('fm-author').value.trim(),
+                description: document.getElementById('fm-description').value.trim(),
+            };
+            try {
+                if (isEdit) {
+                    payload.id = id;
+                    payload.status = document.getElementById('fm-status')?.value || 'approved';
+                    await api('POST', '/api/admin/fan-media/update', payload);
+                } else {
+                    payload.status = 'approved';
+                    await api('POST', '/api/admin/fan-media/add', payload);
+                }
+                closeModal();
+                loadFanMedia();
+                loadOverview();
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+    }
 
     // ============================================================
     // GUIDES
@@ -992,6 +1206,7 @@
                     <td>-</td>
                     <td><span class="badge badge-${g.status}">${g.status}</span></td>
                     <td class="space-x-1">
+                        <button onclick="openGuideForm(${g.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         ${g.status !== 'approved' ? `<button onclick="approveGuide(${g.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
                         ${g.status !== 'rejected' ? `<button onclick="rejectGuide(${g.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Reject</button>` : ''}
                         <button onclick="deleteGuide(${g.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
@@ -1003,7 +1218,99 @@
 
     async function approveGuide(id) { try { await api('POST', '/api/admin/guides/approve', { id }); loadGuides(); loadOverview(); } catch (err) { alert('Error: ' + err.message); } }
     async function rejectGuide(id) { try { await api('POST', '/api/admin/guides/reject', { id }); loadGuides(); loadOverview(); } catch (err) { alert('Error: ' + err.message); } }
-    async function deleteGuide(id) { if (!confirm('Delete this guide permanently?')) return; try { await api('DELETE', '/api/admin/guides', { id }); loadGuides(); } catch (err) { alert('Error: ' + err.message); } }
+    async function deleteGuide(id) { if (!confirm('Delete this guide permanently?')) return; try { await api('DELETE', '/api/admin/guides', { id }); loadGuides(); loadOverview(); } catch (err) { alert('Error: ' + err.message); } }
+
+    function openGuideForm(id = null) {
+        const isEdit = !!id;
+        document.getElementById('modal-title').textContent = isEdit ? 'Edit Guide' : 'Add Guide';
+        document.getElementById('modal-content').innerHTML = `
+            <form id="guide-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Title *</label>
+                    <input type="text" id="gd-title" required maxlength="200" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Author Name *</label>
+                    <input type="text" id="gd-author" required maxlength="100" class="mt-1 block w-full">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Content (Rich Text) *</label>
+                    <div id="gd-quill" class="modal-quill-container"></div>
+                </div>
+                ${isEdit ? `<div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Status</label>
+                    <select id="gd-status" class="mt-1 block w-full">
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>` : ''}
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 text-sm">${isEdit ? 'Update' : 'Add Guide'}</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('modal').classList.add('modal-open');
+
+        // Initialize Quill editor
+        currentQuill = new Quill('#gd-quill', {
+            theme: 'snow',
+            placeholder: 'Write guide content here...',
+            modules: getQuillModules(),
+        });
+
+        // If editing, load current data
+        if (isEdit) {
+            (async () => {
+                try {
+                    const data = await api('GET', '/api/admin/guides?status=approved');
+                    let guide = data.items?.find(g => g.id === id);
+                    if (!guide) {
+                        const data2 = await api('GET', '/api/admin/guides?status=pending');
+                        guide = data2.items?.find(g => g.id === id);
+                    }
+                    if (!guide) {
+                        const data3 = await api('GET', '/api/admin/guides?status=rejected');
+                        guide = data3.items?.find(g => g.id === id);
+                    }
+                    if (guide) {
+                        document.getElementById('gd-title').value = guide.title || '';
+                        document.getElementById('gd-author').value = guide.authorName || '';
+                        document.getElementById('gd-status').value = guide.status || 'approved';
+                        // Load full content for editing
+                        const fullData = await api('GET', `/api/guides?id=${id}`);
+                        if (fullData.guide?.content) {
+                            currentQuill.root.innerHTML = fullData.guide.content;
+                        }
+                    }
+                } catch (err) { console.error('Load guide for edit:', err); }
+            })();
+        }
+
+        document.getElementById('guide-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const content = currentQuill.root.innerHTML;
+            const payload = {
+                title: document.getElementById('gd-title').value.trim(),
+                authorName: document.getElementById('gd-author').value.trim(),
+                content: content,
+            };
+            try {
+                if (isEdit) {
+                    payload.id = id;
+                    payload.status = document.getElementById('gd-status')?.value || 'approved';
+                    await api('POST', '/api/admin/guides/update', payload);
+                } else {
+                    payload.status = 'approved';
+                    await api('POST', '/api/admin/guides/add', payload);
+                }
+                closeModal();
+                loadGuides();
+                loadOverview();
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+    }
 
     // ============================================================
     // WEEKLY RACES CRUD
