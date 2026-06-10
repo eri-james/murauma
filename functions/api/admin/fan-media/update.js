@@ -14,6 +14,7 @@ import {
   sanitizeText,
   requireAdmin,
   adminPreflightResponse,
+  validateUrlScheme,
 } from '../../../_shared/utils.js';
 
 export async function onRequestPost(context) {
@@ -69,12 +70,14 @@ export async function onRequestPost(context) {
       values.push(result.value ? sanitizeText(result.value) : null);
     }
 
-    // URL (optional, 1-2000 chars)
+    // URL (optional, 1-2000 chars, must be https:// or http://)
     if (data.url !== undefined) {
       const result = validateField(data.url, 2000, 'URL');
       if (!result.valid) return errorResponse(result.error);
+      const safeUrl = validateUrlScheme(result.value);
+      if (!safeUrl) return errorResponse('URL must start with https:// or http://');
       updates.push('url = ?');
-      values.push(result.value);
+      values.push(safeUrl);
     }
 
     // Status (optional, 'pending'/'approved'/'rejected')

@@ -17,6 +17,7 @@ import {
   sessionCookieValue,
   checkRateLimit,
   getClientKey,
+  SITE_ORIGIN,
 } from '../_shared/utils.js';
 
 // Login has a more generous rate limit than submissions: 10 attempts per 10 min
@@ -112,7 +113,7 @@ export async function onRequestPost(context) {
 export function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': SITE_ORIGIN,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

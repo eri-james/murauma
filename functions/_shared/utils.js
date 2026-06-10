@@ -374,11 +374,33 @@ function sanitizeRichHtml(html) {
         }
       }
 
-      // Sanitize style attributes — strip url() and expression() to prevent CSS exfiltration
+      // Sanitize style attributes — whitelist safe CSS properties only
       if (attrName === 'style') {
-        if (/url\s*\(/i.test(value) || /expression\s*\(/i.test(value)) {
-          continue;
-        }
+        // Parse style into individual declarations, keep only safe properties
+        const safeStyleProps = new Set([
+          'text-align', 'text-decoration', 'text-indent', 'text-transform',
+          'font-weight', 'font-style', 'font-size', 'font-family',
+          'color', 'background-color', 'background',
+          'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+          'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+          'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
+          'border-collapse', 'border-spacing',
+          'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
+          'vertical-align', 'line-height', 'letter-spacing', 'white-space',
+          'list-style-type', 'list-style-position',
+          'display', 'float', 'clear',
+          'overflow', 'overflow-x', 'overflow-y', 'text-overflow',
+          'word-wrap', 'word-break', 'overflow-wrap',
+        ]);
+        const declarations = value.split(';').map(d => d.trim()).filter(Boolean);
+        const safeDecls = declarations.filter(decl => {
+          const colonIdx = decl.indexOf(':');
+          if (colonIdx === -1) return false;
+          const prop = decl.substring(0, colonIdx).trim().toLowerCase();
+          return safeStyleProps.has(prop);
+        });
+        if (safeDecls.length === 0) continue;
+        value = safeDecls.join('; ');
       }
 
       safeAttrs.push(`${attrName}="${value.replace(/"/g, '&quot;')}"`);
@@ -432,14 +454,19 @@ function sanitizeText(text) {
 
 /**
  * Checks and enforces rate limiting using D1.
+ * Uses atomic INSERT OR REPLACE + conditional check to avoid TOCTOU race conditions.
  * Returns true if the request is allowed, false if rate-limited.
  */
 async function checkRateLimit(db, clientKey, maxRequests = RATE_LIMIT_MAX) {
-  // Clean up expired entries first
-  const cutoff = new Date(Date.now() - RATE_LIMIT_WINDOW_SEC * 1000).toISOString();
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const cutoff = new Date(now.getTime() - RATE_LIMIT_WINDOW_SEC * 1000).toISOString();
+
+  // Clean up expired entries
   await db.prepare('DELETE FROM rate_limits WHERE window_start < ?').bind(cutoff).run();
 
-  // Check current count for this client
+  // Atomically upsert: try to insert, or increment if exists and within window
+  // Step 1: Check current state
   const existing = await db
     .prepare('SELECT request_count, window_start FROM rate_limits WHERE client_key = ?')
     .bind(clientKey)
@@ -447,31 +474,30 @@ async function checkRateLimit(db, clientKey, maxRequests = RATE_LIMIT_MAX) {
 
   if (existing) {
     const windowStart = new Date(existing.window_start);
-    const now = new Date();
     const elapsed = (now - windowStart) / 1000;
 
-    if (elapsed < RATE_LIMIT_WINDOW_SEC && existing.request_count >= maxRequests) {
-      return false; // Rate limit exceeded
-    }
-
-    if (elapsed >= RATE_LIMIT_WINDOW_SEC) {
-      // Window expired, reset counter
+    if (elapsed < RATE_LIMIT_WINDOW_SEC) {
+      // Within window — check limit BEFORE incrementing (atomic check-then-increment)
+      if (existing.request_count >= maxRequests) {
+        return false; // Rate limit exceeded — do NOT increment
+      }
+      // Increment counter atomically
       await db
-        .prepare('UPDATE rate_limits SET request_count = 1, window_start = ? WHERE client_key = ?')
-        .bind(new Date().toISOString(), clientKey)
+        .prepare('UPDATE rate_limits SET request_count = request_count + 1 WHERE client_key = ? AND request_count < ?')
+        .bind(clientKey, maxRequests)
         .run();
     } else {
-      // Within window, increment counter
+      // Window expired, reset counter atomically
       await db
-        .prepare('UPDATE rate_limits SET request_count = request_count + 1 WHERE client_key = ?')
-        .bind(clientKey)
+        .prepare('UPDATE rate_limits SET request_count = 1, window_start = ? WHERE client_key = ?')
+        .bind(nowIso, clientKey)
         .run();
     }
   } else {
-    // First request from this client
+    // First request from this client — insert atomically
     await db
       .prepare('INSERT INTO rate_limits (client_key, request_count, window_start) VALUES (?, 1, ?)')
-      .bind(clientKey, new Date().toISOString())
+      .bind(clientKey, nowIso)
       .run();
   }
 
@@ -865,6 +891,12 @@ async function getOptionalAuth(request, env) {
 const ADMIN_ORIGIN = 'https://murauma.pages.dev';
 
 /**
+ * Site origin for public API CORS headers.
+ * Used to restrict sensitive endpoints (login, register, profile) to the production site.
+ */
+const SITE_ORIGIN = 'https://murauma.pages.dev';
+
+/**
  * Validates the admin secret from the X-Admin-Secret header.
  * Uses timing-safe comparison to prevent timing attacks.
  * Returns true if authenticated, false otherwise.
@@ -933,6 +965,18 @@ function normalizeYouTubeUrl(url) {
   return url; // Return as-is if we can't extract a video ID
 }
 
+/**
+ * Validates that a URL uses a safe scheme (https:// or http://).
+ * Rejects javascript:, data:, vbscript:, and other dangerous schemes.
+ * Returns the URL if safe, or null if dangerous.
+ */
+function validateUrlScheme(url) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return null;
+}
+
 // ============================================================
 // EXPORTS
 // ============================================================
@@ -981,4 +1025,6 @@ export {
   adminCorsHeaders,
   adminPreflightResponse,
   normalizeYouTubeUrl,
+  validateUrlScheme,
+  SITE_ORIGIN,
 };

@@ -116,7 +116,7 @@
             <section id="hero-banner-section" class="mb-8">
                 <a href="https://murauma.github.io/freedomcup/" id="hero-banner-link" class="block group relative rounded-lg shadow-lg overflow-hidden" style="padding-top: 41.66%;">
                     <div id="hero-banner-media">
-                        <iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="https://www.youtube.com/embed/Y8AdCI95eCQ?autoplay=1&mute=1&loop=1&playlist=Y8AdCI95eCQ&controls=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="MURA Background Video"></iframe>
+                        <iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="https://www.youtube.com/embed/Y8AdCI95eCQ?autoplay=1&mute=1&loop=1&playlist=Y8AdCI95eCQ&controls=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen tabindex="-1" title="MURA Background Video"></iframe>
                     </div>
                     <div class="absolute top-0 left-0 right-0 bottom-0 bg-blue-700 bg-opacity-40 flex items-end group-hover:bg-opacity-50 transition-all duration-300">
                          <div class="p-4 md:p-8 text-white w-full">
@@ -686,15 +686,24 @@
                 }
 
                 const fetchAndRenderStreams = () => {
-                    fetch(`${googleSheetUrl}&_=${new Date().getTime()}`, { cache: "no-cache" })
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                    fetch(`${googleSheetUrl}&_=${new Date().getTime()}`, { cache: "no-cache", signal: controller.signal })
                         .then(response => {
+                            clearTimeout(timeout);
                             if (!response.ok) {
                                 throw new Error('Network response was not ok');
                             }
                             return response.text();
                         })
                         .then(csvText => {
-                            const allStreams = parseCSV(csvText).filter(stream => stream.stream_url && stream.status && stream.status.trim().toLowerCase() !== 'offline');
+                            let allStreams;
+                            try {
+                                allStreams = parseCSV(csvText).filter(stream => stream.stream_url && stream.status && stream.status.trim().toLowerCase() !== 'offline');
+                            } catch (parseErr) {
+                                console.error('Error parsing stream CSV:', parseErr);
+                                allStreams = [];
+                            }
                             
                             // Sort streams: live first, then scheduled
                             allStreams.sort((a, b) => {
@@ -784,7 +793,7 @@
                         })
                         .catch(error => {
                             console.error('Error fetching or parsing stream data:', error);
-                            streamsGrid.innerHTML = `<p class="text-red-500 col-span-2">Could not load stream information. Please try again later.</p>`;
+                            streamsGrid.innerHTML = `<p class="text-gray-500 col-span-2">No streams available right now. Check back later!</p>`;
                         });
                 };
                 
@@ -977,9 +986,11 @@
                             videoId = embedMatch?.[1] || shortMatch?.[1] || watchMatch?.[1] || null;
 
                             if (videoId) {
+                                // Reconstruct URL entirely from validated video ID — never use raw input
                                 embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
+                                mediaEl.innerHTML = `<iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen tabindex="-1" title="MURA Background Video"></iframe>`;
                             }
-                            mediaEl.innerHTML = `<iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="MURA Background Video"></iframe>`;
+                            // If no valid video ID found, leave static fallback content intact
                         } else if (b.mediaType === 'image' && b.mediaUrl) {
                             mediaEl.innerHTML = `<img class="absolute w-full h-full object-cover" style="top:0;left:0;" src="${DOMPurify.sanitize(b.mediaUrl)}" alt="${DOMPurify.sanitize(b.title)}" loading="eager">`;
                         }

@@ -630,11 +630,18 @@
 
     <script>
     // Decode HTML entities from server-side sanitizeText() for existing data
+    // Safe: textarea.value is plain text, innerHTML is used only for browser decoding
     function decodeHTMLEntities(text) {
         if (!text || typeof text !== 'string') return text;
         const el = document.createElement('textarea');
         el.innerHTML = text;
         return el.value;
+    }
+
+    // Escape a string for safe insertion into HTML (prevents XSS in innerHTML)
+    function esc(str) {
+        if (str == null) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
     }
 
     // ============================================================
@@ -912,10 +919,10 @@
             tbody.innerHTML = data.items.map(m => `
                 <tr>
                     <td>${m.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(m.name)}</td>
-                    <td>${DOMPurify.sanitize(m.username || '-')}</td>
-                    <td><span class="badge ${m.role === 'admin' ? 'badge-approved' : 'badge-draft'}">${m.role || 'member'}</span></td>
-                    <td><span class="badge badge-${m.status}">${m.status}</span></td>
+                    <td class="font-bold">${esc(m.name)}</td>
+                    <td>${esc(m.username || '-')}</td>
+                    <td><span class="badge ${m.role === 'admin' ? 'badge-approved' : 'badge-draft'}">${esc(m.role || 'member')}</span></td>
+                    <td><span class="badge badge-${esc(m.status)}">${esc(m.status)}</span></td>
                     <td>${new Date(m.createdAt).toLocaleDateString()}</td>
                     <td class="space-x-1">
                         <button onclick="openMemberForm(${m.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
@@ -1072,9 +1079,9 @@
             tbody.innerHTML = data.items.map(w => `
                 <tr>
                     <td>${w.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(w.title)}</td>
-                    <td>${DOMPurify.sanitize(w.authorName || '-')}</td>
-                    <td><span class="badge badge-${w.status}">${w.status}</span></td>
+                    <td class="font-bold">${esc(w.title)}</td>
+                    <td>${esc(w.authorName || '-')}</td>
+                    <td><span class="badge badge-${esc(w.status)}">${esc(w.status)}</span></td>
                     <td>${new Date(w.createdAt).toLocaleDateString()}</td>
                     <td class="space-x-1">
                         ${w.status !== 'approved' ? `<button onclick="approveWriting(${w.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
@@ -1103,10 +1110,10 @@
             tbody.innerHTML = data.items.map(f => `
                 <tr>
                     <td>${f.id}</td>
-                    <td><span class="badge badge-${f.type === 'art' ? 'community' : f.type === 'video' ? 'event' : 'update'}">${f.type}</span></td>
-                    <td class="font-bold">${DOMPurify.sanitize(f.title)}</td>
-                    <td>${DOMPurify.sanitize(f.authorName || '-')}</td>
-                    <td><span class="badge badge-${f.status}">${f.status}</span></td>
+                    <td><span class="badge badge-${f.type === 'art' ? 'community' : f.type === 'video' ? 'event' : 'update'}">${esc(f.type)}</span></td>
+                    <td class="font-bold">${esc(f.title)}</td>
+                    <td>${esc(f.authorName || '-')}</td>
+                    <td><span class="badge badge-${esc(f.status)}">${esc(f.status)}</span></td>
                     <td class="space-x-1">
                         <button onclick="openFanMediaForm(${f.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         ${f.status !== 'approved' ? `<button onclick="approveFanMedia(${f.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
@@ -1222,10 +1229,10 @@
             tbody.innerHTML = data.items.map(g => `
                 <tr>
                     <td>${g.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(g.title)}</td>
-                    <td>${DOMPurify.sanitize(g.authorName || '-')}</td>
+                    <td class="font-bold">${esc(g.title)}</td>
+                    <td>${esc(g.authorName || '-')}</td>
                     <td>-</td>
-                    <td><span class="badge badge-${g.status}">${g.status}</span></td>
+                    <td><span class="badge badge-${esc(g.status)}">${esc(g.status)}</span></td>
                     <td class="space-x-1">
                         <button onclick="openGuideForm(${g.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         ${g.status !== 'approved' ? `<button onclick="approveGuide(${g.id})" class="btn-sm bg-green-500 text-white hover:bg-green-600">Approve</button>` : ''}
@@ -1302,7 +1309,7 @@
                         // Load full content for editing
                         const fullData = await api('GET', `/api/guides?id=${id}`);
                         if (fullData.guide?.content) {
-                            currentQuill.root.innerHTML = fullData.guide.content;
+                            currentQuill.root.innerHTML = DOMPurify.sanitize(fullData.guide.content);
                         }
                     }
                 } catch (err) { console.error('Load guide for edit:', err); }
@@ -1347,12 +1354,12 @@
             tbody.innerHTML = data.items.map(r => `
                 <tr>
                     <td>${r.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(r.title)}</td>
-                    <td class="text-xs text-gray-500">${DOMPurify.sanitize(r.slug || '-')}</td>
-                    <td>${DOMPurify.sanitize(r.track)}</td>
-                    <td>${DOMPurify.sanitize(r.deadline)}</td>
+                    <td class="font-bold">${esc(r.title)}</td>
+                    <td class="text-xs text-gray-500">${esc(r.slug || '-')}</td>
+                    <td>${esc(r.track)}</td>
+                    <td>${esc(r.deadline)}</td>
                     <td>${r.isActive ? '<span class="text-green-600 font-extrabold">Yes</span>' : '<span class="text-gray-400">No</span>'}</td>
-                    <td><span class="badge badge-${r.status}">${r.status}</span></td>
+                    <td><span class="badge badge-${esc(r.status)}">${esc(r.status)}</span></td>
                     <td class="space-x-1">
                         <button onclick="openWeeklyRaceForm(${r.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         <button onclick="deleteWeeklyRace(${r.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
@@ -1482,7 +1489,7 @@
                 document.getElementById('wr-image-url').value = item.imageUrl || '';
                 document.getElementById('wr-active').checked = item.isActive !== false;
                 document.getElementById('wr-published').checked = item.status === 'published';
-                currentQuill.root.innerHTML = item.content || '';
+                currentQuill.root.innerHTML = DOMPurify.sanitize(item.content || '');
             }
         } catch (err) { console.error('Load race for edit error:', err); }
     }
@@ -1507,10 +1514,10 @@
             tbody.innerHTML = data.items.map(e => `
                 <tr>
                     <td>${e.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(e.title)}</td>
-                    <td class="text-gray-500 text-xs">${DOMPurify.sanitize(e.slug)}</td>
-                    <td>${DOMPurify.sanitize(e.startDate || '-')}</td>
-                    <td><span class="badge badge-${e.status}">${e.status}</span></td>
+                    <td class="font-bold">${esc(e.title)}</td>
+                    <td class="text-gray-500 text-xs">${esc(e.slug)}</td>
+                    <td>${esc(e.startDate || '-')}</td>
+                    <td><span class="badge badge-${esc(e.status)}">${esc(e.status)}</span></td>
                     <td class="space-x-1">
                         <button onclick="openEventForm(${e.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         <button onclick="deleteEvent(${e.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
@@ -1619,7 +1626,7 @@
                 document.getElementById('ev-start-date').value = item.startDate || '';
                 document.getElementById('ev-end-date').value = item.endDate || '';
                 document.getElementById('ev-published').checked = item.status === 'published';
-                currentQuill.root.innerHTML = item.content || '';
+                currentQuill.root.innerHTML = DOMPurify.sanitize(item.content || '');
             }
         } catch (err) { console.error('Load event for edit error:', err); }
     }
@@ -1644,10 +1651,10 @@
             tbody.innerHTML = data.items.map(n => `
                 <tr>
                     <td>${n.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(n.title)}</td>
-                    <td><span class="badge badge-${n.category}">${n.category}</span></td>
-                    <td class="text-gray-500 text-xs">${DOMPurify.sanitize(n.slug)}</td>
-                    <td><span class="badge badge-${n.status}">${n.status}</span></td>
+                    <td class="font-bold">${esc(n.title)}</td>
+                    <td><span class="badge badge-${esc(n.category)}">${esc(n.category)}</span></td>
+                    <td class="text-gray-500 text-xs">${esc(n.slug)}</td>
+                    <td><span class="badge badge-${esc(n.status)}">${esc(n.status)}</span></td>
                     <td class="space-x-1">
                         <button onclick="openNewsForm(${n.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
                         <button onclick="deleteNews(${n.id})" class="btn-sm bg-gray-600 text-white hover:bg-gray-700">Delete</button>
@@ -1754,7 +1761,7 @@
                 document.getElementById('nw-description').value = decodeHTMLEntities(item.description) || '';
                 document.getElementById('nw-image-url').value = item.imageUrl || '';
                 document.getElementById('nw-published').checked = item.status === 'published';
-                currentQuill.root.innerHTML = item.content || '';
+                currentQuill.root.innerHTML = DOMPurify.sanitize(item.content || '');
             }
         } catch (err) { console.error('Load news for edit error:', err); }
     }
@@ -1779,9 +1786,9 @@
             tbody.innerHTML = data.items.map(b => `
                 <tr>
                     <td>${b.id}</td>
-                    <td class="font-bold">${DOMPurify.sanitize(b.title)}</td>
-                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : 'badge-community'}">${b.mediaType}</span></td>
-                    <td class="text-gray-500 text-xs" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${DOMPurify.sanitize(b.linkUrl || '—')}</td>
+                    <td class="font-bold">${esc(b.title)}</td>
+                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : 'badge-community'}">${esc(b.mediaType)}</span></td>
+                    <td class="text-gray-500 text-xs" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(b.linkUrl || '—')}</td>
                     <td><span class="badge ${b.isActive ? 'badge-published' : 'badge-draft'}">${b.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td class="space-x-1">
                         <button onclick="openBannerForm(${b.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>

@@ -8,6 +8,7 @@
 import {
   errorResponse,
   requireAuth,
+  SITE_ORIGIN,
 } from '../_shared/utils.js';
 
 export async function onRequestGet(context) {
@@ -52,7 +53,7 @@ export async function onRequestGet(context) {
       {
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': SITE_ORIGIN,
         },
       }
     );
@@ -69,7 +70,7 @@ export async function onRequestGet(context) {
 export function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': SITE_ORIGIN,
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

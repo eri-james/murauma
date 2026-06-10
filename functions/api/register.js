@@ -29,6 +29,7 @@ import {
   MAX_IMAGE_SIZE_BYTES,
   sessionCookieValue,
   createJWT,
+  SITE_ORIGIN,
 } from '../_shared/utils.js';
 
 // Maximum JSON body size: 10MB (profile pictures up to 5MB + overhead)
@@ -249,7 +250,7 @@ export async function onRequestPost(context) {
 export function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': SITE_ORIGIN,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

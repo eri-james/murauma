@@ -24,6 +24,7 @@ import {
   verifyPassword,
   ALLOWED_MIME_TYPES,
   MAX_IMAGE_SIZE_BYTES,
+  SITE_ORIGIN,
 } from '../../_shared/utils.js';
 
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB for profile picture updates
@@ -185,7 +186,7 @@ export async function onRequestPut(context) {
 export function onRequestOptions() {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': SITE_ORIGIN,
       'Access-Control-Allow-Methods': 'PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },
