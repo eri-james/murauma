@@ -447,91 +447,216 @@
                 });
             });
 
-            // --- Infinite Carousel Logic ---
+            // --- Dynamic Carousel Logic ---
+            // Auto-populates with thumbnails from 2 most recent News, Races, Guides, Events.
             const scroller = document.getElementById('thumbnail-scroller');
             if (scroller) {
-                const images = [
-                    { src: 'https://images.microcms-assets.io/assets/973fc097984b400db8729642ddff5938/dcb082b48a6e438fb0b0129d3063083a/slider_designyourisland.jpg?fm=webp', alt: 'Design Your Island Event' },
-                    { src: 'https://i3.ytimg.com/vi/Th9gDQ_I748/maxresdefault.jpg', alt: 'Uma Musume Special' },
-                    { src: 'https://i.ibb.co/rKjpKm0L/thumb-fivestats.jpg', alt: 'Five Stats Guide by Ewidaria' },
-                    { src: 'https://images.microcms-assets.io/assets/973fc097984b400db8729642ddff5938/6f21c61171564d1f9b446d323b8fd305/slider_star-blossom_comics-4.jpg?fm=webp', alt: 'Star Blossom Comics' },
-                    { src: 'https://i.ibb.co/Wp6nSsKb/a-guide-by-ricky.webp', alt: 'A Casual Guide to Umamusume by Ricky' },
-                    { src: 'https://images-ext-1.discordapp.net/external/tfZT4VvvhF81us-2cxUu_szWyMCs8RX6OWpgozSgWbk/https/pbs.twimg.com/media/GudWyYybIAAwi8h.jpg?format=webp', alt: 'Uma Musume Event' },
-                    { src: 'https://i.ytimg.com/vi/Dds2E0KgpVs/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLA5Hf-myeXXcm1Dc-tm63B1yRZiXw', alt: 'Uma Musume PV' },
-                    { src: 'https://i.ibb.co/bMrv4q0y/Regu-Rekomiya-Exploring-Honse-Umamusume.jpg', alt: 'Regu Rekomiya - Exploring Honse Umamusume' }
-                ];
-
                 let isTransitioning = false;
                 let autoScrollInterval;
+                let carouselInitialized = false;
 
-                const createImageElement = (image) => {
+                const FALLBACK_IMG = 'https://placehold.co/400x225/3B82F6/ffffff?text=MURA';
+                const CATEGORY_COLORS = {
+                    news: '#EC4899', races: '#10B981', guides: '#8B5CF6', events: '#EF4444'
+                };
+                const CATEGORY_LABELS = {
+                    news: 'News', races: 'Race', guides: 'Guide', events: 'Event'
+                };
+
+                const createSlideElement = (item) => {
                     const link = document.createElement('a');
-                    link.href = '#';
-                    link.className = 'flex-shrink-0 w-1/2 md:w-1/4 transition-transform duration-300';
+                    link.href = item.link || '#';
+                    link.className = 'flex-shrink-0 w-1/2 md:w-1/4 transition-transform duration-300 relative group';
                     const img = document.createElement('img');
-                    img.loading = 'lazy'; // Use native lazy loading
-                    img.src = image.src;
-                    img.alt = image.alt;
+                    img.loading = 'lazy';
+                    img.src = item.src;
+                    img.alt = item.alt;
                     img.className = 'w-full h-auto rounded-md shadow-sm hover:scale-105';
-                    img.onerror = () => { img.onerror = null; img.src = 'https://placehold.co/400x225/cccccc/ffffff?text=Image+Error'; };
+                    img.onerror = () => { img.onerror = null; img.src = FALLBACK_IMG; };
                     link.appendChild(img);
+                    // Category badge overlay
+                    if (item.category) {
+                        const badge = document.createElement('span');
+                        badge.className = 'absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-bold text-white';
+                        badge.style.backgroundColor = CATEGORY_COLORS[item.category] || '#3B82F6';
+                        badge.textContent = CATEGORY_LABELS[item.category] || item.category;
+                        link.appendChild(badge);
+                    }
                     return link;
                 };
 
-                images.forEach(image => scroller.appendChild(createImageElement(image)));
-                const itemsToCloneAtEnd = Array.from(scroller.children).slice(0, 4);
-                itemsToCloneAtEnd.forEach(item => scroller.appendChild(item.cloneNode(true)));
-                const itemsToCloneAtStart = Array.from(scroller.children).slice(images.length - 4, images.length);
-                itemsToCloneAtStart.reverse().forEach(item => scroller.prepend(item.cloneNode(true)));
-                
-                const getScrollAmount = () => scroller.children[0].offsetWidth + 16;
-                scroller.style.transition = 'none';
-                scroller.getBoundingClientRect(); 
-                scroller.style.transition = 'transform 0.5s ease-in-out';
+                // Fetch thumbnails from 4 API endpoints, pick 2 most recent from each
+                async function loadCarouselData() {
+                    const slides = [];
+                    try {
+                        const [newsData, racesData, guidesData, eventsData] = await Promise.allSettled([
+                            fetch('/api/news').then(r => r.json()),
+                            fetch('/api/weekly-races').then(r => r.json()),
+                            fetch('/api/guides').then(r => r.json()),
+                            fetch('/api/events').then(r => r.json()),
+                        ]);
 
-                const moveRight = () => {
-                    if (isTransitioning) return;
-                    isTransitioning = true;
-                    scroller.style.transform = `translateX(-${getScrollAmount()}px)`;
-                    setTimeout(() => {
-                        scroller.appendChild(scroller.firstElementChild);
-                        scroller.style.transition = 'none';
-                        scroller.style.transform = 'translateX(0)';
-                        scroller.getBoundingClientRect(); 
-                        scroller.style.transition = 'transform 0.5s ease-in-out';
-                        isTransitioning = false;
-                    }, 500);
-                };
+                        // News (2 most recent)
+                        if (newsData.status === 'fulfilled' && newsData.value.result === 'success' && newsData.value.news) {
+                            newsData.value.news.slice(0, 2).forEach(n => {
+                                slides.push({
+                                    src: n.imageUrl || FALLBACK_IMG,
+                                    alt: n.title,
+                                    link: n.slug ? `./news-detail.html?slug=${encodeURIComponent(n.slug)}` : '#',
+                                    category: 'news'
+                                });
+                            });
+                        }
 
-                const moveLeft = () => {
-                    if (isTransitioning) return;
-                    isTransitioning = true;
-                    scroller.style.transition = 'none';
-                    scroller.prepend(scroller.lastElementChild);
-                    scroller.style.transform = `translateX(${getScrollAmount()}px)`;
-                    scroller.getBoundingClientRect(); 
-                    scroller.style.transition = 'transform 0.5s ease-in-out';
-                    scroller.style.transform = 'translateX(0)';
-                    setTimeout(() => { isTransitioning = false; }, 500);
-                };
+                        // Weekly Races (2 most recent)
+                        if (racesData.status === 'fulfilled' && racesData.value.result === 'success' && racesData.value.races) {
+                            racesData.value.races.slice(0, 2).forEach(r => {
+                                slides.push({
+                                    src: r.imageUrl || FALLBACK_IMG,
+                                    alt: r.title,
+                                    link: r.slug ? `./weekly-race.html?slug=${encodeURIComponent(r.slug)}` : '#',
+                                    category: 'races'
+                                });
+                            });
+                        }
 
-                const startAutoScroll = () => {
-                    if (autoScrollInterval) clearInterval(autoScrollInterval);
-                    autoScrollInterval = setInterval(moveRight, 3000);
-                };
-                const stopAutoScroll = () => clearInterval(autoScrollInterval);
+                        // Guides (2 most recent — no imageUrl in API, use fallback)
+                        if (guidesData.status === 'fulfilled' && guidesData.value.result === 'success' && guidesData.value.guides) {
+                            guidesData.value.guides.slice(0, 2).forEach(g => {
+                                slides.push({
+                                    src: FALLBACK_IMG,
+                                    alt: g.title,
+                                    link: g.slug ? `./guide.html?slug=${encodeURIComponent(g.slug)}` : '#',
+                                    category: 'guides'
+                                });
+                            });
+                        }
 
-                const scrollLeftBtn = document.getElementById('scroll-left');
-                const scrollRightBtn = document.getElementById('scroll-right');
-                const container = document.getElementById('thumbnail-container');
-                
-                if(scrollLeftBtn) scrollLeftBtn.addEventListener('click', moveLeft);
-                if(scrollRightBtn) scrollRightBtn.addEventListener('click', moveRight);
-                if(container) {
-                    container.addEventListener('mouseenter', stopAutoScroll);
-                    container.addEventListener('mouseleave', startAutoScroll);
+                        // Events (2 most recent)
+                        if (eventsData.status === 'fulfilled' && eventsData.value.result === 'success' && eventsData.value.events) {
+                            eventsData.value.events.slice(0, 2).forEach(e => {
+                                slides.push({
+                                    src: e.imageUrl || FALLBACK_IMG,
+                                    alt: e.title,
+                                    link: e.slug ? `./event-detail.html?slug=${encodeURIComponent(e.slug)}` : '#',
+                                    category: 'events'
+                                });
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Carousel data load error:', err);
+                    }
+
+                    // Fallback: if no slides loaded, use static images
+                    if (slides.length === 0) {
+                        return [
+                            { src: 'https://i.ibb.co/rKjpKm0L/thumb-fivestats.jpg', alt: 'MURA Community', link: '#', category: null },
+                            { src: 'https://i.ibb.co/Wp6nSsKb/a-guide-by-ricky.webp', alt: 'MURA Guides', link: '#', category: null },
+                            { src: 'https://images.microcms-assets.io/assets/973fc097984b400db8729642ddff5938/dcb082b48a6e438fb0b0129d3063083a/slider_designyourisland.jpg?fm=webp', alt: 'MURA Events', link: '#', category: null },
+                            { src: 'https://i.ibb.co/bMrv4q0y/Regu-Rekomiya-Exploring-Honse-Umamusume.jpg', alt: 'MURA Community', link: '#', category: null },
+                        ];
+                    }
+
+                    return slides;
                 }
-                startAutoScroll();
+
+                function initCarousel(slides) {
+                    // Clear any existing content
+                    scroller.innerHTML = '';
+                    slides.forEach(s => scroller.appendChild(createSlideElement(s)));
+
+                    if (scroller.children.length === 0) return;
+
+                    // Clone items for infinite loop
+                    const visibleCount = Math.min(4, scroller.children.length);
+                    const itemsToCloneAtEnd = Array.from(scroller.children).slice(0, visibleCount);
+                    itemsToCloneAtEnd.forEach(item => scroller.appendChild(item.cloneNode(true)));
+                    const itemsToCloneAtStart = Array.from(scroller.children).slice(slides.length - visibleCount, slides.length);
+                    itemsToCloneAtStart.reverse().forEach(item => scroller.prepend(item.cloneNode(true)));
+
+                    const getScrollAmount = () => scroller.children[0] ? scroller.children[0].offsetWidth + 16 : 200;
+
+                    const moveRight = () => {
+                        if (isTransitioning || !scroller.children.length) return;
+                        isTransitioning = true;
+                        scroller.style.transition = 'transform 0.5s ease-in-out';
+                        scroller.style.transform = `translateX(-${getScrollAmount()}px)`;
+                        const onEnd = () => {
+                            scroller.removeEventListener('transitionend', onEnd);
+                            scroller.style.transition = 'none';
+                            scroller.appendChild(scroller.firstElementChild);
+                            scroller.style.transform = 'translateX(0)';
+                            void scroller.offsetHeight; // force reflow
+                            isTransitioning = false;
+                        };
+                        scroller.addEventListener('transitionend', onEnd);
+                        // Fallback in case transitionend doesn't fire
+                        setTimeout(() => {
+                            if (isTransitioning) {
+                                scroller.removeEventListener('transitionend', onEnd);
+                                scroller.style.transition = 'none';
+                                if (scroller.firstElementChild) scroller.appendChild(scroller.firstElementChild);
+                                scroller.style.transform = 'translateX(0)';
+                                isTransitioning = false;
+                            }
+                        }, 600);
+                    };
+
+                    const moveLeft = () => {
+                        if (isTransitioning || !scroller.children.length) return;
+                        isTransitioning = true;
+                        // Instantly move last child to front (no transition)
+                        scroller.style.transition = 'none';
+                        scroller.prepend(scroller.lastElementChild);
+                        // Set transform to offset right (where the item just came from)
+                        scroller.style.transform = `translateX(${getScrollAmount()}px)`;
+                        void scroller.offsetHeight; // force reflow
+                        // Now animate to translateX(0) — slides left
+                        scroller.style.transition = 'transform 0.5s ease-in-out';
+                        scroller.style.transform = 'translateX(0)';
+                        const onEnd = () => {
+                            scroller.removeEventListener('transitionend', onEnd);
+                            isTransitioning = false;
+                        };
+                        scroller.addEventListener('transitionend', onEnd);
+                        setTimeout(() => {
+                            if (isTransitioning) {
+                                scroller.removeEventListener('transitionend', onEnd);
+                                isTransitioning = false;
+                            }
+                        }, 600);
+                    };
+
+                    const startAutoScroll = () => {
+                        if (autoScrollInterval) clearInterval(autoScrollInterval);
+                        autoScrollInterval = setInterval(moveRight, 3000);
+                    };
+                    const stopAutoScroll = () => clearInterval(autoScrollInterval);
+
+                    const scrollLeftBtn = document.getElementById('scroll-left');
+                    const scrollRightBtn = document.getElementById('scroll-right');
+                    const container = document.getElementById('thumbnail-container');
+
+                    if(scrollLeftBtn) {
+                        scrollLeftBtn.removeEventListener('click', moveLeft); // prevent duplicates
+                        scrollLeftBtn.addEventListener('click', () => { stopAutoScroll(); moveLeft(); startAutoScroll(); });
+                    }
+                    if(scrollRightBtn) {
+                        scrollRightBtn.removeEventListener('click', moveRight);
+                        scrollRightBtn.addEventListener('click', () => { stopAutoScroll(); moveRight(); startAutoScroll(); });
+                    }
+                    if(container) {
+                        container.removeEventListener('mouseenter', stopAutoScroll);
+                        container.removeEventListener('mouseleave', startAutoScroll);
+                        container.addEventListener('mouseenter', stopAutoScroll);
+                        container.addEventListener('mouseleave', startAutoScroll);
+                    }
+                    startAutoScroll();
+                    carouselInitialized = true;
+                }
+
+                // Load data then initialize carousel
+                loadCarouselData().then(slides => initCarousel(slides));
             }
 
             // --- Broadcasts Section Logic ---
