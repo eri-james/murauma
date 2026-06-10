@@ -123,14 +123,31 @@
         /* ========== QUICK ACTION CARDS ========== */
         .quick-action {
             transition: transform 0.2s, box-shadow 0.2s;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             font-weight: 800;
             text-align: center;
             cursor: pointer;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fff;
+            border: none;
         }
         .quick-action:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            filter: brightness(1.1);
+        }
+        .quick-action svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            flex-shrink: 0;
+        }
+        .quick-action span {
+            display: block;
+            padding-top: 0.25rem;
         }
 
         /* ========== QUILL EDITOR IN MODAL ========== */
@@ -171,6 +188,13 @@
         .md\:p-10 { padding: 2.5rem; }
         .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .p-5 { padding: 1.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .mb-5 { margin-bottom: 1.25rem; }
+        .bg-amber-500 { --tw-bg-opacity: 1; background-color: rgb(245 158 11 / var(--tw-bg-opacity, 1)); }
+        .bg-purple-500 { --tw-bg-opacity: 1; background-color: rgb(168 85 247 / var(--tw-bg-opacity, 1)); }
+        .hover\:bg-amber-600:hover { --tw-bg-opacity: 1; background-color: rgb(217 119 6 / var(--tw-bg-opacity, 1)); }
+        .hover\:bg-purple-600:hover { --tw-bg-opacity: 1; background-color: rgb(147 51 234 / var(--tw-bg-opacity, 1)); }
         @media (max-width: 767px) {
             .md\:p-6, .md\:p-10 { padding: 1rem; }
             .md\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -442,31 +466,31 @@
                     </div>
                 </div>
                 <div class="admin-card border-2 border-green-500">
-                    <h3 class="header-skew header-skew-green mb-5">Quick Actions</h3>
+                    <h3 class="header-skew header-skew-green" style="margin-bottom:1.25rem;">Quick Actions</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <button onclick="switchSection('members')" class="quick-action bg-amber-500 text-white p-5 text-sm flex flex-col items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Review Members
+                        <button onclick="switchSection('members')" class="quick-action bg-amber-500 text-sm">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>Review Members</span>
                         </button>
-                        <button onclick="switchSection('writings')" class="quick-action bg-blue-500 text-white p-5 text-sm flex flex-col items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            Review Writings
+                        <button onclick="switchSection('writings')" class="quick-action bg-blue-500 text-sm">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Review Writings</span>
                         </button>
-                        <button onclick="switchSection('guides')" class="quick-action bg-purple-500 text-white p-5 text-sm flex flex-col items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                            Review Guides
+                        <button onclick="switchSection('guides')" class="quick-action bg-purple-500 text-sm">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            <span>Review Guides</span>
                         </button>
-                        <button onclick="switchSection('weekly-races')" class="quick-action bg-green-500 text-white p-5 text-sm flex flex-col items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            Manage Races
+                        <button onclick="switchSection('weekly-races')" class="quick-action bg-green-500 text-sm">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>Manage Races</span>
                         </button>
-                        <button onclick="switchSection('events')" class="quick-action bg-red-500 text-white p-5 text-sm flex flex-col items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            Manage Events
+                        <button onclick="switchSection('events')" class="quick-action bg-red-500 text-sm">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Manage Events</span>
                         </button>
-                        <button onclick="switchSection('news')" class="quick-action bg-pink-500 text-white p-5 text-sm flex flex-col items-center gap-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-                            Manage News
+                        <button onclick="switchSection('news')" class="quick-action bg-pink-500 text-sm">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                            <span>Manage News</span>
                         </button>
                     </div>
                 </div>
