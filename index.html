@@ -112,14 +112,16 @@
 
         <!-- Home Page View -->
         <div id="page-home" class="page-view">
-            <!-- Video Banner Section -->
-            <section class="mb-8">
-                <a href="https://murauma.github.io/freedomcup/" class="block group relative rounded-lg shadow-lg overflow-hidden" style="padding-top: 41.66%;">
-                    <iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="https://www.youtube.com/embed/Y8AdCI95eCQ?autoplay=1&mute=1&loop=1&playlist=Y8AdCI95eCQ&controls=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="MURA Background Video"></iframe>
+            <!-- Hero Banner Section (dynamic — loaded from API) -->
+            <section id="hero-banner-section" class="mb-8">
+                <a href="https://murauma.github.io/freedomcup/" id="hero-banner-link" class="block group relative rounded-lg shadow-lg overflow-hidden" style="padding-top: 41.66%;">
+                    <div id="hero-banner-media">
+                        <iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="https://www.youtube.com/embed/Y8AdCI95eCQ?autoplay=1&mute=1&loop=1&playlist=Y8AdCI95eCQ&controls=0&showinfo=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="MURA Background Video"></iframe>
+                    </div>
                     <div class="absolute top-0 left-0 right-0 bottom-0 bg-blue-700 bg-opacity-40 flex items-end group-hover:bg-opacity-50 transition-all duration-300">
                          <div class="p-4 md:p-8 text-white w-full">
-                             <h2 class="text-xl md:text-3xl font-bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Next Grand Event: The Merdeka Cup!</h2>
-                             <p class="text-sm md:text-base" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Coming this August. Prepare your best horse girls!</p>
+                             <h2 id="hero-banner-title" class="text-xl md:text-3xl font-bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Next Grand Event: The Merdeka Cup!</h2>
+                             <p id="hero-banner-desc" class="text-sm md:text-base" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Coming this August. Prepare your best horse girls!</p>
                          </div>
                     </div>
                 </a>
@@ -815,10 +817,42 @@
     }
 
     // --- Dynamic Content Loading (Phase 4D) ---
-    // Loads News, Weekly Races, and Events from the API.
+    // Loads Hero Banner, News, Weekly Races, and Events from the API.
     // If the API returns data, it replaces the static/hardcoded content.
     // If the API is empty or fails, the existing static content remains as fallback.
     document.addEventListener('DOMContentLoaded', () => {
+        // Load dynamic hero banner
+        fetch('/api/hero-banner')
+            .then(r => r.json())
+            .then(data => {
+                if (data.result === 'success' && data.banner) {
+                    const b = data.banner;
+                    const linkEl = document.getElementById('hero-banner-link');
+                    const mediaEl = document.getElementById('hero-banner-media');
+                    const titleEl = document.getElementById('hero-banner-title');
+                    const descEl = document.getElementById('hero-banner-desc');
+
+                    if (linkEl && b.linkUrl) linkEl.href = DOMPurify.sanitize(b.linkUrl);
+                    if (titleEl) titleEl.textContent = b.title;
+                    if (descEl) descEl.textContent = b.description || '';
+
+                    if (mediaEl) {
+                        if (b.mediaType === 'youtube' && b.mediaUrl) {
+                            // Build autoplay YouTube embed URL
+                            let embedUrl = DOMPurify.sanitize(b.mediaUrl);
+                            const videoId = embedUrl.match(/\/embed\/([a-zA-Z0-9_-]{11})/)?.[1];
+                            if (videoId) {
+                                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
+                            }
+                            mediaEl.innerHTML = `<iframe class="absolute pointer-events-none" style="width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.5);" src="${embedUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen title="MURA Background Video"></iframe>`;
+                        } else if (b.mediaType === 'image' && b.mediaUrl) {
+                            mediaEl.innerHTML = `<img class="absolute w-full h-full object-cover" style="top:0;left:0;" src="${DOMPurify.sanitize(b.mediaUrl)}" alt="${DOMPurify.sanitize(b.title)}" loading="eager">`;
+                        }
+                    }
+                }
+            })
+            .catch(() => {}); // Silent fail — static content remains
+
         // Load dynamic news
         fetch('/api/news')
             .then(r => r.json())

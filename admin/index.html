@@ -390,6 +390,7 @@
                 <a class="admin-pill-link" data-section="weekly-races">Races</a>
                 <a class="admin-pill-link" data-section="events">Events</a>
                 <a class="admin-pill-link" data-section="news">News</a>
+                <a class="admin-pill-link" data-section="hero-banner">Banner</a>
             </nav>
 
             <!-- Burger button (mobile) -->
@@ -413,6 +414,7 @@
             <li><a class="admin-overlay-link" data-section="weekly-races">Races</a></li>
             <li><a class="admin-overlay-link" data-section="events">Events</a></li>
             <li><a class="admin-overlay-link" data-section="news">News</a></li>
+            <li><a class="admin-overlay-link" data-section="hero-banner">Banner</a></li>
         </ul>
         <a href="/" class="admin-overlay-back">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -581,6 +583,20 @@
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Slug</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="events-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== HERO BANNER ========== -->
+            <div id="section-hero-banner" class="admin-section">
+                <div class="flex justify-between items-center mb-6 section-header">
+                    <h2 class="header-skew header-skew-orange">Hero Banner</h2>
+                    <button onclick="openBannerForm()" class="bg-orange-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-orange-600 text-sm transition-colors">+ New Banner</button>
+                </div>
+                <div class="admin-card border-2 border-orange-400 overflow-x-auto">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>Title</th><th>Media</th><th>Link</th><th>Active</th><th>Actions</th></tr></thead>
+                        <tbody id="hero-banner-table-body"><tr><td colspan="6" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -877,6 +893,7 @@
             case 'weekly-races': loadWeeklyRaces(); break;
             case 'events': loadEvents(); break;
             case 'news': loadNews(); break;
+            case 'hero-banner': loadHeroBanners(); break;
         }
     }
 
@@ -1745,6 +1762,145 @@
     async function deleteNews(id) {
         if (!confirm('Delete this news post permanently?')) return;
         try { await api('DELETE', '/api/admin/news', { id }); loadNews(); }
+        catch (err) { alert('Error: ' + err.message); }
+    }
+
+    // ============================================================
+    // HERO BANNER
+    // ============================================================
+    async function loadHeroBanners() {
+        try {
+            const data = await api('GET', '/api/admin/hero-banner');
+            const tbody = document.getElementById('hero-banner-table-body');
+            if (!data.items || data.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-400">No banners yet. Create one!</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.items.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td class="font-bold">${DOMPurify.sanitize(b.title)}</td>
+                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : 'badge-community'}">${b.mediaType}</span></td>
+                    <td class="text-gray-500 text-xs" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${DOMPurify.sanitize(b.linkUrl || '—')}</td>
+                    <td><span class="badge ${b.isActive ? 'badge-published' : 'badge-draft'}">${b.isActive ? 'Active' : 'Inactive'}</span></td>
+                    <td class="space-x-1">
+                        <button onclick="openBannerForm(${b.id})" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>
+                        <button onclick="toggleBannerActive(${b.id}, ${b.isActive})" class="btn-sm ${b.isActive ? 'bg-gray-600' : 'bg-green-500'} text-white hover:${b.isActive ? 'bg-gray-700' : 'bg-green-600'}">${b.isActive ? 'Deactivate' : 'Activate'}</button>
+                        <button onclick="deleteBanner(${b.id})" class="btn-sm bg-red-500 text-white hover:bg-red-600">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) { console.error('Load hero banners error:', err); }
+    }
+
+    function openBannerForm(id = null) {
+        const isEdit = !!id;
+        document.getElementById('modal-title').textContent = isEdit ? 'Edit Hero Banner' : 'New Hero Banner';
+        document.getElementById('modal-content').innerHTML = `
+            <form id="banner-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Title *</label>
+                    <input type="text" id="bn-title" required maxlength="200" placeholder="Next Grand Event: The Merdeka Cup!" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Description</label>
+                    <textarea id="bn-description" maxlength="500" rows="2" placeholder="Coming this August. Prepare your best horse girls!" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Link URL (where clicking the banner takes you)</label>
+                    <input type="url" id="bn-link-url" maxlength="2000" placeholder="https://murauma.github.io/freedomcup/" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Media Type *</label>
+                        <select id="bn-media-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                            <option value="youtube">YouTube Video</option>
+                            <option value="image">Image</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <label class="flex items-center"><input type="checkbox" id="bn-active" checked class="mr-2"> Active (shown on homepage)</label>
+                    </div>
+                </div>
+                <div id="bn-media-url-group">
+                    <label class="block text-sm font-bold text-gray-700" id="bn-media-url-label">YouTube Embed URL *</label>
+                    <input type="url" id="bn-media-url" maxlength="2000" placeholder="https://www.youtube.com/embed/VIDEO_ID" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                    <p id="bn-media-hint" class="text-xs text-gray-400 mt-1">Use the embed URL format: https://www.youtube.com/embed/VIDEO_ID</p>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('modal').classList.add('modal-open');
+
+        // Toggle media URL label/hint based on media type
+        const mediaTypeSelect = document.getElementById('bn-media-type');
+        function updateMediaLabels() {
+            const isYoutube = mediaTypeSelect.value === 'youtube';
+            document.getElementById('bn-media-url-label').textContent = isYoutube ? 'YouTube Embed URL' : 'Image URL';
+            document.getElementById('bn-media-url').placeholder = isYoutube
+                ? 'https://www.youtube.com/embed/VIDEO_ID'
+                : 'https://example.com/banner.jpg';
+            document.getElementById('bn-media-hint').textContent = isYoutube
+                ? 'Use the embed URL format: https://www.youtube.com/embed/VIDEO_ID'
+                : 'Direct link to an image file (jpg, png, webp)';
+        }
+        mediaTypeSelect.addEventListener('change', updateMediaLabels);
+
+        if (isEdit) {
+            loadBannerForEdit(id);
+        }
+
+        document.getElementById('banner-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                title: document.getElementById('bn-title').value.trim(),
+                description: document.getElementById('bn-description').value.trim(),
+                linkUrl: document.getElementById('bn-link-url').value.trim(),
+                mediaType: document.getElementById('bn-media-type').value,
+                mediaUrl: document.getElementById('bn-media-url').value.trim(),
+                isActive: document.getElementById('bn-active').checked,
+            };
+            try {
+                if (isEdit) {
+                    await api('POST', '/api/admin/hero-banner/update', { ...payload, id });
+                } else {
+                    await api('POST', '/api/admin/hero-banner', payload);
+                }
+                closeModal();
+                loadHeroBanners();
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+    }
+
+    async function loadBannerForEdit(id) {
+        try {
+            const data = await api('GET', '/api/admin/hero-banner');
+            const item = data.items?.find(b => b.id === id);
+            if (!item) { console.error('Banner not found'); return; }
+            document.getElementById('bn-title').value = decodeHTMLEntities(item.title) || '';
+            document.getElementById('bn-description').value = decodeHTMLEntities(item.description) || '';
+            document.getElementById('bn-link-url').value = item.linkUrl || '';
+            document.getElementById('bn-media-type').value = item.mediaType || 'youtube';
+            document.getElementById('bn-media-url').value = item.mediaUrl || '';
+            document.getElementById('bn-active').checked = item.isActive;
+            // Update labels after setting media type
+            document.getElementById('bn-media-type').dispatchEvent(new Event('change'));
+        } catch (err) { console.error('Load banner for edit error:', err); }
+    }
+
+    async function toggleBannerActive(id, currentlyActive) {
+        try {
+            await api('POST', '/api/admin/hero-banner/update', { id, isActive: !currentlyActive });
+            loadHeroBanners();
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function deleteBanner(id) {
+        if (!confirm('Delete this hero banner permanently?')) return;
+        try { await api('DELETE', '/api/admin/hero-banner', { id }); loadHeroBanners(); }
         catch (err) { alert('Error: ' + err.message); }
     }
 
