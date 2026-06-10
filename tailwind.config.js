@@ -2,11 +2,9 @@
 module.exports = {
   content: [
     './*.html',
+    './admin/*.html',
     './fan-media/*.html',
-    './guides/*.html',
-    './news/*.html',
-    './events/*.html',
-    './js/**/*.js',
+    './functions/**/*.js',
   ],
   theme: {
     extend: {
