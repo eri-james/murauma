@@ -187,10 +187,10 @@ body {
 
 @media (min-width: 768px) {
   .nav-pill-links {
-    display: flex;
+    display: flex !important;
   }
   .nav-pill-burger {
-    display: none;
+    display: none !important;
   }
 }
 
