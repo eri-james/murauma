@@ -903,6 +903,37 @@ function adminPreflightResponse(methods) {
 }
 
 // ============================================================
+// YOUTUBE URL NORMALIZATION
+// ============================================================
+
+/**
+ * Normalizes a YouTube URL to the embed format.
+ * Supports:
+ *   - https://www.youtube.com/embed/VIDEO_ID
+ *   - https://youtu.be/VIDEO_ID
+ *   - https://www.youtube.com/watch?v=VIDEO_ID
+ * Returns the normalized embed URL, or the original URL if no video ID found.
+ */
+function normalizeYouTubeUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+
+  // 1) Embed URL: https://www.youtube.com/embed/VIDEO_ID
+  const embedMatch = url.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+  // 2) Short URL: https://youtu.be/VIDEO_ID
+  const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  // 3) Watch URL: https://www.youtube.com/watch?v=VIDEO_ID
+  const watchMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+
+  const videoId = embedMatch?.[1] || shortMatch?.[1] || watchMatch?.[1] || null;
+
+  if (videoId) {
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+
+  return url; // Return as-is if we can't extract a video ID
+}
+
+// ============================================================
 // EXPORTS
 // ============================================================
 
@@ -949,4 +980,5 @@ export {
   authenticateAdmin,
   adminCorsHeaders,
   adminPreflightResponse,
+  normalizeYouTubeUrl,
 };

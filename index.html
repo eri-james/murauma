@@ -963,9 +963,19 @@
 
                     if (mediaEl) {
                         if (b.mediaType === 'youtube' && b.mediaUrl) {
-                            // Build autoplay YouTube embed URL
+                            // Build autoplay YouTube embed URL — support multiple URL formats
                             let embedUrl = DOMPurify.sanitize(b.mediaUrl);
-                            const videoId = embedUrl.match(/\/embed\/([a-zA-Z0-9_-]{11})/)?.[1];
+                            let videoId = null;
+
+                            // 1) Embed URL: https://www.youtube.com/embed/VIDEO_ID
+                            const embedMatch = embedUrl.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+                            // 2) Short URL: https://youtu.be/VIDEO_ID
+                            const shortMatch = embedUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+                            // 3) Watch URL: https://www.youtube.com/watch?v=VIDEO_ID
+                            const watchMatch = embedUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+
+                            videoId = embedMatch?.[1] || shortMatch?.[1] || watchMatch?.[1] || null;
+
                             if (videoId) {
                                 embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
                             }

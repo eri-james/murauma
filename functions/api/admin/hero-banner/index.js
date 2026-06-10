@@ -15,6 +15,7 @@ import {
   validateOptionalField,
   requireAdmin,
   adminPreflightResponse,
+  normalizeYouTubeUrl,
 } from '../../../_shared/utils.js';
 
 export async function onRequestGet(context) {
@@ -75,6 +76,13 @@ export async function onRequestPost(context) {
     if (!mediaUrlResult.valid) return errorResponse(mediaUrlResult.error);
 
     const mediaType = ['youtube', 'image'].includes(data.mediaType) ? data.mediaType : 'youtube';
+
+    // Normalize YouTube URLs to embed format (handles youtu.be, watch?v=, etc.)
+    let mediaUrlValue = mediaUrlResult.value || '';
+    if (mediaType === 'youtube' && mediaUrlValue) {
+      mediaUrlValue = normalizeYouTubeUrl(mediaUrlValue);
+    }
+
     const isActive = data.isActive === true || data.isActive === 1 ? 1 : 0;
 
     // If this banner is active, deactivate all others
@@ -92,7 +100,7 @@ export async function onRequestPost(context) {
         descResult.value || '',
         linkUrlResult.value || '',
         mediaType,
-        mediaUrlResult.value || '',
+        mediaUrlValue,
         isActive
       )
       .run();

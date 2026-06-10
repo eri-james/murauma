@@ -13,6 +13,7 @@ import {
   validateOptionalField,
   requireAdmin,
   adminPreflightResponse,
+  normalizeYouTubeUrl,
 } from '../../../_shared/utils.js';
 
 export async function onRequestPost(context) {
@@ -73,8 +74,19 @@ export async function onRequestPost(context) {
     if (data.mediaUrl !== undefined) {
       const result = validateOptionalField(data.mediaUrl, 2000, 'Media URL');
       if (!result.valid) return errorResponse(result.error);
+
+      // Normalize YouTube URLs to embed format
+      let mediaUrlValue = result.value || '';
+      // Determine the media type for this update (could be new or existing)
+      const effectiveMediaType = data.mediaType !== undefined
+        ? (['youtube', 'image'].includes(data.mediaType) ? data.mediaType : 'youtube')
+        : 'youtube'; // default assumption when only URL changes
+      if (effectiveMediaType === 'youtube' && mediaUrlValue) {
+        mediaUrlValue = normalizeYouTubeUrl(mediaUrlValue);
+      }
+
       updates.push('media_url = ?');
-      values.push(result.value || '');
+      values.push(mediaUrlValue);
     }
 
     if (data.isActive !== undefined) {

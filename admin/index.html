@@ -1825,7 +1825,7 @@
                 <div id="bn-media-url-group">
                     <label class="block text-sm font-bold text-gray-700" id="bn-media-url-label">YouTube Embed URL *</label>
                     <input type="url" id="bn-media-url" maxlength="2000" placeholder="https://www.youtube.com/embed/VIDEO_ID" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
-                    <p id="bn-media-hint" class="text-xs text-gray-400 mt-1">Use the embed URL format: https://www.youtube.com/embed/VIDEO_ID</p>
+                    <p id="bn-media-hint" class="text-xs text-gray-400 mt-1">Supported formats: youtube.com/embed/ID, youtu.be/ID, or youtube.com/watch?v=ID</p>
                 </div>
                 <div class="flex justify-end space-x-2 pt-4">
                     <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
@@ -1844,7 +1844,7 @@
                 ? 'https://www.youtube.com/embed/VIDEO_ID'
                 : 'https://example.com/banner.jpg';
             document.getElementById('bn-media-hint').textContent = isYoutube
-                ? 'Use the embed URL format: https://www.youtube.com/embed/VIDEO_ID'
+                ? 'Supported formats: youtube.com/embed/ID, youtu.be/ID, or youtube.com/watch?v=ID'
                 : 'Direct link to an image file (jpg, png, webp)';
         }
         mediaTypeSelect.addEventListener('change', updateMediaLabels);
