@@ -55,6 +55,12 @@
                 <a href="#about" class="nav-pill-link" data-nav-link>About</a>
                 <a href="#events" class="nav-pill-link" data-nav-link>Events</a>
                 <a href="#community" class="nav-pill-link" data-nav-link>Community</a>
+                <!-- Auth buttons (desktop) -->
+                <a href="register.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-join">Join</a>
+                <a href="login.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-login">Log In</a>
+                <a href="edit-profile.html" data-auth="logged-in" class="nav-pill-auth nav-pill-auth-profile"><span data-auth="display-name"></span></a>
+                <a href="/admin/" data-auth="admin" class="nav-pill-auth nav-pill-auth-admin">Admin</a>
+                <button data-auth="logout" class="nav-pill-auth nav-pill-auth-logout">Log Out</button>
             </nav>
 
             <!-- Burger button -->
