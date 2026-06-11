@@ -26,7 +26,7 @@ export async function onRequestGet(context) {
     if (path.endsWith('/leaderboard')) {
       const { results } = await db
         .prepare(
-          `SELECT rp.user_id, m.name AS member_name, m.avatar_url, m.trainer_id,
+          `SELECT rp.user_id, m.name AS member_name, m.trainer_id,
                   COUNT(rp.id) AS races_predicted,
                   SUM(COALESCE(rp.score, 0)) AS total_score
            FROM race_predictions rp
@@ -43,7 +43,7 @@ export async function onRequestGet(context) {
         userId: row.user_id,
         memberName: row.member_name,
         trainerId: row.trainer_id,
-        avatarUrl: row.avatar_url || '',
+        avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.user_id}`,
         racesPredicted: row.races_predicted,
         totalScore: row.total_score,
       }));
@@ -92,7 +92,7 @@ export async function onRequestGet(context) {
     // Get participants with positions (if results entered)
     const { results: participants } = await db
       .prepare(
-        `SELECT rp.member_id, rp.position, m.name AS member_name, m.trainer_id, m.avatar_url
+        `SELECT rp.member_id, rp.position, m.name AS member_name, m.trainer_id
          FROM race_participants rp
          JOIN members m ON m.id = rp.member_id
          WHERE rp.race_id = ?
@@ -105,7 +105,7 @@ export async function onRequestGet(context) {
       memberId: row.member_id,
       memberName: row.member_name,
       trainerId: row.trainer_id,
-      avatarUrl: row.avatar_url || '',
+      avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.member_id}`,
       position: row.position,
     }));
 

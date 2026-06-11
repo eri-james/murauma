@@ -33,7 +33,7 @@ export async function onRequestGet(context) {
     const { results } = await db
       .prepare(
         `SELECT rp.id, rp.race_id, rp.member_id, rp.position, rp.added_at,
-                m.name AS member_name, m.trainer_id, m.avatar_url
+                m.name AS member_name, m.trainer_id
          FROM race_participants rp
          JOIN members m ON m.id = rp.member_id
          WHERE rp.race_id = ?
@@ -48,7 +48,7 @@ export async function onRequestGet(context) {
       memberId: row.member_id,
       memberName: row.member_name,
       trainerId: row.trainer_id,
-      avatarUrl: row.avatar_url || '',
+      avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.member_id}`,
       position: row.position,
       addedAt: row.added_at,
     }));
