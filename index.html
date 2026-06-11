@@ -179,15 +179,14 @@
                                     <p class="text-gray-400 text-sm py-4 text-center">Loading activity...</p>
                                 </div>
                             </div>
-                            <!-- Right: Official Updates (X/Twitter) -->
+                            <!-- Right: YouTube Feed -->
                             <div>
                                 <h3 class="font-extrabold text-gray-800 text-lg mb-3 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                    Official Updates
+                                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                    Latest Videos
                                 </h3>
-                                <div class="max-h-96 overflow-y-auto">
-                                    <a class="twitter-timeline" data-height="380" data-chrome="noheader nofooter noborders transparent" data-theme="light" href="https://x.com/umamusume_eng?ref_src=twsrc%5Etfw">Umamusume English Posts</a>
-                                    <script async src="https://platform.x.com/widgets.js" charset="utf-8"></script>
+                                <div id="youtube-feed" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                                    <p class="text-gray-400 text-sm py-4 text-center">Loading videos...</p>
                                 </div>
                             </div>
                         </div>
@@ -791,6 +790,61 @@
                 }
 
                 loadActivityFeed();
+            }
+
+            // --- YouTube Feed ---
+            const youtubeFeed = document.getElementById('youtube-feed');
+            if (youtubeFeed) {
+                const CHANNEL_COLORS = {
+                    'MURA': 'bg-red-600',
+                    'URA Archives': 'bg-purple-600',
+                    'PakaTube': 'bg-pink-600',
+                };
+
+                function timeAgo(dateStr) {
+                    const now = new Date();
+                    const then = new Date(dateStr);
+                    const diff = Math.floor((now - then) / 1000);
+                    if (diff < 60) return 'just now';
+                    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+                    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+                    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+                    return then.toLocaleDateString();
+                }
+
+                async function loadYouTubeFeed() {
+                    try {
+                        const res = await fetch('/api/youtube-feed');
+                        if (!res.ok) throw new Error('API error');
+                        const data = await res.json();
+
+                        if (!data.videos || data.videos.length === 0) {
+                            youtubeFeed.innerHTML = '<p class="text-gray-400 text-sm py-4 text-center">No videos found.</p>';
+                            return;
+                        }
+
+                        youtubeFeed.innerHTML = data.videos.slice(0, 9).map(v => `
+                            <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="flex gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                                <div class="relative flex-shrink-0 w-28 rounded overflow-hidden bg-gray-100">
+                                    <img src="${v.thumbnail}" alt="" class="w-full h-auto" loading="lazy">
+                                    <svg class="absolute inset-0 m-auto w-8 h-8 text-white opacity-80 group-hover:opacity-100 transition-opacity drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm text-gray-800 font-semibold leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">${v.title}</p>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        <span class="inline-block px-1.5 py-0.5 rounded text-white text-[10px] font-bold mr-1 ${CHANNEL_COLORS[v.channel.name] || 'bg-gray-500'}">${v.channel.name}</span>
+                                        ${timeAgo(v.published)}
+                                    </p>
+                                </div>
+                            </a>
+                        `).join('');
+                    } catch (err) {
+                        console.error('YouTube feed error:', err);
+                        youtubeFeed.innerHTML = '<p class="text-gray-400 text-sm py-4 text-center">Could not load videos.</p>';
+                    }
+                }
+
+                loadYouTubeFeed();
             }
 
             // --- Members Page Logic ---
