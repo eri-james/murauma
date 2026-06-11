@@ -1,89 +1,23 @@
 /**
- * Public API — Race Predictions (Pick'em)
+ * Public API — Race Predictions (Pick'em) — Base endpoint
  *
- * GET  /api/race-predictions?raceId=N           — Get participants + prediction stats for a race
- * POST /api/race-predictions                     — Submit or update a prediction (requires auth)
- * GET  /api/race-predictions/mine?raceId=N       — Get current user's prediction for a race
- * GET  /api/race-predictions/leaderboard          — Get overall prediction leaderboard
+ * GET  /api/race-predictions?raceId=N  — Get participants + prediction stats for a race
+ * POST /api/race-predictions           — Submit or update a prediction (requires auth)
  */
 import {
   errorResponse,
   successResponse,
   requireAuth,
   getOptionalAuth,
-} from '../_shared/utils.js';
+} from '../../_shared/utils.js';
 
-// --- GET handler ---
+// --- GET handler — Race participants + prediction stats ---
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = env.DB;
 
   try {
     const url = new URL(request.url);
-    const path = url.pathname;
-
-    // --- Leaderboard ---
-    if (path.endsWith('/leaderboard')) {
-      const { results } = await db
-        .prepare(
-          `SELECT rp.user_id, m.name AS member_name, m.trainer_id,
-                  COUNT(rp.id) AS races_predicted,
-                  SUM(COALESCE(rp.score, 0)) AS total_score
-           FROM race_predictions rp
-           JOIN members m ON m.id = rp.user_id
-           WHERE rp.score IS NOT NULL
-           GROUP BY rp.user_id
-           ORDER BY total_score DESC, races_predicted ASC
-           LIMIT 50`
-        )
-        .all();
-
-      const leaderboard = results.map((row, index) => ({
-        rank: index + 1,
-        userId: row.user_id,
-        memberName: row.member_name,
-        trainerId: row.trainer_id,
-        avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.user_id}`,
-        racesPredicted: row.races_predicted,
-        totalScore: row.total_score,
-      }));
-
-      return successResponse('Leaderboard loaded.', { leaderboard });
-    }
-
-    // --- My prediction for a specific race ---
-    if (path.endsWith('/mine')) {
-      const raceId = parseInt(url.searchParams.get('raceId'), 10);
-      if (!raceId || isNaN(raceId)) {
-        return errorResponse('Valid raceId is required.');
-      }
-
-      const { user, error: authError } = await requireAuth(request, env);
-      if (authError) return authError;
-
-      const pred = await db
-        .prepare('SELECT id, pick_1st, pick_2nd, pick_3rd, score, created_at, updated_at FROM race_predictions WHERE race_id = ? AND user_id = ?')
-        .bind(raceId, user.userId)
-        .first();
-
-      if (!pred) {
-        return successResponse('No prediction found.', { prediction: null });
-      }
-
-      return successResponse('Prediction loaded.', {
-        prediction: {
-          id: pred.id,
-          pick1st: pred.pick_1st,
-          pick2nd: pred.pick_2nd,
-          pick3rd: pred.pick_3rd,
-          score: pred.score,
-          createdAt: pred.created_at,
-          updatedAt: pred.updated_at,
-        },
-      });
-    }
-
-    // --- Race participants + prediction stats ---
     const raceId = parseInt(url.searchParams.get('raceId'), 10);
     if (!raceId || isNaN(raceId)) {
       return errorResponse('Valid raceId is required.');
