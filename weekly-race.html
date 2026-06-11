@@ -84,6 +84,81 @@
             padding: 1.25rem;
             margin-top: 1.5rem;
         }
+
+        /* Pick'em Section */
+        .pickem-section {
+            border: 2px solid #a78bfa;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+        }
+        .pickem-section h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #6d28d9;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pickem-roster {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .pickem-roster-card {
+            background: white;
+            border: 2px solid #e9d5ff;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .pickem-roster-card.has-position {
+            border-color: #a78bfa;
+        }
+        .pickem-roster-card .name {
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        .pickem-roster-card .pos {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+        .pickem-roster-card .pos.p1 { color: #eab308; }
+        .pickem-roster-card .pos.p2 { color: #9ca3af; }
+        .pickem-roster-card .pos.p3 { color: #d97706; }
+        .pickem-form select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 2px solid #e9d5ff;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: white;
+            margin-bottom: 0.5rem;
+        }
+        .pickem-form select:focus {
+            border-color: #8b5cf6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+        .pickem-bar-bg {
+            background: #ede9fe;
+            border-radius: 999px;
+            height: 0.5rem;
+            overflow: hidden;
+        }
+        .pickem-bar-fill {
+            background: #8b5cf6;
+            height: 0.5rem;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
     </style>
 </head>
 <body class="has-pill-nav">
@@ -206,6 +281,59 @@
                 <h2 class="text-xl font-bold text-green-800 mb-3">How to Participate</h2>
                 <p class="text-green-900">Joining is simple! The room will be opened on the event day. Please keep an eye on the <b>#club-announcement</b> channel in our Discord for the Room ID and password. Simply join the room in-game before the deadline.</p>
                 <p class="text-green-900 mt-2">Good luck to all participating trainers!</p>
+            </div>
+
+            <!-- Pick'em: Race Predictions -->
+            <div id="pickem-section" class="pickem-section hidden">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                    Race Pick'em
+                </h2>
+                <p class="text-sm text-purple-700 mb-4">Predict the podium! Pick who you think will finish 1st, 2nd, and 3rd. <b>3 pts</b> for correct 1st, <b>2 pts</b> for correct 2nd, <b>1 pt</b> for correct 3rd.</p>
+
+                <!-- Roster -->
+                <div id="pickem-roster" class="pickem-roster"></div>
+
+                <!-- Prediction Form (logged in only) -->
+                <div id="pickem-form-container" class="hidden">
+                    <h3 class="text-sm font-bold text-purple-800 mb-2">Your Prediction</h3>
+                    <div id="pickem-form" class="pickem-form"></div>
+                    <div id="pickem-form-message" class="hidden text-sm font-bold mt-2"></div>
+                </div>
+                <div id="pickem-login-prompt" class="hidden text-sm text-purple-600 mt-2">
+                    <a href="login.html" class="font-bold underline">Log in</a> to submit your prediction!
+                </div>
+
+                <!-- My Prediction (after submitting) -->
+                <div id="pickem-my-prediction" class="hidden mt-4 bg-white rounded-lg p-3 border border-purple-200">
+                    <h3 class="text-sm font-bold text-purple-800 mb-1">Your Pick</h3>
+                    <div id="pickem-my-picks"></div>
+                </div>
+
+                <!-- Popular Picks -->
+                <div id="pickem-popular" class="hidden mt-4">
+                    <h3 class="text-sm font-bold text-purple-800 mb-2">Community Picks</h3>
+                    <div id="pickem-popular-content"></div>
+                </div>
+
+                <!-- Results (after admin enters results) -->
+                <div id="pickem-results" class="hidden mt-4 bg-white rounded-lg p-3 border-2 border-yellow-400">
+                    <h3 class="text-sm font-bold text-yellow-700 mb-2">Race Results</h3>
+                    <div id="pickem-results-content"></div>
+                </div>
+
+                <!-- My Score (if results are in and I predicted) -->
+                <div id="pickem-score" class="hidden mt-3 bg-purple-50 rounded-lg p-3 border border-purple-300">
+                    <div id="pickem-score-content"></div>
+                </div>
+
+                <!-- Leaderboard link -->
+                <div class="mt-4 text-center">
+                    <a href="pickem-leaderboard.html" class="inline-flex items-center gap-1 text-sm font-bold text-purple-600 hover:text-purple-800 underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                        Pick'em Leaderboard
+                    </a>
+                </div>
             </div>
 
             <!-- Discord CTA -->
@@ -357,12 +485,315 @@
                 loadingEl.classList.add('hidden');
                 contentEl.classList.remove('hidden');
 
+                // Load Pick'em data
+                loadPickemData(race.id);
+
             } catch (error) {
                 console.error('Failed to load race:', error);
                 loadingEl.classList.add('hidden');
                 errorEl.classList.remove('hidden');
             }
         });
+
+        // ============================================================
+        // Pick'em Logic
+        // ============================================================
+        let pickemRaceId = null;
+        let pickemRoster = [];
+        let pickemMyPrediction = null;
+        let pickemHasResults = false;
+
+        async function loadPickemData(raceId) {
+            pickemRaceId = raceId;
+            const section = document.getElementById('pickem-section');
+
+            try {
+                const resp = await fetch(`/api/race-predictions?raceId=${raceId}`);
+                const data = await resp.json();
+
+                if (data.result !== 'success') {
+                    // No pickem data — just don't show the section
+                    return;
+                }
+
+                pickemRoster = data.roster || [];
+                pickemMyPrediction = data.myPrediction || null;
+                pickemHasResults = data.hasResults || false;
+
+                if (pickemRoster.length === 0) {
+                    // No participants added yet — don't show pickem
+                    return;
+                }
+
+                section.classList.remove('hidden');
+
+                // Render roster
+                renderRoster();
+
+                // Render prediction form or login prompt
+                await renderPredictionForm();
+
+                // Render popular picks
+                if (data.totalPredictions > 0) {
+                    renderPopularPicks(data.popularPicks, data.totalPredictions);
+                }
+
+                // Render results if available
+                if (pickemHasResults) {
+                    renderResults();
+                    renderMyScore();
+                }
+            } catch (err) {
+                console.error('Pickem load error:', err);
+            }
+        }
+
+        function renderRoster() {
+            const container = document.getElementById('pickem-roster');
+            const sorted = [...pickemRoster].sort((a, b) => (a.position || 999) - (b.position || 999));
+
+            container.innerHTML = sorted.map(p => {
+                const hasPos = p.position !== null && p.position !== undefined;
+                let posLabel = '';
+                let posClass = '';
+                if (hasPos) {
+                    if (p.position === 1) { posLabel = '1st'; posClass = 'p1'; }
+                    else if (p.position === 2) { posLabel = '2nd'; posClass = 'p2'; }
+                    else if (p.position === 3) { posLabel = '3rd'; posClass = 'p3'; }
+                    else { posLabel = `${p.position}th`; posClass = ''; }
+                }
+                return `<div class="pickem-roster-card ${hasPos ? 'has-position' : ''}">
+                    <div class="name">${DOMPurify.sanitize(p.memberName)}</div>
+                    ${hasPos ? `<div class="pos ${posClass}">${posLabel}</div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        async function renderPredictionForm() {
+            const formContainer = document.getElementById('pickem-form-container');
+            const loginPrompt = document.getElementById('pickem-login-prompt');
+            const myPredDiv = document.getElementById('pickem-my-prediction');
+
+            // Check if logged in
+            let isLoggedIn = false;
+            try {
+                const meResp = await fetch('/api/me');
+                const meData = await meResp.json();
+                isLoggedIn = meData.result === 'success' && meData.user;
+            } catch (e) { isLoggedIn = false; }
+
+            if (!isLoggedIn) {
+                loginPrompt.classList.remove('hidden');
+                return;
+            }
+
+            // If results are in, no more editing
+            if (pickemHasResults) {
+                if (pickemMyPrediction) {
+                    myPredDiv.classList.remove('hidden');
+                    document.getElementById('pickem-my-picks').innerHTML = renderPicks(pickemMyPrediction);
+                }
+                return;
+            }
+
+            if (pickemMyPrediction && pickemMyPrediction.score === null) {
+                // Show existing prediction with edit option
+                myPredDiv.classList.remove('hidden');
+                document.getElementById('pickem-my-picks').innerHTML = renderPicks(pickemMyPrediction);
+            }
+
+            // Show form
+            formContainer.classList.remove('hidden');
+            const form = document.getElementById('pickem-form');
+
+            const memberOptions = pickemRoster.map(p =>
+                `<option value="${p.memberId}">${DOMPurify.sanitize(p.memberName)}</option>`
+            ).join('');
+
+            form.innerHTML = `
+                <label class="block text-xs font-bold text-purple-700 mb-1">1st Place <span class="text-yellow-500">(3 pts)</span></label>
+                <select id="pick-1st">
+                    <option value="">Select...</option>
+                    ${memberOptions}
+                    ${pickemMyPrediction?.pick1st ? '' : ''}
+                </select>
+                <label class="block text-xs font-bold text-purple-700 mb-1">2nd Place <span class="text-gray-400">(2 pts)</span></label>
+                <select id="pick-2nd">
+                    <option value="">Select...</option>
+                    ${memberOptions}
+                </select>
+                <label class="block text-xs font-bold text-purple-700 mb-1">3rd Place <span class="text-amber-600">(1 pt)</span></label>
+                <select id="pick-3rd">
+                    <option value="">Select...</option>
+                    ${memberOptions}
+                </select>
+                <button id="pickem-submit-btn" class="mt-2 w-full bg-purple-600 text-white font-bold py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                    ${pickemMyPrediction ? 'Update Prediction' : 'Submit Prediction'}
+                </button>
+            `;
+
+            // Pre-fill if existing prediction
+            if (pickemMyPrediction) {
+                document.getElementById('pick-1st').value = pickemMyPrediction.pick1st;
+                document.getElementById('pick-2nd').value = pickemMyPrediction.pick2nd;
+                document.getElementById('pick-3rd').value = pickemMyPrediction.pick3rd;
+            }
+
+            document.getElementById('pickem-submit-btn').addEventListener('click', submitPrediction);
+        }
+
+        function renderPicks(pred) {
+            const findName = (id) => {
+                const m = pickemRoster.find(p => p.memberId === id);
+                return m ? DOMPurify.sanitize(m.memberName) : 'Unknown';
+            };
+            return `<div class="flex gap-3 text-sm">
+                <span class="font-bold text-yellow-600">1st: ${findName(pred.pick1st)}</span>
+                <span class="font-bold text-gray-500">2nd: ${findName(pred.pick2nd)}</span>
+                <span class="font-bold text-amber-600">3rd: ${findName(pred.pick3rd)}</span>
+            </div>`;
+        }
+
+        async function submitPrediction() {
+            const pick1st = parseInt(document.getElementById('pick-1st').value, 10);
+            const pick2nd = parseInt(document.getElementById('pick-2nd').value, 10);
+            const pick3rd = parseInt(document.getElementById('pick-3rd').value, 10);
+            const msgEl = document.getElementById('pickem-form-message');
+
+            if (!pick1st || !pick2nd || !pick3rd) {
+                msgEl.textContent = 'Please pick all 3 positions!';
+                msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (pick1st === pick2nd || pick1st === pick3rd || pick2nd === pick3rd) {
+                msgEl.textContent = 'You must pick 3 different racers!';
+                msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/race-predictions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        raceId: pickemRaceId,
+                        pick1st, pick2nd, pick3rd,
+                    }),
+                });
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    msgEl.textContent = data.updated ? 'Prediction updated!' : 'Prediction submitted!';
+                    msgEl.className = 'text-sm font-bold mt-2 text-green-600';
+                    msgEl.classList.remove('hidden');
+
+                    // Update my prediction
+                    pickemMyPrediction = { pick1st, pick2nd, pick3rd, score: null };
+
+                    // Show my picks
+                    const myPredDiv = document.getElementById('pickem-my-prediction');
+                    myPredDiv.classList.remove('hidden');
+                    document.getElementById('pickem-my-picks').innerHTML = renderPicks(pickemMyPrediction);
+
+                    // Reload popular picks
+                    const pickemResp = await fetch(`/api/race-predictions?raceId=${pickemRaceId}`);
+                    const pickemData = await pickemResp.json();
+                    if (pickemData.totalPredictions > 0) {
+                        renderPopularPicks(pickemData.popularPicks, pickemData.totalPredictions);
+                    }
+                } else {
+                    msgEl.textContent = data.message || 'Failed to submit.';
+                    msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                    msgEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                msgEl.textContent = 'Error submitting prediction.';
+                msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                msgEl.classList.remove('hidden');
+            }
+        }
+
+        function renderPopularPicks(popularPicks, total) {
+            const container = document.getElementById('pickem-popular');
+            const content = document.getElementById('pickem-popular-content');
+            container.classList.remove('hidden');
+
+            let html = `<p class="text-xs text-purple-500 mb-3">${total} prediction(s) submitted</p>`;
+            html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-3">';
+
+            ['first', 'second', 'third'].forEach((pos, idx) => {
+                const label = ['1st Place', '2nd Place', '3rd Place'][idx];
+                const color = ['text-yellow-600', 'text-gray-500', 'text-amber-600'][idx];
+                const picks = popularPicks[pos] || [];
+                html += `<div>
+                    <h4 class="text-xs font-bold ${color} mb-1">${label}</h4>`;
+                if (picks.length === 0) {
+                    html += '<p class="text-xs text-gray-300">No picks yet</p>';
+                } else {
+                    const maxCount = picks[0].count;
+                    picks.slice(0, 5).forEach(p => {
+                        const pct = total > 0 ? Math.round((p.count / total) * 100) : 0;
+                        html += `<div class="mb-1.5">
+                            <div class="flex justify-between text-xs"><span class="font-bold">${DOMPurify.sanitize(p.name)}</span><span class="text-gray-400">${pct}%</span></div>
+                            <div class="pickem-bar-bg"><div class="pickem-bar-fill" style="width:${pct}%"></div></div>
+                        </div>`;
+                    });
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        function renderResults() {
+            const resultsDiv = document.getElementById('pickem-results');
+            const content = document.getElementById('pickem-results-content');
+            resultsDiv.classList.remove('hidden');
+
+            const sorted = [...pickemRoster].filter(p => p.position !== null).sort((a, b) => a.position - b.position);
+
+            if (sorted.length === 0) return;
+
+            content.innerHTML = sorted.map(p => {
+                let badge = '';
+                let nameClass = 'text-gray-700';
+                if (p.position === 1) { badge = '<span class="text-yellow-500 font-extrabold">1st</span>'; nameClass = 'text-yellow-700 font-bold'; }
+                else if (p.position === 2) { badge = '<span class="text-gray-400 font-extrabold">2nd</span>'; nameClass = 'text-gray-600 font-bold'; }
+                else if (p.position === 3) { badge = '<span class="text-amber-600 font-extrabold">3rd</span>'; nameClass = 'text-amber-700 font-bold'; }
+                else { badge = `<span class="text-gray-400">${p.position}th</span>`; }
+
+                return `<div class="flex items-center gap-2 py-1">
+                    ${badge}
+                    <span class="${nameClass} text-sm">${DOMPurify.sanitize(p.memberName)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderMyScore() {
+            if (!pickemMyPrediction || pickemMyPrediction.score === null || pickemMyPrediction.score === undefined) return;
+
+            const scoreDiv = document.getElementById('pickem-score');
+            const content = document.getElementById('pickem-score-content');
+            scoreDiv.classList.remove('hidden');
+
+            const score = pickemMyPrediction.score;
+            const maxScore = 6;
+            let message = '';
+            if (score === 6) message = 'Perfect prediction!';
+            else if (score >= 4) message = 'Great prediction!';
+            else if (score >= 2) message = 'Not bad!';
+            else if (score >= 1) message = 'Got one right!';
+            else message = 'Better luck next time!';
+
+            content.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-purple-800">${message}</span>
+                    <span class="text-lg font-extrabold text-purple-600">${score}/${maxScore} pts</span>
+                </div>
+            `;
+        }
     </script>
 <script src="/js/particles.js"></script>
 </body>
