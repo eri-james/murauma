@@ -33,7 +33,7 @@ const YOUTUBE_CHANNELS = [
   },
 ];
 
-const VIDEOS_PER_CHANNEL = 5;
+const VIDEOS_PER_CHANNEL = 2;
 const RSS_BASE = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
 /**

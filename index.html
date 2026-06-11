@@ -823,7 +823,7 @@
                             return;
                         }
 
-                        youtubeFeed.innerHTML = data.videos.slice(0, 9).map(v => `
+                        youtubeFeed.innerHTML = data.videos.slice(0, 6).map(v => `
                             <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="flex gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group">
                                 <div class="relative flex-shrink-0 w-28 rounded overflow-hidden bg-gray-100">
                                     <img src="${v.thumbnail}" alt="" class="w-full h-auto" loading="lazy">
