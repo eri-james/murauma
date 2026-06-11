@@ -3,74 +3,20 @@
   <!-- Homepage -->
   <url>
     <loc>https://murauma.pages.dev/</loc>
-    <changefreq>daily</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Registration & Auth -->
-  <url>
-    <loc>https://murauma.pages.dev/register.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/login.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/setup-account.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/edit-profile.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-
-  <!-- Community Content -->
+  <!-- Main Content Pages -->
   <url>
     <loc>https://murauma.pages.dev/guides.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://murauma.pages.dev/weekly-race.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/news-detail.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/event-detail.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/guide.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- Submission Pages -->
-  <url>
-    <loc>https://murauma.pages.dev/submit-writing.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/submit-fan-media.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://murauma.pages.dev/write-guide.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.7</priority>
   </url>
 
   <!-- Fan Media -->
@@ -95,7 +41,7 @@
     <priority>0.6</priority>
   </url>
 
-  <!-- Archived Content (static, high SEO value) -->
+  <!-- Static Content (Archive) -->
   <url>
     <loc>https://murauma.pages.dev/_content-archive/news/website-launch.html</loc>
     <changefreq>yearly</changefreq>

@@ -4,6 +4,16 @@
 User-agent: *
 Allow: /
 
+# Private pages — not useful for search engines
+Disallow: /admin/
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /setup-account.html
+Disallow: /edit-profile.html
+Disallow: /write-guide.html
+Disallow: /submit-fan-media.html
+Disallow: /submit-writing.html
+
 # Sitemap
 Sitemap: https://murauma.pages.dev/sitemap.xml
 
