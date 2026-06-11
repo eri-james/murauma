@@ -63,7 +63,7 @@ export async function onRequestGet(context) {
 
       const pred = await db
         .prepare('SELECT id, pick_1st, pick_2nd, pick_3rd, score, created_at, updated_at FROM race_predictions WHERE race_id = ? AND user_id = ?')
-        .bind(raceId, user.id)
+        .bind(raceId, user.userId)
         .first();
 
       if (!pred) {
@@ -151,7 +151,7 @@ export async function onRequestGet(context) {
     if (user) {
       const pred = await db
         .prepare('SELECT id, pick_1st, pick_2nd, pick_3rd, score FROM race_predictions WHERE race_id = ? AND user_id = ?')
-        .bind(raceId, user.id)
+        .bind(raceId, user.userId)
         .first();
       if (pred) {
         myPrediction = {
@@ -179,8 +179,8 @@ export async function onRequestGet(context) {
       hasResults,
     });
   } catch (error) {
-    console.error('Race predictions GET error:', error.message);
-    return errorResponse('Failed to load prediction data.', 500);
+    console.error('Race predictions GET error:', error.message, error.stack);
+    return errorResponse(`Failed to load prediction data: ${error.message}`, 500);
   }
 }
 
@@ -240,7 +240,7 @@ export async function onRequestPost(context) {
     // Upsert prediction (one per user per race)
     const existing = await db
       .prepare('SELECT id FROM race_predictions WHERE race_id = ? AND user_id = ?')
-      .bind(data.raceId, user.id)
+      .bind(data.raceId, user.userId)
       .first();
 
     if (existing) {
@@ -260,7 +260,7 @@ export async function onRequestPost(context) {
           `INSERT INTO race_predictions (race_id, user_id, pick_1st, pick_2nd, pick_3rd)
            VALUES (?, ?, ?, ?, ?)`
         )
-        .bind(data.raceId, user.id, data.pick1st, data.pick2nd, data.pick3rd)
+        .bind(data.raceId, user.userId, data.pick1st, data.pick2nd, data.pick3rd)
         .run();
       return successResponse('Prediction submitted!', { updated: false });
     }
