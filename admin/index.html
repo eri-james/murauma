@@ -22,11 +22,7 @@
     <style>
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
+            background-color: #f8f9fa;
             padding-top: 5rem;
         }
 
@@ -386,6 +382,7 @@
     </style>
 </head>
 <body>
+<canvas id="particle-bg" aria-hidden="true"></canvas>
     <!-- Not authorized notice -->
     <div id="not-authorized" class="hidden min-h-screen flex items-center justify-center" style="background:rgba(0,0,0,0.5); backdrop-filter:blur(6px);">
         <div class="bg-white p-10 rounded-xl shadow-2xl text-center max-w-md border-2 border-red-500">
@@ -1968,5 +1965,6 @@
         }
     });
     </script>
+<script src="/js/particles.js"></script>
 </body>
 </html>

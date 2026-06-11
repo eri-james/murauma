@@ -46,11 +46,7 @@
         /* Sets the base font and the new fixed background for the entire page */
         body {
             font-family: 'Noto Sans JP', 'Inter', sans-serif;
-            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
+            background-color: #f8f9fa;
         }
 
         /* Creates the skewed, banner-like header style for section titles */
@@ -69,6 +65,7 @@
     </style>
 </head>
 <body>
+<canvas id="particle-bg" aria-hidden="true"></canvas>
 
     <!-- Header & Navigation -->
     <header class="bg-blue-700 text-white shadow-lg">
@@ -260,5 +257,6 @@
             }
         });
     </script>
+<script src="../../js/particles.js"></script>
 </body>
 </html>

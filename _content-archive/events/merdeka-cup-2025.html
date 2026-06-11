@@ -20,11 +20,7 @@
         /* --- Custom CSS from original site --- */
         body {
             font-family: 'Noto Sans JP', 'Inter', sans-serif;
-            background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
+            background-color: #f8f9fa;
         }
 
         .header-skew {
@@ -72,6 +68,7 @@
     </style>
 </head>
 <body>
+<canvas id="particle-bg" aria-hidden="true"></canvas>
 
     <!-- Header Placeholder -->
     <div id="main-header">
@@ -207,5 +204,6 @@
         });
     </script>
 
+<script src="../../js/particles.js"></script>
 </body>
 </html>

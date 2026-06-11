@@ -7,11 +7,18 @@
 /* --- Base Font & Background --- */
 body {
   font-family: 'Inter', 'Noto Sans JP', sans-serif;
-  background-image: url('https://umamusume.jp/_nuxt/images/bg-fFg7lReW.jpg');
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  background-color: #f8f9fa; /* Off-white fallback for particle canvas */
+}
+
+/* Particle canvas background — sits behind all content */
+#particle-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* --- Skewed Section Headers --- */
