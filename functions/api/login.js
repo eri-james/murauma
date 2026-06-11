@@ -64,14 +64,14 @@ export async function onRequestPost(context) {
       return errorResponse('Your account needs to be set up. Please use the Account Setup page to create a username and password.', 403);
     }
 
-    // --- Check if account is approved ---
-    if (member.status === 'pending') {
-      return errorResponse('Your registration is still pending admin approval.', 403);
-    }
-
+    // --- Check if account is rejected ---
     if (member.status === 'rejected') {
       return errorResponse('Your registration has been rejected.', 403);
     }
+
+    // Note: pending users ARE allowed to log in. They can browse the site and
+    // edit their profile, but content submission (writings, guides, fan media)
+    // is gated on admin approval. The frontend shows a pending notice.
 
     // --- Verify Password ---
     const isValid = await verifyPassword(data.password, member.password_hash, member.password_salt);
@@ -86,15 +86,20 @@ export async function onRequestPost(context) {
     );
 
     // --- Return success with session cookie ---
+    const message = member.status === 'pending'
+      ? 'Logged in. Your membership is pending admin approval — you can edit your profile, but content submission requires approval first.'
+      : 'Logged in successfully.';
+
     return jsonResponse(
       {
         result: 'success',
-        message: 'Logged in successfully.',
+        message,
         user: {
           userId: member.id,
           username: member.username,
           displayName: member.name,
           role: member.role,
+          status: member.status,
         },
       },
       200,

@@ -175,10 +175,15 @@
                         const data = await response.json();
 
                         if (data.result === 'success') {
-                            statusMessage.innerHTML = '<p class="text-green-600 font-bold">Logged in! Redirecting...</p>';
+                            const isPending = data.user && data.user.status === 'pending';
+                            if (isPending) {
+                                statusMessage.innerHTML = '<p class="text-green-600 font-bold">Logged in!</p><p class="text-sm text-amber-600 mt-1">Your membership is pending admin approval. You can edit your profile, but content submission requires approval first.</p>';
+                            } else {
+                                statusMessage.innerHTML = '<p class="text-green-600 font-bold">Logged in! Redirecting...</p>';
+                            }
                             setTimeout(() => {
                                 window.location.href = 'edit-profile.html';
-                            }, 1000);
+                            }, isPending ? 3000 : 1000);
                         } else {
                             statusMessage.innerHTML = `<p class="text-red-600 font-bold">${data.message || 'Login failed.'}</p>`;
                             submitButton.disabled = false;
