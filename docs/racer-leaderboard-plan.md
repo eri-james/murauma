@@ -1,7 +1,7 @@
 # Racer Leaderboard — Feature Plan
 
 > Created: 2026-06-12
-> Status: Planning (not yet implemented)
+> Status: Phase 1 + Phase 2 implemented (commit 18061d8)
 > Context: MURA (Malayan Umamusume Racing Association) community site
 > Dependency: Pick'em results system (migration 010 — already applied)
 
@@ -107,11 +107,11 @@ The Pick'em leaderboard (predictor rankings) and the Racer leaderboard serve dif
 **No new tables, no new migrations, no new admin workflows.**
 
 All data already exists:
-- `race_participants` (race_id, member_id, position) — populated when admin enters results
+- `race_participants` (race_id, member_id, **category**, position) — populated when admin enters results
 - `weekly_races` (id, title, created_at) — already exists
 - `members` (id, name, trainer_id) — already exists
 
-The leaderboard API is pure aggregation:
+The leaderboard API is pure aggregation with category filter:
 
 ```sql
 SELECT
@@ -133,12 +133,13 @@ FROM race_participants rp
 JOIN members m ON m.id = rp.member_id
 JOIN weekly_races wr ON wr.id = rp.race_id
 WHERE rp.position IS NOT NULL
+  AND rp.category = ?  -- 'graded' or 'open'
   AND wr.created_at >= ?  -- season start date (or '1970-01-01' for all-time)
 GROUP BY rp.member_id
 ORDER BY total_points DESC, wins DESC, seconds DESC, thirds DESC, total_races ASC
 ```
 
-One query, one endpoint, one page.
+Plus a cross-division query that shows each racer's presence in the other category.
 
 ---
 
@@ -213,21 +214,21 @@ Add "Racer Leaderboard" link to:
 
 ## Build Phases
 
-### Phase 1 — Core Leaderboard (v1)
-1. Leaderboard API endpoint (`/api/race-leaderboard`)
-2. Leaderboard page (`race-leaderboard.html`)
-3. Season/all-time toggle
-4. Add navigation link
+### Phase 1 — Core Leaderboard (v1) ✅
+1. ✅ Leaderboard API endpoint (`/api/race-leaderboard`) with category filter
+2. ✅ Leaderboard page (`race-leaderboard.html`) with Graded/Open tabs
+3. ✅ Season/all-time toggle
+4. ✅ Add navigation links (home, race page, cross-linked with Pick'em)
+5. ✅ Top 3 podium cards
 
-### Phase 2 — Racer Detail
-5. Member detail API (`/api/race-leaderboard/member`)
-6. Inline expandable racer detail on leaderboard page
-7. Recent results + trend indicator
+### Phase 2 — Racer Detail ✅
+6. ✅ Member detail API (`/api/race-leaderboard/member`)
+7. ✅ Inline expandable racer detail on leaderboard page
+8. ✅ Recent results + cross-division summary
 
 ### Phase 3 — Polish (later)
-8. Season champion recognition (badge, announcement)
-9. Top 3 highlight cards with flair
-10. Race class filter (when Open/Graded/Classic tiers exist)
+9. Season champion recognition (badge, announcement)
+10. Trend indicator (climbing/falling/steady) in racer detail
 11. Season management (D1 table + admin UI, when needed)
 
 ---
