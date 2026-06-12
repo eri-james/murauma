@@ -48,7 +48,7 @@ export async function onRequestPut(context) {
 
     // --- Fetch current member data ---
     const member = await db
-      .prepare('SELECT id, username, password_hash, password_salt, trainer_id FROM members WHERE id = ?')
+      .prepare('SELECT id, username, password_hash, password_salt, trainer_id, status FROM members WHERE id = ?')
       .bind(user.userId)
       .first();
 
@@ -85,6 +85,7 @@ export async function onRequestPut(context) {
     }
 
     // --- Trainer ID ---
+    let trainerIdAdded = false; // Track if Trainer ID was newly added
     if (data.trainerID !== undefined) {
       const trainerResult = validateTrainerId(data.trainerID);
       if (!trainerResult.valid) return errorResponse(trainerResult.error);
@@ -97,6 +98,10 @@ export async function onRequestPut(context) {
           .first();
         if (existing) {
           return errorResponse('This Trainer ID is already registered by another member.');
+        }
+        // Track if this is a newly added Trainer ID (was null before, now has a value)
+        if (!member.trainer_id) {
+          trainerIdAdded = true;
         }
       }
       updates.push('trainer_id = ?');
@@ -172,7 +177,23 @@ export async function onRequestPut(context) {
       return errorResponse('Failed to update profile. Please try again.');
     }
 
-    return jsonResponse({ result: 'success', message: 'Profile updated successfully.' });
+    // --- Auto-approve: If member was pending and just added a Trainer ID, silently approve ---
+    // This is never communicated to the user — the form still says "pending review"
+    let newStatus = member.status;
+    if (member.status === 'pending' && trainerIdAdded) {
+      try {
+        await db
+          .prepare('UPDATE members SET status = ? WHERE id = ?')
+          .bind('approved', user.userId)
+          .run();
+        newStatus = 'approved';
+      } catch (autoApproveError) {
+        // Non-critical — don't fail the whole update if auto-approve fails
+        console.error('Auto-approve on Trainer ID add failed:', autoApproveError.message);
+      }
+    }
+
+    return jsonResponse({ result: 'success', message: 'Profile updated successfully.', status: newStatus });
 
   } catch (error) {
     console.error('Profile update error:', error.message);

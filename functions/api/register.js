@@ -189,11 +189,14 @@ export async function onRequestPost(context) {
     const sanitizedFavUma = favUmaResult.value ? sanitizeText(favUmaResult.value) : null;
     const sanitizedBio = bioResult.value ? sanitizeText(bioResult.value) : null;
 
+    // Auto-approve members who provide a valid Trainer ID (silent — never communicated on the form)
+    const initialStatus = trainerResult.value ? 'approved' : 'pending';
+
     try {
       await db
         .prepare(
           `INSERT INTO members (username, password_hash, password_salt, name, trainer_id, favorite_uma, bio, profile_picture_data, profile_picture_mime, role, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'member', 'pending')`
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'member', ?)`
         )
         .bind(
           usernameResult.value,
@@ -204,7 +207,8 @@ export async function onRequestPost(context) {
           sanitizedFavUma,
           sanitizedBio,
           base64Data,
-          profilePictureMime
+          profilePictureMime,
+          initialStatus
         )
         .run();
     } catch (dbError) {
@@ -233,7 +237,7 @@ export async function onRequestPost(context) {
       responseHeaders['Set-Cookie'] = cookieHeader;
     }
     return jsonResponse(
-      { result: 'success', message: 'Account created! You can now explore the site and edit your profile. To submit fan content or guides, an admin will need to approve your membership first.' },
+      { result: 'success', message: 'Account created! You can now explore the site and edit your profile.', status: initialStatus },
       200,
       responseHeaders
     );

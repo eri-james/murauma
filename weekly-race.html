@@ -159,6 +159,86 @@
             border-radius: 999px;
             transition: width 0.4s ease;
         }
+
+        /* Self-Join Section */
+        .join-section {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            border: 2px solid #86efac;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .join-section .join-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .join-section .join-status .check {
+            color: #16a34a;
+        }
+        .join-section .join-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .btn-join-race {
+            background: #16a34a;
+            color: white;
+            font-weight: 700;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.875rem;
+        }
+        .btn-join-race:hover { background: #15803d; }
+        .btn-join-race:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .btn-leave-race {
+            background: transparent;
+            color: #dc2626;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid #fca5a5;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .btn-leave-race:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+        .join-locked {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .join-locked svg { flex-shrink: 0; }
+        .join-message {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.375rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .join-message.success { background: #dcfce7; color: #166534; }
+        .join-message.error { background: #fef2f2; color: #991b1b; }
     </style>
 </head>
 <body class="has-pill-nav">
@@ -279,8 +359,13 @@
             <!-- How to Participate (default section — shown only if content is empty or minimal) -->
             <div id="race-how-to-participate" class="participate-section hidden">
                 <h2 class="text-xl font-bold text-green-800 mb-3">How to Participate</h2>
-                <p class="text-green-900">Joining is simple! The room will be opened on the event day. Please keep an eye on the <b>#club-announcement</b> channel in our Discord for the Room ID and password. Simply join the room in-game before the deadline.</p>
+                <p class="text-green-900">Joining is simple! Create an account with your Trainer ID, then click "Join Race" below. The room will be opened on the event day — keep an eye on the <b>#club-announcement</b> channel in our Discord for the Room ID and password.</p>
                 <p class="text-green-900 mt-2">Good luck to all participating trainers!</p>
+            </div>
+
+            <!-- Self-Join Section -->
+            <div id="join-section" class="join-section hidden">
+                <!-- Populated by JS -->
             </div>
 
             <!-- Pick'em: Race Predictions -->
@@ -485,6 +570,9 @@
                 loadingEl.classList.add('hidden');
                 contentEl.classList.remove('hidden');
 
+                // Load Self-Join section
+                loadJoinSection(race.id);
+
                 // Load Pick'em data
                 loadPickemData(race.id);
 
@@ -494,6 +582,200 @@
                 errorEl.classList.remove('hidden');
             }
         });
+
+        // ============================================================
+        // Self-Join Logic
+        // ============================================================
+        let joinRaceId = null;
+        let joinIsParticipant = false;
+        let joinHasResults = false;
+
+        async function loadJoinSection(raceId) {
+            joinRaceId = raceId;
+            const section = document.getElementById('join-section');
+
+            try {
+                // Fetch current user info
+                let currentUser = null;
+                try {
+                    const meResp = await fetch('/api/me');
+                    const meData = await meResp.json();
+                    if (meData.result === 'success' && meData.user) {
+                        currentUser = meData.user;
+                    }
+                } catch (e) { /* not logged in */ }
+
+                // Fetch pickem data to check roster + results
+                const pickemResp = await fetch(`/api/race-predictions?raceId=${raceId}`);
+                const pickemData = await pickemResp.json();
+
+                let roster = [];
+                joinHasResults = false;
+
+                if (pickemData.result === 'success') {
+                    roster = pickemData.roster || [];
+                    joinHasResults = pickemData.hasResults || false;
+                }
+
+                // Check if current user is already a participant
+                joinIsParticipant = currentUser && roster.some(p => p.memberId === currentUser.userId);
+
+                // Not logged in
+                if (!currentUser) {
+                    section.innerHTML = `
+                        <div class="join-locked">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            <a href="login.html" class="underline text-green-700">Log in</a> to join this race
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Not approved
+                if (currentUser.status !== 'approved') {
+                    section.innerHTML = `
+                        <div class="join-locked">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            Your account needs to be approved before joining races
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // No Trainer ID
+                if (!currentUser.trainerId) {
+                    section.innerHTML = `
+                        <div class="join-locked">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            <a href="edit-profile.html" class="underline text-green-700">Add your Trainer ID</a> to your profile to join races
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Results already in
+                if (joinHasResults) {
+                    // Show their result if they participated
+                    if (joinIsParticipant) {
+                        const myEntry = roster.find(p => p.memberId === currentUser.userId);
+                        const pos = myEntry?.position;
+                        let posText = '';
+                        if (pos === 1) posText = '1st place!';
+                        else if (pos === 2) posText = '2nd place!';
+                        else if (pos === 3) posText = '3rd place!';
+                        else if (pos) posText = `${pos}th place`;
+                        section.innerHTML = `
+                            <div class="join-status">
+                                <svg class="check" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                                You raced in this event${posText ? ' — finished ' + posText : ''}!
+                            </div>`;
+                    } else {
+                        section.innerHTML = `
+                            <div class="join-locked">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                                Race has ended — results are in
+                            </div>`;
+                    }
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Already joined
+                if (joinIsParticipant) {
+                    section.innerHTML = `
+                        <div class="join-status">
+                            <svg class="check" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                            You're in this race!
+                        </div>
+                        <div class="join-actions">
+                            <button class="btn-leave-race" onclick="leaveRace()">Leave Race</button>
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Can join
+                section.innerHTML = `
+                    <div class="join-status">Ready to race?</div>
+                    <div class="join-actions">
+                        <button class="btn-join-race" onclick="joinRace()">Join This Race</button>
+                    </div>`;
+                section.classList.remove('hidden');
+
+            } catch (err) {
+                console.error('Join section error:', err);
+            }
+        }
+
+        async function joinRace() {
+            const btn = document.querySelector('.btn-join-race');
+            const section = document.getElementById('join-section');
+            if (btn) { btn.disabled = true; btn.textContent = 'Joining...'; }
+
+            try {
+                const resp = await fetch('/api/race-participants/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raceId: joinRaceId }),
+                });
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    joinIsParticipant = true;
+                    // Reload the join section
+                    await loadJoinSection(joinRaceId);
+                    // Reload pickem data so the roster updates
+                    await loadPickemData(joinRaceId);
+                } else {
+                    // Show error inline
+                    section.innerHTML = `
+                        <div class="join-status">${DOMPurify.sanitize(data.message || 'Failed to join.')}</div>
+                        <div class="join-actions">
+                            <button class="btn-join-race" onclick="joinRace()">Try Again</button>
+                        </div>`;
+                }
+            } catch (err) {
+                section.innerHTML = `
+                    <div class="join-status">Network error. Please try again.</div>
+                    <div class="join-actions">
+                        <button class="btn-join-race" onclick="joinRace()">Try Again</button>
+                    </div>`;
+            }
+        }
+
+        async function leaveRace() {
+            const btn = document.querySelector('.btn-leave-race');
+            const section = document.getElementById('join-section');
+            if (btn) { btn.disabled = true; btn.textContent = 'Leaving...'; }
+
+            try {
+                const resp = await fetch('/api/race-participants/leave', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raceId: joinRaceId }),
+                });
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    joinIsParticipant = false;
+                    // Reload the join section
+                    await loadJoinSection(joinRaceId);
+                    // Reload pickem data so the roster updates
+                    await loadPickemData(joinRaceId);
+                } else {
+                    // Show error inline
+                    const statusDiv = section.querySelector('.join-status');
+                    if (statusDiv) {
+                        statusDiv.innerHTML = `<span class="join-message error">${DOMPurify.sanitize(data.message || 'Failed to leave.')}</span>`;
+                    }
+                }
+            } catch (err) {
+                const statusDiv = section.querySelector('.join-status');
+                if (statusDiv) {
+                    statusDiv.innerHTML = '<span class="join-message error">Network error. Please try again.</span>';
+                }
+            }
+        }
 
         // ============================================================
         // Pick'em Logic
