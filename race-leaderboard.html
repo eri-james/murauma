@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="YyHtpyC4Qyd60TqjjYi8FO5eyCKZ4stbpYFTrDBIKeQ" />
+    <title>Racer Leaderboard — MURA</title>
+    <meta name="description" content="Racer performance leaderboard for the Malayan Umamusume Racing Association (MURA).">
+    <link rel="canonical" href="https://murauma.pages.dev/race-leaderboard.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MURA Racer Leaderboard">
+    <meta property="og:description" content="Racer performance leaderboard for MURA. See who tops the rankings!">
+    <meta property="og:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
+    <meta property="og:url" content="https://murauma.pages.dev/race-leaderboard.html">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/favicon.png" sizes="180x180">
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <style>
+        /* Division Tabs */
+        .division-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+        }
+        .division-tab {
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #9ca3af;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .division-tab:hover { color: #166534; }
+        .division-tab.active-graded {
+            color: #166534;
+            border-bottom-color: #16a34a;
+        }
+        .division-tab.active-open {
+            color: #0369a1;
+            border-bottom-color: #0ea5e9;
+        }
+        .division-tab .tab-count {
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 0.1rem 0.4rem;
+            border-radius: 999px;
+            margin-left: 0.35rem;
+        }
+        .division-tab.active-graded .tab-count { background: #dcfce7; color: #166534; }
+        .division-tab.active-open .tab-count { background: #e0f2fe; color: #0369a1; }
+
+        /* Season Toggle */
+        .season-toggle {
+            display: inline-flex;
+            border-radius: 999px;
+            border: 2px solid #e5e7eb;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .season-btn {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            background: white;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+        .season-btn.active {
+            background: #16a34a;
+            color: white;
+        }
+        .season-btn:hover:not(.active) { background: #f9fafb; color: #374151; }
+
+        /* Top 3 Podium (Graded only) */
+        .podium-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 640px) {
+            .podium-section { grid-template-columns: 1fr; }
+        }
+        .podium-card {
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            text-align: center;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .podium-card:hover { transform: translateY(-4px); }
+        .podium-card.gold {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 3px solid #eab308;
+            order: 2;
+        }
+        .podium-card.silver {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border: 3px solid #9ca3af;
+            order: 1;
+        }
+        .podium-card.bronze {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef9c3 100%);
+            border: 3px solid #d97706;
+            order: 3;
+        }
+        .podium-avatar {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            border: 3px solid #e5e7eb;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: #6b7280;
+            overflow: hidden;
+        }
+        .podium-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .gold .podium-avatar { border-color: #eab308; }
+        .silver .podium-avatar { border-color: #9ca3af; }
+        .bronze .podium-avatar { border-color: #d97706; }
+        .podium-rank {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        .gold .podium-rank { color: #b45309; }
+        .silver .podium-rank { color: #6b7280; }
+        .bronze .podium-rank { color: #b45309; }
+        .podium-name { font-weight: 800; font-size: 1rem; color: #1f2937; }
+        .podium-points { font-size: 1.5rem; font-weight: 900; margin-top: 0.25rem; }
+        .gold .podium-points { color: #b45309; }
+        .silver .podium-points { color: #6b7280; }
+        .bronze .podium-points { color: #b45309; }
+        .podium-meta { font-size: 0.7rem; color: #9ca3af; margin-top: 0.25rem; }
+
+        /* Leaderboard Table */
+        .lb-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.35rem;
+        }
+        .lb-table th {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .lb-table td {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+        .lb-row {
+            background: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lb-row:hover {
+            background: #f0fdf4;
+            transform: translateX(2px);
+        }
+        .lb-row td:first-child { border-radius: 0.5rem 0 0 0.5rem; }
+        .lb-row td:last-child { border-radius: 0 0.5rem 0.5rem 0; }
+        .lb-row.rank-1 { border-left: 4px solid #eab308; }
+        .lb-row.rank-2 { border-left: 4px solid #9ca3af; }
+        .lb-row.rank-3 { border-left: 4px solid #d97706; }
+
+        .lb-rank {
+            font-weight: 800;
+            width: 2.5rem;
+            text-align: center;
+        }
+        .lb-rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+        .rank-1 .lb-rank-badge { background: #fef3c7; color: #b45309; }
+        .rank-2 .lb-rank-badge { background: #f3f4f6; color: #6b7280; }
+        .rank-3 .lb-rank-badge { background: #fef9c3; color: #b45309; }
+        .lb-rank-badge.other { background: #f3f4f6; color: #9ca3af; }
+
+        .lb-name { font-weight: 700; color: #1f2937; }
+        .lb-points { font-weight: 900; color: #16a34a; font-size: 1rem; }
+        .lb-stat { color: #6b7280; text-align: center; }
+
+        /* Inline Racer Detail */
+        .racer-detail {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            margin: 0.5rem 0 1rem;
+            display: none;
+        }
+        .racer-detail.open { display: block; }
+        .racer-detail h4 { font-weight: 800; font-size: 0.9rem; margin-bottom: 0.75rem; color: #374151; }
+        .racer-detail .detail-races {
+            display: grid;
+            gap: 0.35rem;
+        }
+        .detail-race-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0.75rem;
+            background: white;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            font-size: 0.8rem;
+        }
+        .detail-race-row .pos {
+            font-weight: 800;
+            min-width: 2.5rem;
+            text-align: center;
+        }
+        .detail-race-row .pos.p1 { color: #eab308; }
+        .detail-race-row .pos.p2 { color: #9ca3af; }
+        .detail-race-row .pos.p3 { color: #d97706; }
+        .detail-race-row .pts {
+            font-weight: 700;
+            color: #16a34a;
+        }
+        .detail-other-div {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .detail-other-div b { color: #374151; }
+
+        /* Open Division — lighter styling */
+        .open-theme .lb-row:hover { background: #f0f9ff; }
+        .open-theme .lb-points { color: #0ea5e9; }
+        .open-theme .podium-card.gold { border-color: #0ea5e9; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+        .open-theme .podium-card.silver { border-color: #93c5fd; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+        .open-theme .podium-card.bronze { border-color: #38bdf8; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+
+        /* Scoring explainer */
+        .scoring-explainer {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.8rem;
+            color: #166534;
+        }
+        .scoring-explainer b { color: #15803d; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9ca3af;
+        }
+        .empty-state svg { margin: 0 auto 1rem; opacity: 0.3; }
+    </style>
+</head>
+<body class="has-pill-nav">
+<canvas id="particle-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block;border:none;margin:0;padding:0"></canvas>
+
+    <!-- Pill Navigation Bar -->
+    <div class="nav-pill">
+        <div class="nav-pill-inner">
+            <a href="index.html" class="nav-pill-logo">
+                <span class="logo-title">MALAYAN UMAMUSUME</span>
+                <span class="logo-sub">RACING ASSOCIATION</span>
+            </a>
+            <nav id="main-nav" class="nav-pill-links">
+                <a href="index.html#news" class="nav-pill-link">News</a>
+                <a href="index.html#about" class="nav-pill-link">About</a>
+                <a href="index.html#events" class="nav-pill-link">Events</a>
+                <a href="index.html#community" class="nav-pill-link">Community</a>
+            </nav>
+            <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Full-Page Overlay Menu -->
+    <div id="nav-overlay" class="nav-overlay">
+        <button id="nav-overlay-close" class="nav-overlay-close" aria-label="Close menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <ul class="nav-overlay-menu">
+            <li class="nav-overlay-item"><a href="index.html#news" class="nav-overlay-link">News</a></li>
+            <li class="nav-overlay-item"><a href="index.html#about" class="nav-overlay-link">About</a></li>
+            <li class="nav-overlay-item"><a href="index.html#events" class="nav-overlay-link">Events</a></li>
+            <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-green-700">Racer Leaderboard</h1>
+                    <p id="season-label" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+                <a href="javascript:history.back()" class="text-sm font-bold text-green-600 hover:text-green-800 underline">Back</a>
+            </div>
+
+            <!-- Scoring explainer -->
+            <div class="scoring-explainer">
+                <b>Scoring:</b> 1st = 10 pts, 2nd = 6 pts, 3rd = 4 pts, 4th = 2 pts, 5th+ = 1 pt.
+                Tiebreaker: most wins, then most 2nds, then fewest races.
+            </div>
+
+            <div class="mb-4 text-center">
+                <a href="pickem-leaderboard.html" class="inline-flex items-center gap-1 text-sm font-bold text-purple-600 hover:text-purple-800 underline">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                    View Pick'em Leaderboard
+                </a>
+            </div>
+
+            <!-- Season Toggle -->
+            <div class="season-toggle">
+                <button id="btn-season-current" class="season-btn active" onclick="switchSeason('current')">Season 1 2026</button>
+                <button id="btn-season-alltime" class="season-btn" onclick="switchSeason('alltime')">All-Time</button>
+            </div>
+
+            <!-- Division Tabs -->
+            <div class="division-tabs">
+                <button id="tab-graded" class="division-tab active-graded" onclick="switchCategory('graded')">
+                    Graded Division
+                    <span id="tab-graded-count" class="tab-count">0</span>
+                </button>
+                <button id="tab-open" class="division-tab" onclick="switchCategory('open')">
+                    Open Division
+                    <span id="tab-open-count" class="tab-count">0</span>
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="lb-loading" class="text-center py-12">
+                <p class="text-gray-400">Loading leaderboard...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="lb-error" class="hidden text-center py-12">
+                <p class="text-red-500 font-bold">Failed to load leaderboard.</p>
+                <button onclick="loadLeaderboard()" class="mt-3 bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm hover:bg-green-700">Retry</button>
+            </div>
+
+            <!-- Leaderboard Content -->
+            <div id="lb-content" class="hidden">
+                <!-- Top 3 Podium (Graded only, or both with lighter style for Open) -->
+                <div id="podium-section" class="podium-section"></div>
+
+                <!-- Full Rankings Table -->
+                <div id="table-section"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="lb-empty" class="hidden empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                <p class="font-bold text-gray-500">No race results yet</p>
+                <p class="text-sm mt-1">Rankings will appear after races are completed!</p>
+                <a href="index.html#events" class="inline-block mt-4 bg-green-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-green-700 text-sm">View Races</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025–2026 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+        </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        // Nav overlay
+        const navBurgerBtn = document.getElementById('nav-burger-btn');
+        const navOverlay = document.getElementById('nav-overlay');
+        const navOverlayClose = document.getElementById('nav-overlay-close');
+        function openOverlay() { if (navOverlay) navOverlay.classList.add('is-open'); document.body.style.overflow = 'hidden'; }
+        function closeOverlay() { if (navOverlay) navOverlay.classList.remove('is-open'); document.body.style.overflow = ''; }
+        if (navBurgerBtn) navBurgerBtn.addEventListener('click', openOverlay);
+        if (navOverlayClose) navOverlayClose.addEventListener('click', closeOverlay);
+        if (navOverlay) navOverlay.addEventListener('click', (e) => { if (e.target === navOverlay) closeOverlay(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && navOverlay && navOverlay.classList.contains('is-open')) closeOverlay(); });
+
+        // State
+        let currentCategory = 'graded';
+        let currentSeason = 'current'; // 'current' or 'alltime'
+        let leaderboardData = [];
+        let expandedMemberId = null;
+
+        // Category tab switching
+        function switchCategory(cat) {
+            currentCategory = cat;
+            // Update tab styling
+            const gradedTab = document.getElementById('tab-graded');
+            const openTab = document.getElementById('tab-open');
+            gradedTab.className = 'division-tab' + (cat === 'graded' ? ' active-graded' : '');
+            openTab.className = 'division-tab' + (cat === 'open' ? ' active-open' : '');
+            expandedMemberId = null;
+            loadLeaderboard();
+        }
+
+        // Season toggle
+        function switchSeason(season) {
+            currentSeason = season;
+            document.getElementById('btn-season-current').classList.toggle('active', season === 'current');
+            document.getElementById('btn-season-alltime').classList.toggle('active', season === 'alltime');
+            expandedMemberId = null;
+            loadLeaderboard();
+        }
+
+        // Load leaderboard
+        async function loadLeaderboard() {
+            const loadingEl = document.getElementById('lb-loading');
+            const errorEl = document.getElementById('lb-error');
+            const contentEl = document.getElementById('lb-content');
+            const emptyEl = document.getElementById('lb-empty');
+
+            loadingEl.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+            contentEl.classList.add('hidden');
+            emptyEl.classList.add('hidden');
+
+            try {
+                const allTime = currentSeason === 'alltime';
+                const resp = await fetch(`/api/race-leaderboard?category=${currentCategory}${allTime ? '&allTime=true' : ''}`);
+                const data = await resp.json();
+
+                loadingEl.classList.add('hidden');
+
+                if (data.result !== 'success') {
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                // Update season label
+                const seasonLabel = document.getElementById('season-label');
+                if (allTime) {
+                    seasonLabel.textContent = 'All-time rankings across all seasons';
+                } else {
+                    seasonLabel.textContent = `${data.season.label} — ${data.season.raceCount} race(s) completed`;
+                }
+
+                // Update tab counts (we only have the current category's count from the API)
+                const count = data.leaderboard ? data.leaderboard.length : 0;
+                if (currentCategory === 'graded') {
+                    document.getElementById('tab-graded-count').textContent = count;
+                } else {
+                    document.getElementById('tab-open-count').textContent = count;
+                }
+
+                leaderboardData = data.leaderboard || [];
+
+                if (leaderboardData.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                    return;
+                }
+
+                contentEl.classList.remove('hidden');
+
+                // Render
+                renderLeaderboard();
+
+            } catch (err) {
+                console.error('Leaderboard load error:', err);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function renderLeaderboard() {
+            const isGraded = currentCategory === 'graded';
+            const themeClass = isGraded ? '' : 'open-theme';
+
+            // Podium (top 3) — show for both divisions but with different styling
+            const podiumSection = document.getElementById('podium-section');
+            const top3 = leaderboardData.slice(0, 3);
+
+            if (top3.length >= 1) {
+                podiumSection.innerHTML = top3.map(entry => {
+                    const cardClass = entry.rank === 1 ? 'gold' : entry.rank === 2 ? 'silver' : 'bronze';
+                    const rankLabel = entry.rank === 1 ? '1st Place' : entry.rank === 2 ? '2nd Place' : '3rd Place';
+                    const winsLabel = entry.wins === 1 ? '1 win' : `${entry.wins} wins`;
+                    const podiumLabel = entry.podiums === 1 ? '1 podium' : `${entry.podiums} podiums`;
+
+                    return `<div class="podium-card ${cardClass} ${themeClass}" onclick="toggleMemberDetail(${entry.memberId})">
+                        <div class="podium-rank">${rankLabel}</div>
+                        <div class="podium-avatar">
+                            <img src="${entry.avatarUrl}" alt="${DOMPurify.sanitize(entry.memberName)}" onerror="this.parentNode.innerHTML='${entry.memberName.charAt(0).toUpperCase()}'">
+                        </div>
+                        <div class="podium-name">${DOMPurify.sanitize(entry.memberName)}</div>
+                        <div class="podium-points">${entry.totalPoints} pts</div>
+                        <div class="podium-meta">${winsLabel} · ${podiumLabel} · ${entry.totalRaces} race(s)</div>
+                    </div>`;
+                }).join('');
+                podiumSection.classList.remove('hidden');
+            } else {
+                podiumSection.classList.add('hidden');
+            }
+
+            // Full table
+            const tableSection = document.getElementById('table-section');
+            let html = `<table class="lb-table ${themeClass}">`;
+            html += `<thead><tr>
+                <th>Rank</th>
+                <th>Racer</th>
+                <th style="text-align:center">Points</th>
+                <th style="text-align:center">Wins</th>
+                <th style="text-align:center">Podiums</th>
+                <th style="text-align:center">Races</th>
+                <th style="text-align:center">Avg Pos</th>
+            </tr></thead><tbody>`;
+
+            for (const entry of leaderboardData) {
+                const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+                const badgeClass = entry.rank <= 3 ? `rank-${entry.rank}` : 'other';
+                const rankIcon = entry.rank <= 3 ? (entry.rank === 1 ? '1' : entry.rank === 2 ? '2' : '3') : entry.rank;
+
+                html += `<tr class="lb-row ${rankClass}" onclick="toggleMemberDetail(${entry.memberId})">
+                    <td class="lb-rank"><span class="lb-rank-badge ${badgeClass}">${rankIcon}</span></td>
+                    <td class="lb-name">${DOMPurify.sanitize(entry.memberName)}</td>
+                    <td class="lb-points" style="text-align:center">${entry.totalPoints}</td>
+                    <td class="lb-stat">${entry.wins}</td>
+                    <td class="lb-stat">${entry.podiums}</td>
+                    <td class="lb-stat">${entry.totalRaces}</td>
+                    <td class="lb-stat">${entry.avgPosition}</td>
+                </tr>`;
+
+                // Inline detail row
+                html += `<tr><td colspan="7" style="padding:0;border:none;">
+                    <div id="detail-${entry.memberId}" class="racer-detail">
+                        <p class="text-gray-400 text-xs">Loading...</p>
+                    </div>
+                </td></tr>`;
+            }
+
+            html += '</tbody></table>';
+            tableSection.innerHTML = html;
+        }
+
+        async function toggleMemberDetail(memberId) {
+            if (expandedMemberId === memberId) {
+                // Collapse
+                const el = document.getElementById(`detail-${memberId}`);
+                if (el) el.classList.remove('open');
+                expandedMemberId = null;
+                return;
+            }
+
+            // Collapse previous
+            if (expandedMemberId !== null) {
+                const prev = document.getElementById(`detail-${expandedMemberId}`);
+                if (prev) prev.classList.remove('open');
+            }
+
+            expandedMemberId = memberId;
+            const el = document.getElementById(`detail-${memberId}`);
+            if (!el) return;
+
+            el.classList.add('open');
+            el.innerHTML = '<p class="text-gray-400 text-xs py-2">Loading race history...</p>';
+
+            try {
+                const allTime = currentSeason === 'alltime';
+                const resp = await fetch(`/api/race-leaderboard/member?memberId=${memberId}&category=${currentCategory}${allTime ? '&allTime=true' : ''}`);
+                const data = await resp.json();
+
+                if (data.result !== 'success') {
+                    el.innerHTML = '<p class="text-red-400 text-xs">Failed to load details.</p>';
+                    return;
+                }
+
+                let html = `<h4>Recent Races — ${DOMPurify.sanitize(data.member.name)}</h4>`;
+                html += '<div class="detail-races">';
+
+                if (data.recentRaces.length === 0) {
+                    html += '<p class="text-gray-400 text-xs">No completed races yet.</p>';
+                } else {
+                    for (const race of data.recentRaces) {
+                        const posClass = race.position === 1 ? 'p1' : race.position === 2 ? 'p2' : race.position === 3 ? 'p3' : '';
+                        const posLabel = formatPos(race.position);
+                        const dateStr = race.date ? new Date(race.date).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) : '';
+
+                        html += `<div class="detail-race-row">
+                            <span class="pos ${posClass}">${posLabel}</span>
+                            <span class="flex-1 text-gray-700 font-medium">${DOMPurify.sanitize(race.raceTitle)}</span>
+                            <span class="text-gray-400 text-xs">${dateStr}</span>
+                            <span class="pts">+${race.points}</span>
+                        </div>`;
+                    }
+                }
+
+                html += '</div>';
+
+                // Cross-division note
+                if (data.otherDivision) {
+                    const otherLabel = data.otherDivision.category === 'graded' ? 'Graded' : 'Open';
+                    html += `<div class="detail-other-div">
+                        Also competing in <b>${otherLabel}</b>: ${data.otherDivision.totalPoints} pts across ${data.otherDivision.totalRaces} race(s)
+                    </div>`;
+                }
+
+                el.innerHTML = html;
+            } catch (err) {
+                console.error('Member detail error:', err);
+                el.innerHTML = '<p class="text-red-400 text-xs">Network error.</p>';
+            }
+        }
+
+        function formatPos(pos) {
+            if (pos === 1) return '1st';
+            if (pos === 2) return '2nd';
+            if (pos === 3) return '3rd';
+            return `${pos}th`;
+        }
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+            // Also preload the other category's count
+            setTimeout(async () => {
+                try {
+                    const otherCat = currentCategory === 'graded' ? 'open' : 'graded';
+                    const allTime = currentSeason === 'alltime';
+                    const resp = await fetch(`/api/race-leaderboard?category=${otherCat}${allTime ? '&allTime=true' : ''}`);
+                    const data = await resp.json();
+                    if (data.result === 'success') {
+                        document.getElementById(`tab-${otherCat}-count`).textContent = (data.leaderboard || []).length;
+                    }
+                } catch (e) { /* non-critical */ }
+            }, 500);
+        });
+    </script>
+<script src="/js/particles.js"></script>
+</body>
+</html>

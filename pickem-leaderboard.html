@@ -96,13 +96,20 @@
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
         <div class="max-w-2xl mx-auto">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-4">
                 <h1 class="text-3xl font-extrabold text-purple-700">Pick'em Leaderboard</h1>
                 <a href="javascript:history.back()" class="text-sm font-bold text-purple-500 hover:text-purple-700 underline">Back</a>
             </div>
 
-            <div class="bg-purple-50 border-2 border-purple-300 rounded-xl p-4 mb-6">
+            <div class="bg-purple-50 border-2 border-purple-300 rounded-xl p-4 mb-4">
                 <p class="text-sm text-purple-700">Predict the podium for each race! <b>3 pts</b> for correct 1st place, <b>2 pts</b> for 2nd, <b>1 pt</b> for 3rd. Maximum 6 points per race.</p>
+            </div>
+
+            <div class="mb-6 text-center">
+                <a href="race-leaderboard.html" class="inline-flex items-center gap-1 text-sm font-bold text-green-600 hover:text-green-800 underline">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM5 12V2h6v10H5z"/><path d="M8 6a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+                    View Racer Leaderboard
+                </a>
             </div>
 
             <div id="leaderboard-loading" class="text-center py-12">
