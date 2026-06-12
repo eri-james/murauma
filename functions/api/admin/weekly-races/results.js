@@ -3,9 +3,11 @@
  *
  * POST /api/admin/weekly-races/results — Enter race results (positions) and auto-score predictions
  *
- * Request body: { raceId, results: [{ memberId, position }] }
+ * Request body: { raceId, results: [{ memberId, position, category }] }
  * Positions should be 1, 2, 3... for top finishers.
  * After saving positions, all predictions for this race are auto-scored.
+ *
+ * Pick'em scoring is based on graded division results only.
  */
 import {
   errorResponse,
@@ -37,20 +39,23 @@ export async function onRequestPost(context) {
       if (!Number.isInteger(r.memberId) || !Number.isInteger(r.position) || r.position < 1) {
         return errorResponse('Each result must have a valid memberId and position (positive integer).');
       }
+      if (!r.category || !['open', 'graded'].includes(r.category)) {
+        return errorResponse('Each result must specify category "open" or "graded".');
+      }
     }
 
     // Verify race exists
     const race = await db.prepare('SELECT id FROM weekly_races WHERE id = ?').bind(data.raceId).first();
     if (!race) return errorResponse('Race not found.');
 
-    // Verify all members are participants in this race
+    // Verify all members are participants in the specified category
     for (const r of data.results) {
       const participant = await db
-        .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ?')
-        .bind(data.raceId, r.memberId)
+        .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+        .bind(data.raceId, r.memberId, r.category)
         .first();
       if (!participant) {
-        return errorResponse(`Member #${r.memberId} is not a participant in this race.`);
+        return errorResponse(`Member #${r.memberId} is not a participant in the ${r.category} division.`);
       }
     }
 
@@ -63,17 +68,17 @@ export async function onRequestPost(context) {
     // Set new positions
     for (const r of data.results) {
       await db
-        .prepare('UPDATE race_participants SET position = ? WHERE race_id = ? AND member_id = ?')
-        .bind(r.position, data.raceId, r.memberId)
+        .prepare('UPDATE race_participants SET position = ? WHERE race_id = ? AND member_id = ? AND category = ?')
+        .bind(r.position, data.raceId, r.memberId, r.category)
         .run();
     }
 
-    // --- Auto-score predictions ---
-    // Get the top 3 finishers
+    // --- Auto-score predictions (graded division only) ---
+    // Get the top 3 finishers from graded division
     const topFinishers = await db
       .prepare(
         `SELECT member_id, position FROM race_participants
-         WHERE race_id = ? AND position IS NOT NULL AND position <= 3
+         WHERE race_id = ? AND category = 'graded' AND position IS NOT NULL AND position <= 3
          ORDER BY position ASC`
       )
       .bind(data.raceId)

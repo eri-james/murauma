@@ -1,12 +1,12 @@
 /**
  * POST /api/race-participants/leave — Leave a Race (Self-Unjoin)
  *
- * Allows a member to remove themselves from a race before results are entered.
- * Once results are in, leaving is disabled.
+ * Allows a member to remove themselves from a race (specific category) before
+ * results are entered. Once results are in, leaving is disabled.
  *
  * Guard rails:
  *   - Must be logged in (requireAuth)
- *   - Must be a participant in the race
+ *   - Must be a participant in the specified category
  *   - Race must not have results entered yet
  */
 import {
@@ -14,6 +14,8 @@ import {
   successResponse,
   requireAuth,
 } from '../../_shared/utils.js';
+
+const VALID_CATEGORIES = ['open', 'graded'];
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -30,13 +32,20 @@ export async function onRequestPost(context) {
       return errorResponse('Valid raceId is required.');
     }
 
-    // --- Guard: Must be a participant ---
+    // --- Validate category ---
+    const category = (data.category || 'graded').toLowerCase();
+    if (!VALID_CATEGORIES.includes(category)) {
+      return errorResponse('Category must be "open" or "graded".');
+    }
+
+    // --- Guard: Must be a participant in this category ---
     const existing = await db
-      .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ?')
-      .bind(data.raceId, user.userId)
+      .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+      .bind(data.raceId, user.userId, category)
       .first();
     if (!existing) {
-      return errorResponse('You are not a participant in this race.');
+      const label = category === 'open' ? 'Open Division' : 'Graded Division';
+      return errorResponse(`You are not a participant in the ${label}.`);
     }
 
     // --- Guard: Race must not have results yet ---
@@ -48,25 +57,14 @@ export async function onRequestPost(context) {
       return errorResponse('Results have already been entered. You cannot leave this race.');
     }
 
-    // --- Also remove any prediction the user made for this race ---
-    // (If they leave the race, their pick'em prediction referencing them as a participant is invalid)
-    // Actually — their prediction picks OTHER participants, not themselves. So we keep predictions.
-    // But we should remove them from the roster so others can't pick them anymore.
-
-    // --- Remove from race_participants ---
+    // --- Remove from race_participants (specific category) ---
     await db
-      .prepare('DELETE FROM race_participants WHERE race_id = ? AND member_id = ?')
-      .bind(data.raceId, user.userId)
+      .prepare('DELETE FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+      .bind(data.raceId, user.userId, category)
       .run();
 
-    // --- Remove any pick'em predictions that picked this member ---
-    // If other users picked this member as 1st/2nd/3rd, those picks now reference
-    // a non-participant. We should clear those specific picks to maintain data integrity.
-    // However, this would be complex and potentially confusing. Instead, the scoring
-    // system naturally handles it — a pick for a non-participant simply won't match
-    // any result position. We'll leave predictions as-is for simplicity.
-
-    return successResponse('You have left the race.');
+    const label = category === 'open' ? 'Open Division' : 'Graded Division';
+    return successResponse(`You have left the ${label}.`);
 
   } catch (error) {
     console.error('Self-leave race error:', error.message);

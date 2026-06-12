@@ -23,10 +23,10 @@ export async function onRequestGet(context) {
       return errorResponse('Valid raceId is required.');
     }
 
-    // Get participants with positions (if results entered)
-    const { results: participants } = await db
+    // Get ALL participants (for join section display)
+    const { results: allParticipants } = await db
       .prepare(
-        `SELECT rp.member_id, rp.position, m.name AS member_name, m.trainer_id
+        `SELECT rp.member_id, rp.category, rp.position, m.name AS member_name, m.trainer_id
          FROM race_participants rp
          JOIN members m ON m.id = rp.member_id
          WHERE rp.race_id = ?
@@ -35,13 +35,27 @@ export async function onRequestGet(context) {
       .bind(raceId)
       .all();
 
-    const roster = participants.map(row => ({
-      memberId: row.member_id,
-      memberName: row.member_name,
-      trainerId: row.trainer_id,
-      avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.member_id}`,
-      position: row.position,
-    }));
+    // Pick'em roster: graded only (predictions are for graded division)
+    const roster = allParticipants
+      .filter(row => row.category === 'graded')
+      .map(row => ({
+        memberId: row.member_id,
+        memberName: row.member_name,
+        trainerId: row.trainer_id,
+        avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.member_id}`,
+        position: row.position,
+      }));
+
+    // Open division roster (no predictions, display only)
+    const openRoster = allParticipants
+      .filter(row => row.category === 'open')
+      .map(row => ({
+        memberId: row.member_id,
+        memberName: row.member_name,
+        trainerId: row.trainer_id,
+        avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.member_id}`,
+        position: row.position,
+      }));
 
     // Get prediction count and "popular picks" (aggregate stats)
     const predStats = await db
@@ -101,8 +115,17 @@ export async function onRequestGet(context) {
     // Results available?
     const hasResults = roster.some(p => p.position !== null);
 
+    // Check what categories the current user has joined
+    let myCategories = [];
+    if (user) {
+      myCategories = allParticipants
+        .filter(row => row.member_id === user.userId)
+        .map(row => row.category);
+    }
+
     return successResponse('Race prediction data loaded.', {
       roster,
+      openRoster,
       totalPredictions: predStats?.total_predictions || 0,
       popularPicks: {
         first: pick1Counts.map(r => ({ memberId: r.member_id, name: r.name, count: r.count })),
@@ -110,6 +133,7 @@ export async function onRequestGet(context) {
         third: pick3Counts.map(r => ({ memberId: r.member_id, name: r.name, count: r.count })),
       },
       myPrediction,
+      myCategories,
       hasResults,
     });
   } catch (error) {
@@ -151,14 +175,14 @@ export async function onRequestPost(context) {
     const race = await db.prepare('SELECT id FROM weekly_races WHERE id = ?').bind(data.raceId).first();
     if (!race) return errorResponse('Race not found.');
 
-    // Verify all picked members are participants
+    // Verify all picked members are graded participants (Pick'em is graded-only)
     for (const pickId of [data.pick1st, data.pick2nd, data.pick3rd]) {
       const participant = await db
-        .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ?')
-        .bind(data.raceId, pickId)
+        .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+        .bind(data.raceId, pickId, 'graded')
         .first();
       if (!participant) {
-        return errorResponse(`Member #${pickId} is not a participant in this race.`);
+        return errorResponse(`Member #${pickId} is not a graded division participant in this race.`);
       }
     }
 

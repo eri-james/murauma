@@ -12,6 +12,8 @@ import {
   adminPreflightResponse,
 } from '../../../_shared/utils.js';
 
+const VALID_CATEGORIES = ['open', 'graded'];
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = env.DB;
@@ -32,12 +34,12 @@ export async function onRequestGet(context) {
 
     const { results } = await db
       .prepare(
-        `SELECT rp.id, rp.race_id, rp.member_id, rp.position, rp.added_at,
+        `SELECT rp.id, rp.race_id, rp.member_id, rp.category, rp.position, rp.added_at,
                 m.name AS member_name, m.trainer_id
          FROM race_participants rp
          JOIN members m ON m.id = rp.member_id
          WHERE rp.race_id = ?
-         ORDER BY rp.added_at ASC`
+         ORDER BY rp.category ASC, rp.added_at ASC`
       )
       .bind(raceId)
       .all();
@@ -49,6 +51,7 @@ export async function onRequestGet(context) {
       memberName: row.member_name,
       trainerId: row.trainer_id,
       avatarUrl: row.trainer_id ? `/api/avatar/${row.trainer_id}` : `/api/avatar/${row.member_id}`,
+      category: row.category,
       position: row.position,
       addedAt: row.added_at,
     }));
@@ -77,6 +80,12 @@ export async function onRequestPost(context) {
       return errorResponse('Valid memberId is required.');
     }
 
+    // Validate category
+    const category = (data.category || 'graded').toLowerCase();
+    if (!VALID_CATEGORIES.includes(category)) {
+      return errorResponse('Category must be "open" or "graded".');
+    }
+
     // Verify race exists
     const race = await db.prepare('SELECT id FROM weekly_races WHERE id = ?').bind(data.raceId).first();
     if (!race) return errorResponse('Race not found.');
@@ -85,21 +94,23 @@ export async function onRequestPost(context) {
     const member = await db.prepare('SELECT id, name FROM members WHERE id = ?').bind(data.memberId).first();
     if (!member) return errorResponse('Member not found.');
 
-    // Check for duplicate
+    // Check for duplicate in same category
     const existing = await db
-      .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ?')
-      .bind(data.raceId, data.memberId)
+      .prepare('SELECT id, category FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+      .bind(data.raceId, data.memberId, category)
       .first();
     if (existing) {
-      return errorResponse(`${member.name} is already a participant in this race.`);
+      const label = category === 'open' ? 'Open Division' : 'Graded Division';
+      return errorResponse(`${member.name} is already in the ${label}.`);
     }
 
     await db
-      .prepare('INSERT INTO race_participants (race_id, member_id) VALUES (?, ?)')
-      .bind(data.raceId, data.memberId)
+      .prepare('INSERT INTO race_participants (race_id, member_id, category) VALUES (?, ?, ?)')
+      .bind(data.raceId, data.memberId, category)
       .run();
 
-    return successResponse(`${member.name} added to race.`, { memberId: data.memberId });
+    const label = category === 'open' ? 'Open Division' : 'Graded Division';
+    return successResponse(`${member.name} added to ${label}.`, { memberId: data.memberId, category });
   } catch (error) {
     console.error('Admin add participant error:', error.message);
     return errorResponse('Failed to add participant.', 500);
@@ -123,20 +134,27 @@ export async function onRequestDelete(context) {
       return errorResponse('Valid memberId is required.');
     }
 
+    // Validate category (required for deletion since same member can be in both)
+    const category = (data.category || '').toLowerCase();
+    if (!VALID_CATEGORIES.includes(category)) {
+      return errorResponse('Category ("open" or "graded") is required to remove a participant.');
+    }
+
     const existing = await db
-      .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ?')
-      .bind(data.raceId, data.memberId)
+      .prepare('SELECT id FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+      .bind(data.raceId, data.memberId, category)
       .first();
     if (!existing) {
-      return errorResponse('Participant not found in this race.');
+      return errorResponse('Participant not found in this division.');
     }
 
     await db
-      .prepare('DELETE FROM race_participants WHERE race_id = ? AND member_id = ?')
-      .bind(data.raceId, data.memberId)
+      .prepare('DELETE FROM race_participants WHERE race_id = ? AND member_id = ? AND category = ?')
+      .bind(data.raceId, data.memberId, category)
       .run();
 
-    return successResponse('Participant removed from race.');
+    const label = category === 'open' ? 'Open Division' : 'Graded Division';
+    return successResponse(`Participant removed from ${label}.`);
   } catch (error) {
     console.error('Admin remove participant error:', error.message);
     return errorResponse('Failed to remove participant.', 500);

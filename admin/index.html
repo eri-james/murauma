@@ -1844,37 +1844,77 @@
             const data = await api('GET', `/api/admin/weekly-races/participants?raceId=${pickemRaceId}`);
             const participants = data.participants || [];
 
-            // Add participant form
+            const graded = participants.filter(p => (p.category || 'graded') === 'graded');
+            const open = participants.filter(p => (p.category || 'graded') === 'open');
+
+            // Helper: filter members not already in a specific category
+            const availableForCategory = (cat) => pickemMembers.filter(m => !participants.find(p => p.memberId === m.id && (p.category || 'graded') === cat));
+
+            // Add participant form with category dropdown
             let addForm = `
-                <div class="flex gap-2 mb-4">
+                <div class="flex gap-2 mb-4 items-center">
                     <select id="pickem-add-member" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm">
                         <option value="">Select a member to add...</option>
-                        ${pickemMembers
-                            .filter(m => !participants.find(p => p.memberId === m.id))
-                            .map(m => `<option value="${m.id}">${esc(m.name)} (${esc(m.trainerId || 'no ID')})</option>`)
-                            .join('')}
+                    </select>
+                    <select id="pickem-add-category" class="rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm w-32">
+                        <option value="graded">Graded</option>
+                        <option value="open">Open</option>
                     </select>
                     <button onclick="addPickemParticipant()" class="px-4 py-2 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 text-sm">Add</button>
                 </div>
             `;
 
+            // Category badge helper
+            const catBadge = (cat) => {
+                const c = cat || 'graded';
+                const cls = c === 'graded' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700';
+                return `<span class="text-xs font-bold px-1.5 py-0.5 rounded ${cls}">${c === 'graded' ? 'Graded' : 'Open'}</span>`;
+            };
+
+            // Render a division section
+            const renderSection = (title, cat, list) => {
+                const catClass = cat === 'graded' ? 'border-purple-300 bg-purple-50' : 'border-green-300 bg-green-50';
+                const titleClass = cat === 'graded' ? 'text-purple-700' : 'text-green-700';
+                if (list.length === 0) {
+                    return `<div class="mb-4 border-l-4 ${catClass} rounded-r-lg p-3">
+                        <h4 class="font-bold text-sm ${titleClass} mb-1">${title}</h4>
+                        <p class="text-gray-400 text-xs">No participants in this division yet.</p>
+                    </div>`;
+                }
+                const items = list.map(p => `
+                    <div class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-sm">${esc(p.memberName)}</span>
+                            <span class="text-xs text-gray-400">${esc(p.trainerId || '')}</span>
+                            ${catBadge(p.category)}
+                            ${p.position ? `<span class="text-xs font-bold ${p.position === 1 ? 'text-yellow-500' : p.position === 2 ? 'text-gray-400' : p.position === 3 ? 'text-amber-600' : 'text-gray-500'}">P${p.position}</span>` : ''}
+                        </div>
+                        <button onclick="removePickemParticipant(${p.memberId}, '${p.category || 'graded'}')" class="text-red-400 hover:text-red-600 text-xs font-bold">Remove</button>
+                    </div>
+                `).join('');
+                return `<div class="mb-4 border-l-4 ${catClass} rounded-r-lg p-3">
+                    <h4 class="font-bold text-sm ${titleClass} mb-2">${title} <span class="font-normal text-gray-400">(${list.length})</span></h4>
+                    ${items}
+                </div>`;
+            };
+
             if (participants.length === 0) {
                 content.innerHTML = addForm + '<p class="text-gray-400 text-sm py-2">No participants added yet. Add members who are racing!</p>';
-                return;
+            } else {
+                content.innerHTML = addForm + renderSection('Graded Division', 'graded', graded) + renderSection('Open Division', 'open', open);
             }
 
-            const list = participants.map(p => `
-                <div class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100 mb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm">${esc(p.memberName)}</span>
-                        <span class="text-xs text-gray-400">${esc(p.trainerId || '')}</span>
-                        ${p.position ? `<span class="text-xs font-bold ${p.position === 1 ? 'text-yellow-500' : p.position === 2 ? 'text-gray-400' : p.position === 3 ? 'text-amber-600' : 'text-gray-500'}">P${p.position}</span>` : ''}
-                    </div>
-                    <button onclick="removePickemParticipant(${p.memberId})" class="text-red-400 hover:text-red-600 text-xs font-bold">Remove</button>
-                </div>
-            `).join('');
-
-            content.innerHTML = addForm + `<div>${list}</div>`;
+            // Populate member dropdown based on selected category
+            const populateMemberDropdown = () => {
+                const catSelect = document.getElementById('pickem-add-category');
+                const memberSelect = document.getElementById('pickem-add-member');
+                const cat = catSelect.value;
+                const available = availableForCategory(cat);
+                memberSelect.innerHTML = '<option value="">Select a member to add...</option>' +
+                    available.map(m => `<option value="${m.id}">${esc(m.name)} (${esc(m.trainerId || 'no ID')})</option>`).join('');
+            };
+            document.getElementById('pickem-add-category').addEventListener('change', populateMemberDropdown);
+            populateMemberDropdown(); // initial population
         } catch (err) {
             content.innerHTML = `<p class="text-red-500 text-sm">Error: ${err.message}</p>`;
         }
@@ -1882,18 +1922,20 @@
 
     async function addPickemParticipant() {
         const select = document.getElementById('pickem-add-member');
+        const categorySelect = document.getElementById('pickem-add-category');
         const memberId = parseInt(select.value, 10);
+        const category = categorySelect.value || 'graded';
         if (!memberId) { alert('Select a member first.'); return; }
         try {
-            await api('POST', '/api/admin/weekly-races/participants', { raceId: pickemRaceId, memberId });
+            await api('POST', '/api/admin/weekly-races/participants', { raceId: pickemRaceId, memberId, category });
             loadPickemParticipants();
         } catch (err) { alert('Error: ' + err.message); }
     }
 
-    async function removePickemParticipant(memberId) {
+    async function removePickemParticipant(memberId, category) {
         if (!confirm('Remove this participant?')) return;
         try {
-            await api('DELETE', '/api/admin/weekly-races/participants', { raceId: pickemRaceId, memberId });
+            await api('DELETE', '/api/admin/weekly-races/participants', { raceId: pickemRaceId, memberId, category: category || 'graded' });
             loadPickemParticipants();
         } catch (err) { alert('Error: ' + err.message); }
     }
@@ -1910,31 +1952,50 @@
                 return;
             }
 
+            const graded = participants.filter(p => (p.category || 'graded') === 'graded');
+            const open = participants.filter(p => (p.category || 'graded') === 'open');
+
             const hasResults = participants.some(p => p.position !== null);
-            let resultRows = participants.map(p => `
-                <div class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100 mb-2">
-                    <span class="font-bold text-sm">${esc(p.memberName)}</span>
-                    <select data-member-id="${p.memberId}" class="pickem-position-select rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-sm w-28">
-                        <option value="" ${!p.position ? 'selected' : ''}>No position</option>
-                        <option value="1" ${p.position === 1 ? 'selected' : ''}>1st Place</option>
-                        <option value="2" ${p.position === 2 ? 'selected' : ''}>2nd Place</option>
-                        <option value="3" ${p.position === 3 ? 'selected' : ''}>3rd Place</option>
-                        <option value="4" ${p.position === 4 ? 'selected' : ''}>4th</option>
-                        <option value="5" ${p.position === 5 ? 'selected' : ''}>5th</option>
-                        <option value="6" ${p.position === 6 ? 'selected' : ''}>6th</option>
-                        <option value="7" ${p.position === 7 ? 'selected' : ''}>7th</option>
-                        <option value="8" ${p.position === 8 ? 'selected' : ''}>8th</option>
-                        <option value="9" ${p.position === 9 ? 'selected' : ''}>9th</option>
-                        <option value="10" ${p.position === 10 ? 'selected' : ''}>10th</option>
-                        <option value="11" ${p.position === 11 ? 'selected' : ''}>11th</option>
-                        <option value="12" ${p.position === 12 ? 'selected' : ''}>12th</option>
-                    </select>
-                </div>
-            `).join('');
+
+            const renderSection = (title, cat, list) => {
+                const catClass = cat === 'graded' ? 'border-purple-300 bg-purple-50' : 'border-green-300 bg-green-50';
+                const titleClass = cat === 'graded' ? 'text-purple-700' : 'text-green-700';
+                if (list.length === 0) {
+                    return `<div class="mb-4 border-l-4 ${catClass} rounded-r-lg p-3">
+                        <h4 class="font-bold text-sm ${titleClass} mb-1">${title}</h4>
+                        <p class="text-gray-400 text-xs">No participants in this division.</p>
+                    </div>`;
+                }
+                const rows = list.map(p => `
+                    <div class="flex items-center justify-between py-2 px-3 bg-white rounded-lg border border-gray-100 mb-2">
+                        <span class="font-bold text-sm">${esc(p.memberName)}</span>
+                        <select data-member-id="${p.memberId}" data-category="${p.category || 'graded'}" class="pickem-position-select rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-sm w-28">
+                            <option value="" ${!p.position ? 'selected' : ''}>No position</option>
+                            <option value="1" ${p.position === 1 ? 'selected' : ''}>1st Place</option>
+                            <option value="2" ${p.position === 2 ? 'selected' : ''}>2nd Place</option>
+                            <option value="3" ${p.position === 3 ? 'selected' : ''}>3rd Place</option>
+                            <option value="4" ${p.position === 4 ? 'selected' : ''}>4th</option>
+                            <option value="5" ${p.position === 5 ? 'selected' : ''}>5th</option>
+                            <option value="6" ${p.position === 6 ? 'selected' : ''}>6th</option>
+                            <option value="7" ${p.position === 7 ? 'selected' : ''}>7th</option>
+                            <option value="8" ${p.position === 8 ? 'selected' : ''}>8th</option>
+                            <option value="9" ${p.position === 9 ? 'selected' : ''}>9th</option>
+                            <option value="10" ${p.position === 10 ? 'selected' : ''}>10th</option>
+                            <option value="11" ${p.position === 11 ? 'selected' : ''}>11th</option>
+                            <option value="12" ${p.position === 12 ? 'selected' : ''}>12th</option>
+                        </select>
+                    </div>
+                `).join('');
+                return `<div class="mb-4 border-l-4 ${catClass} rounded-r-lg p-3">
+                    <h4 class="font-bold text-sm ${titleClass} mb-2">${title} <span class="font-normal text-gray-400">(${list.length})</span></h4>
+                    ${rows}
+                </div>`;
+            };
 
             content.innerHTML = `
-                <p class="text-xs text-gray-500 mb-3">Set the finishing position for each participant. Only top 3 are scored for predictions. Submitting results will auto-score all predictions.</p>
-                ${resultRows}
+                <p class="text-xs text-gray-500 mb-3">Set the finishing position for each participant. Only top 3 are scored for predictions. Positions must be unique within each division. Submitting results will auto-score all predictions.</p>
+                ${renderSection('Graded Division', 'graded', graded)}
+                ${renderSection('Open Division', 'open', open)}
                 <button onclick="savePickemResults()" class="mt-4 w-full px-4 py-2.5 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 text-sm">
                     ${hasResults ? 'Update Results & Re-score Predictions' : 'Save Results & Score Predictions'}
                 </button>
@@ -1949,20 +2010,26 @@
         const results = [];
         selects.forEach(sel => {
             const memberId = parseInt(sel.dataset.memberId, 10);
+            const category = sel.dataset.category || 'graded';
             const position = sel.value ? parseInt(sel.value, 10) : null;
             if (position !== null) {
-                results.push({ memberId, position });
+                results.push({ memberId, position, category });
             }
         });
         if (results.length === 0) {
             alert('Set at least one position before saving.');
             return;
         }
-        // Check for duplicate positions
-        const positions = results.map(r => r.position);
-        if (new Set(positions).size !== positions.length) {
-            alert('Each position must be unique. Two participants cannot share the same position.');
-            return;
+        // Check for duplicate positions within each category
+        const categories = [...new Set(results.map(r => r.category))];
+        for (const cat of categories) {
+            const catResults = results.filter(r => r.category === cat);
+            const positions = catResults.map(r => r.position);
+            if (new Set(positions).size !== positions.length) {
+                const label = cat === 'graded' ? 'Graded' : 'Open';
+                alert(`Each position must be unique within the ${label} Division. Two participants cannot share the same position.`);
+                return;
+            }
         }
         try {
             const data = await api('POST', '/api/admin/weekly-races/results', { raceId: pickemRaceId, results });
