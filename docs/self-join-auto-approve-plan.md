@@ -1,7 +1,7 @@
 # Self-Join & Auto-Approve — Feature Plan
 
 > Created: 2026-06-12
-> Status: Planning (not yet implemented)
+> Status: Implemented (2026-06-12)
 > Context: MURA (Malayan Umamusume Racing Association) community site
 
 ---
