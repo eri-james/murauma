@@ -29,7 +29,7 @@
     function init() {
         if (initialized) return;
         const btn = document.getElementById('nav-burger-btn');
-        if (!btn) return; // Nav not in DOM yet — will retry on mura:layout-ready
+        if (!btn) return; // Nav not in DOM yet — will retry on next event
         initialized = true;
 
         const closeBtn = document.getElementById('nav-overlay-close');
@@ -50,4 +50,24 @@
 
     // Try after layout.js injects nav (for pages using <div id="site-nav">)
     document.addEventListener('mura:layout-ready', init);
+
+    // Safety net: if both events already fired (race condition on some browsers),
+    // use a MutationObserver to watch for the burger button appearing.
+    if (!initialized && document.readyState !== 'loading') {
+        const navContainer = document.getElementById('site-nav');
+        if (navContainer && !document.getElementById('nav-burger-btn')) {
+            const observer = new MutationObserver(() => {
+                if (document.getElementById('nav-burger-btn')) {
+                    observer.disconnect();
+                    init();
+                }
+            });
+            observer.observe(navContainer, { childList: true, subtree: true });
+            // Stop observing after 10 seconds to avoid lingering observers
+            setTimeout(() => observer.disconnect(), 10000);
+        } else {
+            // Burger might already be in the DOM — try once more
+            init();
+        }
+    }
 })();

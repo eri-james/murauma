@@ -28,22 +28,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Footer is the same for root & home; sub-pages use -sub variant
     const footerPath = inSubdir ? '/includes/footer-sub.html' : '/includes/footer.html';
 
+    // Fetch with a 5-second timeout so a stalled network doesn't block forever
+    function fetchWithTimeout(url, ms) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), ms);
+        return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+    }
+
     const navContainer = document.getElementById('site-nav');
     if (navContainer) {
         try {
-            const r = await fetch(navPath);
-            navContainer.innerHTML = await r.text();
-        } catch (_) { /* nav load failure is non-critical */ }
+            const r = await fetchWithTimeout(navPath, 5000);
+            if (r.ok) navContainer.innerHTML = await r.text();
+            else console.warn('layout.js: nav fetch returned', r.status);
+        } catch (e) {
+            console.warn('layout.js: nav fetch failed', e.message || e);
+        }
     }
 
     const footerContainer = document.getElementById('site-footer');
     if (footerContainer) {
         try {
-            const r = await fetch(footerPath);
-            footerContainer.innerHTML = await r.text();
-        } catch (_) { /* footer load failure is non-critical */ }
+            const r = await fetchWithTimeout(footerPath, 5000);
+            if (r.ok) footerContainer.innerHTML = await r.text();
+            else console.warn('layout.js: footer fetch returned', r.status);
+        } catch (e) {
+            console.warn('layout.js: footer fetch failed', e.message || e);
+        }
     }
 
-    // Signal that layout HTML is in the DOM so nav-overlay.js and auth.js can initialise
+    // Signal that layout HTML is in the DOM so nav-overlay.js and auth.js can initialise.
+    // This ALWAYS fires, even if the fetches failed, so other scripts don't hang.
     document.dispatchEvent(new CustomEvent('mura:layout-ready'));
 });

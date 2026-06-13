@@ -299,6 +299,7 @@
         document.addEventListener('mura:layout-ready', () => {
 
             // --- Page Navigation Logic ---
+            try {
             const pageHome = document.getElementById('page-home');
             const pageNews = document.getElementById('page-news');
             const pageGuides = document.getElementById('page-guides');
@@ -390,8 +391,11 @@
                 });
             });
 
+            } catch (navErr) { console.error('MURA nav init error:', navErr); }
+
             // --- Dynamic Carousel Logic ---
             // Auto-populates with thumbnails from 2 most recent News, Races, Guides, Events.
+            try {
             const scroller = document.getElementById('thumbnail-scroller');
             if (scroller) {
                 let isTransitioning = false;
@@ -602,7 +606,10 @@
                 loadCarouselData().then(slides => initCarousel(slides));
             }
 
+            } catch (carouselErr) { console.error('MURA carousel error:', carouselErr); }
+
             // --- Community Activity Feed ---
+            try {
             const activityFeed = document.getElementById('activity-feed');
             if (activityFeed) {
                 const TYPE_ICONS = {
@@ -716,7 +723,10 @@
                 loadActivityFeed();
             }
 
+            } catch (activityErr) { console.error('MURA activity feed error:', activityErr); }
+
             // --- YouTube Feed ---
+            try {
             const youtubeFeed = document.getElementById('youtube-feed');
             if (youtubeFeed) {
                 const CHANNEL_COLORS = {
@@ -817,7 +827,10 @@
                 loadYouTubeFeed();
             }
 
+            } catch (ytErr) { console.error('MURA YouTube feed error:', ytErr); }
+
             // --- Members Page Logic ---
+            try {
             const membersGrid = document.getElementById('members-grid');
             if (membersGrid) {
                 const memberModal = document.getElementById('member-modal');
@@ -939,24 +952,59 @@
                 });
             }
 
-            // --- Intersection Observer for Fade-In Sections ---
-            const sections = document.querySelectorAll('.fade-in-section');
-            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-            sections.forEach(section => { observer.observe(section); });
+            } catch (membersErr) { console.error('MURA members error:', membersErr); }
+
         });
     </script>
 
-    <!-- Shared mobile menu logic -->
-    <script src="/js/auth.js"></script>
+    <!-- Fade-in observer: MUST run independently so content is always visible.
+         Previously inside mura:layout-ready where a JS error before it could
+         leave all fade-in-section elements at opacity:0 forever. -->
     <script>
+    (function () {
+        function initFadeIn() {
+            const sections = document.querySelectorAll('.fade-in-section');
+            if (!sections.length) return;
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { root: null, rootMargin: '0px', threshold: 0.1 });
+            sections.forEach(s => observer.observe(s));
+        }
+        // Run immediately if DOM is ready, otherwise wait
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFadeIn);
+        } else {
+            initFadeIn();
+        }
+        // Also re-scan after layout injection in case new .fade-in-section elements appear
+        document.addEventListener('mura:layout-ready', initFadeIn);
+    })();
+    </script>
+    <script>
+    // DOMPurify fallback — if CDN fails, provide a minimal sanitizer so the page still works
+    if (typeof DOMPurify === 'undefined') {
+        window.DOMPurify = {
+            sanitize: function (str) {
+                if (typeof str !== 'string') return '';
+                var d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            },
+            sanitize: function (str, opts) {
+                if (typeof str !== 'string') return '';
+                var d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            }
+        };
+        console.warn('DOMPurify CDN failed to load — using text-only fallback sanitizer');
+    }
+
     // Decode HTML entities from server-side sanitizeText() for existing data
     function decodeHTMLEntities(text) {
         if (!text || typeof text !== 'string') return text;
