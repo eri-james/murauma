@@ -2400,7 +2400,7 @@
                 <tr>
                     <td>${b.id}</td>
                     <td class="font-bold">${esc(b.title)}</td>
-                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : b.mediaType === 'video' ? 'badge-guide' : 'badge-community'}">${esc(b.mediaType)}</span></td>
+                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : b.mediaType === 'video' ? 'badge-guide' : 'badge-community'}">${esc(b.mediaType)}</span>${b.posterUrl ? ' <span class="text-xs text-gray-400" title="Has fallback image">🖼</span>' : ''}</td>
                     <td class="text-gray-500 text-xs" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(b.linkUrl || '—')}</td>
                     <td><span class="badge ${b.isActive ? 'badge-published' : 'badge-draft'}">${b.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td class="space-x-1">
@@ -2411,7 +2411,7 @@
                 </tr>
             `).join('');
             mobileCards.innerHTML = data.items.map(b => buildMobileCard(b.id, esc(b.title), [
-                { label: 'Media', value: `<span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : b.mediaType === 'video' ? 'badge-guide' : 'badge-community'}">${esc(b.mediaType)}</span>` },
+                { label: 'Media', value: `<span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : b.mediaType === 'video' ? 'badge-guide' : 'badge-community'}">${esc(b.mediaType)}</span>${b.posterUrl ? ' <span class=\'text-xs text-gray-400\'>🖼 fallback</span>' : ''}` },
                 { label: 'Link', value: esc(b.linkUrl || '—') },
                 { label: 'Active', value: `<span class="badge ${b.isActive ? 'badge-published' : 'badge-draft'}">${b.isActive ? 'Active' : 'Inactive'}</span>` },
             ], `
@@ -2458,6 +2458,11 @@
                     <input type="url" id="bn-media-url" maxlength="2000" placeholder="https://www.youtube.com/embed/VIDEO_ID" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                     <p id="bn-media-hint" class="text-xs text-gray-400 mt-1">Supported formats: youtube.com/embed/ID, youtu.be/ID, or youtube.com/watch?v=ID</p>
                 </div>
+                <div id="bn-poster-url-group">
+                    <label class="block text-sm font-bold text-gray-700">Fallback / Poster Image URL</label>
+                    <input type="url" id="bn-poster-url" maxlength="2000" placeholder="https://i.ibb.co/xxxxx/image.webp" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                    <p class="text-xs text-gray-400 mt-1">Shown while video loads or if it can't play. Optional — defaults to MURA banner image.</p>
+                </div>
                 <div class="flex justify-end space-x-2 pt-4">
                     <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
                     <button type="submit" class="px-5 py-2.5 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
@@ -2498,6 +2503,7 @@
                 linkUrl: document.getElementById('bn-link-url').value.trim(),
                 mediaType: document.getElementById('bn-media-type').value,
                 mediaUrl: document.getElementById('bn-media-url').value.trim(),
+                posterUrl: document.getElementById('bn-poster-url').value.trim(),
                 isActive: document.getElementById('bn-active').checked,
             };
             try {
@@ -2522,6 +2528,7 @@
             document.getElementById('bn-link-url').value = item.linkUrl || '';
             document.getElementById('bn-media-type').value = item.mediaType || 'youtube';
             document.getElementById('bn-media-url').value = item.mediaUrl || '';
+            document.getElementById('bn-poster-url').value = item.posterUrl || '';
             document.getElementById('bn-active').checked = item.isActive;
             // Update labels after setting media type
             document.getElementById('bn-media-type').dispatchEvent(new Event('change'));

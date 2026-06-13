@@ -13,7 +13,7 @@ export async function onRequestGet(context) {
   try {
     const banner = await db
       .prepare(
-        `SELECT id, title, description, link_url, media_type, media_url, is_active, created_at, updated_at
+        `SELECT id, title, description, link_url, media_type, media_url, poster_url, is_active, created_at, updated_at
          FROM hero_banner
          WHERE is_active = 1
          LIMIT 1`
@@ -38,6 +38,7 @@ export async function onRequestGet(context) {
         linkUrl: banner.link_url || '',
         mediaType: banner.media_type,
         mediaUrl: banner.media_url || '',
+        posterUrl: banner.poster_url || '',
         isActive: banner.is_active,
         createdAt: banner.created_at,
         updatedAt: banner.updated_at,

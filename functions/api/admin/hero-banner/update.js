@@ -2,7 +2,7 @@
  * POST /api/admin/hero-banner/update — Update a hero banner by ID
  *
  * Request body (JSON):
- *   { id, title?, description?, linkUrl?, mediaType?, mediaUrl?, isActive? }
+ *   { id, title?, description?, linkUrl?, mediaType?, mediaUrl?, posterUrl?, isActive? }
  *
  * When isActive is set to true, all other banners are deactivated.
  */
@@ -93,6 +93,13 @@ export async function onRequestPost(context) {
 
       updates.push('media_url = ?');
       values.push(mediaUrlValue);
+    }
+
+    if (data.posterUrl !== undefined) {
+      const result = validateOptionalField(data.posterUrl, 2000, 'Poster URL');
+      if (!result.valid) return errorResponse(result.error);
+      updates.push('poster_url = ?');
+      values.push(result.value || '');
     }
 
     if (data.isActive !== undefined) {

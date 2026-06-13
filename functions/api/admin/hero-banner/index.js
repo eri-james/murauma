@@ -28,7 +28,7 @@ export async function onRequestGet(context) {
   try {
     const { results } = await db
       .prepare(
-        `SELECT id, title, description, link_url, media_type, media_url, is_active, created_at, updated_at
+        `SELECT id, title, description, link_url, media_type, media_url, poster_url, is_active, created_at, updated_at
          FROM hero_banner
          ORDER BY is_active DESC, created_at DESC`
       )
@@ -41,6 +41,7 @@ export async function onRequestGet(context) {
       linkUrl: row.link_url || '',
       mediaType: row.media_type,
       mediaUrl: row.media_url || '',
+      posterUrl: row.poster_url || '',
       isActive: row.is_active,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -75,6 +76,9 @@ export async function onRequestPost(context) {
     const mediaUrlResult = validateOptionalField(data.mediaUrl, 2000, 'Media URL');
     if (!mediaUrlResult.valid) return errorResponse(mediaUrlResult.error);
 
+    const posterUrlResult = validateOptionalField(data.posterUrl, 2000, 'Poster URL');
+    if (!posterUrlResult.valid) return errorResponse(posterUrlResult.error);
+
     const mediaType = ['youtube', 'image', 'video'].includes(data.mediaType) ? data.mediaType : 'youtube';
 
     // Normalize YouTube URLs to embed format (handles youtu.be, watch?v=, etc.)
@@ -99,8 +103,8 @@ export async function onRequestPost(context) {
 
     await db
       .prepare(
-        `INSERT INTO hero_banner (title, description, link_url, media_type, media_url, is_active)
-         VALUES (?, ?, ?, ?, ?, ?)`
+        `INSERT INTO hero_banner (title, description, link_url, media_type, media_url, poster_url, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         titleResult.value,
@@ -108,6 +112,7 @@ export async function onRequestPost(context) {
         linkUrlResult.value || '',
         mediaType,
         mediaUrlValue,
+        posterUrlResult.value || '',
         isActive
       )
       .run();

@@ -41,6 +41,14 @@ const MIGRATIONS = [
       `CREATE INDEX IF NOT EXISTS idx_hero_banner_active ON hero_banner(is_active)`,
     ],
   },
+  {
+    id: '013',
+    name: 'hero-banner-poster-url',
+    description: 'Add poster_url column to hero_banner for video fallback image',
+    sql: [
+      `ALTER TABLE hero_banner ADD COLUMN poster_url TEXT NOT NULL DEFAULT '' CHECK(length(poster_url) <= 2000)`,
+    ],
+  },
 ];
 
 // ============================================================
