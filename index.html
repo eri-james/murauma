@@ -157,7 +157,7 @@
                             <p class="text-gray-400 text-center py-4">Loading news...</p>
                         </div>
                         <div class="text-center mt-6">
-                            <button id="view-more-news-btn" class="inline-block bg-pink-500 text-white font-bold px-6 py-2 rounded-full hover:bg-pink-600 transition-colors">View more >></button>
+                            <a href="news-detail.html" id="view-more-news-btn" class="inline-block bg-pink-500 text-white font-bold px-6 py-2 rounded-full hover:bg-pink-600 transition-colors">View more >></a>
                         </div>
                     </section>
                      <!-- Weekly Race Events Section -->
@@ -207,7 +207,7 @@
                         <h2 class="header-skew header-skew-orange mb-6">Explore</h2>
                         <div class="grid grid-cols-2 gap-4">
                             <button id="view-guides-btn" class="content-card block bg-blue-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-blue-500">Game Guides</button>
-                            <button id="view-events-btn" class="content-card block bg-red-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-red-500">Events</button>
+                            <a href="event-detail.html" id="view-events-btn" class="content-card block bg-red-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-red-500">Events</a>
                             <button id="view-fan-media-btn" class="content-card block bg-yellow-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-yellow-500">Fan Media</button>
                             <a href="race-leaderboard.html" class="content-card block bg-green-500 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-green-600 transition-colors">Leaderboard</a>
                             <button id="view-members-btn" class="content-card block bg-purple-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-purple-500">Members</button>
@@ -433,10 +433,9 @@
                 });
             }
 
-            if(viewMoreNewsBtn) viewMoreNewsBtn.addEventListener('click', () => switchPage(pageHome, pageNews));
+            // News & Events now navigate to dedicated listing pages (see <a> href)
             if(viewGuidesBtn) viewGuidesBtn.addEventListener('click', () => switchPage(pageHome, pageGuides));
             if(viewFanMediaBtn) viewFanMediaBtn.addEventListener('click', () => switchPage(pageHome, pageFanMedia));
-            if(viewEventsBtn) viewEventsBtn.addEventListener('click', () => switchPage(pageHome, pageEvents));
             if(viewMembersBtn) viewMembersBtn.addEventListener('click', () => switchPage(pageHome, pageMembers));
             
             backToHomeBtns.forEach(btn => {
