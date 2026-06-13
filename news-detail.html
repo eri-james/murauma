@@ -62,9 +62,9 @@
                 <span class="logo-sub">RACING ASSOCIATION</span>
             </a>
             <nav class="nav-pill-links">
-                <a href="index.html#news" class="nav-pill-link">News</a>
+                <a href="news-detail.html" class="nav-pill-link">News</a>
                 <a href="index.html#about" class="nav-pill-link">About</a>
-                <a href="index.html#events" class="nav-pill-link">Events</a>
+                <a href="event-detail.html" class="nav-pill-link">Events</a>
                 <a href="index.html#community" class="nav-pill-link">Community</a>
                 <a href="weekly-race.html" class="nav-pill-link">Races</a>
             </nav>
@@ -80,9 +80,9 @@
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
         <ul class="nav-overlay-menu">
-            <li class="nav-overlay-item"><a href="index.html#news" class="nav-overlay-link">News</a></li>
+            <li class="nav-overlay-item"><a href="news-detail.html" class="nav-overlay-link">News</a></li>
             <li class="nav-overlay-item"><a href="index.html#about" class="nav-overlay-link">About</a></li>
-            <li class="nav-overlay-item"><a href="index.html#events" class="nav-overlay-link">Events</a></li>
+            <li class="nav-overlay-item"><a href="event-detail.html" class="nav-overlay-link">Events</a></li>
             <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
             <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
         </ul>
@@ -115,6 +115,16 @@
         <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-pink-500 max-w-4xl mx-auto">
             <!-- Loading -->
             <div id="loading" class="text-center py-12 text-gray-500">Loading news...</div>
+
+            <!-- News listing (no slug — shows all news) -->
+            <div id="news-listing" class="hidden">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">News</h1>
+                <p class="text-base text-gray-500 mb-6">All the latest updates and announcements from MURA.</p>
+                <div id="news-listing-grid" class="grid md:grid-cols-2 gap-4"></div>
+                <div id="news-listing-empty" class="hidden text-center py-12">
+                    <p class="text-gray-400 text-lg">No news posts yet.</p>
+                </div>
+            </div>
 
             <!-- News content (hidden until loaded) -->
             <div id="news-content" class="hidden">
@@ -177,8 +187,47 @@
             const slug = urlParams.get('slug');
 
             if (!slug) {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error-state').classList.remove('hidden');
+                // Show news listing
+                try {
+                    const resp = await fetch('/api/news');
+                    const data = await resp.json();
+                    document.getElementById('loading').classList.add('hidden');
+
+                    if (data.result !== 'success' || !data.news || data.news.length === 0) {
+                        document.getElementById('news-listing-empty').classList.remove('hidden');
+                        document.getElementById('news-listing').classList.remove('hidden');
+                        return;
+                    }
+
+                    const grid = document.getElementById('news-listing-grid');
+                    grid.innerHTML = data.news.map(item => {
+                        const img = item.imageUrl
+                            ? `<img src="${DOMPurify.sanitize(item.imageUrl)}" alt="${DOMPurify.sanitize(decodeHTMLEntities(item.title))}" class="w-full rounded-lg mb-3 object-cover aspect-video" loading="lazy" onerror="this.style.display='none'">`
+                            : '';
+                        const cat = item.category
+                            ? `<span class="inline-block bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full mb-2 uppercase tracking-wide">${DOMPurify.sanitize(decodeHTMLEntities(item.category))}</span>`
+                            : '';
+                        const date = item.createdAt
+                            ? `<p class="text-gray-400 text-xs mt-2">${new Date(item.createdAt).toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' })}</p>`
+                            : '';
+                        const desc = item.description
+                            ? `<p class="text-gray-500 text-sm mt-2 line-clamp-2">${DOMPurify.sanitize(decodeHTMLEntities(item.description))}</p>`
+                            : '';
+                        return `<a href="news-detail.html?slug=${encodeURIComponent(item.slug)}" class="block bg-gray-50 p-4 rounded-lg border-2 border-gray-200 hover:border-pink-400 transition-colors">
+                            ${img}
+                            ${cat}
+                            <h3 class="font-bold text-lg text-gray-800">${DOMPurify.sanitize(decodeHTMLEntities(item.title))}</h3>
+                            ${date}
+                            ${desc}
+                        </a>`;
+                    }).join('');
+
+                    document.getElementById('news-listing').classList.remove('hidden');
+                } catch (err) {
+                    console.error('Error loading news listing:', err);
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('error-state').classList.remove('hidden');
+                }
                 return;
             }
 

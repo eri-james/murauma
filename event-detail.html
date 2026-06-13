@@ -62,9 +62,9 @@
                 <span class="logo-sub">RACING ASSOCIATION</span>
             </a>
             <nav class="nav-pill-links">
-                <a href="index.html#news" class="nav-pill-link">News</a>
+                <a href="news-detail.html" class="nav-pill-link">News</a>
                 <a href="index.html#about" class="nav-pill-link">About</a>
-                <a href="index.html#events" class="nav-pill-link">Events</a>
+                <a href="event-detail.html" class="nav-pill-link">Events</a>
                 <a href="index.html#community" class="nav-pill-link">Community</a>
                 <a href="weekly-race.html" class="nav-pill-link">Races</a>
             </nav>
@@ -80,9 +80,9 @@
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
         <ul class="nav-overlay-menu">
-            <li class="nav-overlay-item"><a href="index.html#news" class="nav-overlay-link">News</a></li>
+            <li class="nav-overlay-item"><a href="news-detail.html" class="nav-overlay-link">News</a></li>
             <li class="nav-overlay-item"><a href="index.html#about" class="nav-overlay-link">About</a></li>
-            <li class="nav-overlay-item"><a href="index.html#events" class="nav-overlay-link">Events</a></li>
+            <li class="nav-overlay-item"><a href="event-detail.html" class="nav-overlay-link">Events</a></li>
             <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
             <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
         </ul>
@@ -115,6 +115,16 @@
         <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500 max-w-4xl mx-auto">
             <!-- Loading -->
             <div id="loading" class="text-center py-12 text-gray-500">Loading event...</div>
+
+            <!-- Events listing (no slug — shows all events) -->
+            <div id="event-listing" class="hidden">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">Events</h1>
+                <p class="text-base text-gray-500 mb-6">Browse upcoming and past MURA events.</p>
+                <div id="event-listing-grid" class="grid md:grid-cols-2 gap-4"></div>
+                <div id="event-listing-empty" class="hidden text-center py-12">
+                    <p class="text-gray-400 text-lg">No events yet.</p>
+                </div>
+            </div>
 
             <!-- Event content (hidden until loaded) -->
             <div id="event-content" class="hidden">
@@ -179,8 +189,47 @@
             const slug = urlParams.get('slug');
 
             if (!slug) {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error-state').classList.remove('hidden');
+                // Show events listing
+                try {
+                    const resp = await fetch('/api/events');
+                    const data = await resp.json();
+                    document.getElementById('loading').classList.add('hidden');
+
+                    if (data.result !== 'success' || !data.events || data.events.length === 0) {
+                        document.getElementById('event-listing-empty').classList.remove('hidden');
+                        document.getElementById('event-listing').classList.remove('hidden');
+                        return;
+                    }
+
+                    const grid = document.getElementById('event-listing-grid');
+                    grid.innerHTML = data.events.map(item => {
+                        const img = item.imageUrl
+                            ? `<img src="${DOMPurify.sanitize(item.imageUrl)}" alt="${DOMPurify.sanitize(decodeHTMLEntities(item.title))}" class="w-full rounded-lg mb-3 object-cover aspect-video" loading="lazy" onerror="this.style.display='none'">`
+                            : '';
+                        const dateStr = item.startDate
+                            ? `<p class="text-gray-600 text-sm"><strong>${new Date(item.startDate).toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></p>`
+                            : '';
+                        const endDateStr = item.endDate
+                            ? `<p class="text-gray-400 text-xs">until ${new Date(item.endDate).toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' })}</p>`
+                            : '';
+                        const desc = item.description
+                            ? `<p class="text-gray-500 text-sm mt-2 line-clamp-2">${DOMPurify.sanitize(decodeHTMLEntities(item.description))}</p>`
+                            : '';
+                        return `<a href="event-detail.html?slug=${encodeURIComponent(item.slug)}" class="block bg-gray-50 p-4 rounded-lg border-2 border-gray-200 hover:border-red-400 transition-colors">
+                            ${img}
+                            <h3 class="font-bold text-lg text-gray-800">${DOMPurify.sanitize(decodeHTMLEntities(item.title))}</h3>
+                            ${dateStr}
+                            ${endDateStr}
+                            ${desc}
+                        </a>`;
+                    }).join('');
+
+                    document.getElementById('event-listing').classList.remove('hidden');
+                } catch (err) {
+                    console.error('Error loading events listing:', err);
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('error-state').classList.remove('hidden');
+                }
                 return;
             }
 
