@@ -381,7 +381,6 @@ body {
 .nav-overlay-auth button {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
   padding: 0.625rem 1.5rem;
   border-radius: 9999px;
   font-weight: 600;
