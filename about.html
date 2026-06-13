@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="YyHtpyC4Qyd60TqjjYi8FO5eyCKZ4stbpYFTrDBIKeQ" />
+    <title>About MURA — Malayan Umamusume Racing Association</title>
+    <meta name="description" content="Learn about MURA, the Malayan Umamusume Racing Association — a global community for Umamusume: Pretty Derby players built around competitive racing and camaraderie.">
+    <link rel="canonical" href="https://murauma.pages.dev/about.html">
+
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="About MURA — Malayan Umamusume Racing Association">
+    <meta property="og:description" content="Learn about MURA — a global community for Umamusume: Pretty Derby players built around competitive racing and camaraderie.">
+    <meta property="og:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
+    <meta property="og:url" content="https://murauma.pages.dev/about.html">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="About MURA — Malayan Umamusume Racing Association">
+    <meta name="twitter:description" content="Learn about MURA — a global community for Umamusume: Pretty Derby players built around competitive racing and camaraderie.">
+    <meta name="twitter:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/favicon.png" sizes="180x180">
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <style>
+        /* Timeline styling */
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.55rem;
+            top: 0.5rem;
+            bottom: 0.5rem;
+            width: 3px;
+            background: linear-gradient(to bottom, #22c55e, #eab308, #ef4444);
+            border-radius: 2px;
+        }
+        .timeline-item { position: relative; margin-bottom: 2.5rem; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot {
+            position: absolute;
+            left: -1.65rem;
+            top: 0.35rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 3px solid;
+            background: white;
+        }
+        .timeline-dot-green { border-color: #22c55e; }
+        .timeline-dot-yellow { border-color: #eab308; }
+        .timeline-dot-red { border-color: #ef4444; }
+
+        /* Placeholder image styling */
+        .img-placeholder {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 3px dashed #86efac;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #16a34a;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 0.5rem;
+        }
+        .img-placeholder svg { opacity: 0.5; }
+
+        /* Feature card hover */
+        .feature-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="has-pill-nav">
+<canvas id="particle-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block;border:none;margin:0;padding:0"></canvas>
+
+    <!-- Pill Navigation Bar -->
+    <div class="nav-pill">
+        <div class="nav-pill-inner">
+            <a href="index.html" class="nav-pill-logo">
+                <span class="logo-title">MALAYAN UMAMUSUME</span>
+                <span class="logo-sub">RACING ASSOCIATION</span>
+            </a>
+            <nav class="nav-pill-links">
+                <a href="news-detail.html" class="nav-pill-link">News</a>
+                <a href="about.html" class="nav-pill-link">About</a>
+                <a href="event-detail.html" class="nav-pill-link">Events</a>
+                <a href="index.html#community" class="nav-pill-link">Community</a>
+                <a href="weekly-race.html" class="nav-pill-link">Races</a>
+            </nav>
+            <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Full-Page Overlay Menu -->
+    <div id="nav-overlay" class="nav-overlay">
+        <button id="nav-overlay-close" class="nav-overlay-close" aria-label="Close menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <ul class="nav-overlay-menu">
+            <li class="nav-overlay-item"><a href="news-detail.html" class="nav-overlay-link">News</a></li>
+            <li class="nav-overlay-item"><a href="about.html" class="nav-overlay-link">About</a></li>
+            <li class="nav-overlay-item"><a href="event-detail.html" class="nav-overlay-link">Events</a></li>
+            <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
+            <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
+        </ul>
+        <div class="nav-overlay-auth">
+            <a href="register.html" data-auth="logged-out" class="btn-join">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                Join Us
+            </a>
+            <a href="login.html" data-auth="logged-out" class="btn-login">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0v-2zm-2 4a.5.5 0 0 1 .5-.5H11a.5.5 0 0 1 0 1H4.5a.5.5 0 0 1-.5-.5z"/><path fill-rule="evenodd" d="M4.146 5.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L3.707 5l1.147 1.146a.5.5 0 0 1-.708.708l-2-2z"/></svg>
+                Log In
+            </a>
+            <a href="edit-profile.html" data-auth="logged-in" class="btn-profile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+                <span data-auth="username"></span>
+            </a>
+            <a href="/admin/" data-auth="admin" class="btn-admin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/></svg>
+                Admin
+            </a>
+            <button data-auth="logout" class="btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
+                Log Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- ============ HERO / INTRO ============ -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="bg-white rounded-lg shadow-md border-2 border-green-500 overflow-hidden">
+                <!-- Hero image / placeholder -->
+                <div id="about-hero-image" class="relative">
+                    <!-- PLACEHOLDER: Replace with actual hero image -->
+                    <div class="img-placeholder w-full aspect-[21/9]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                        <p class="mt-2 text-sm">Hero Image Placeholder</p>
+                        <p class="text-xs font-normal opacity-70">e.g. MURA club group photo or banner</p>
+                    </div>
+                    <!-- To use a real image, replace the placeholder div above with:
+                    <img src="IMAGE_URL" alt="MURA Community" class="w-full object-cover" style="max-height: 320px;">
+                    -->
+                </div>
+
+                <!-- Intro text -->
+                <div class="p-6 md:p-10">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4">About MURA</h1>
+                    <p class="text-lg text-gray-600 leading-relaxed mb-4">
+                        The <strong class="text-green-700">Malayan Umamusume Racing Association</strong> (or <strong class="text-green-700">MURA</strong> for short) is an in-game club and community created for the global version of <em>Umamusume: Pretty Derby</em>. While originally founded by members from Malaysia and Singapore, it has since grown into a global community.
+                    </p>
+                    <p class="text-lg text-gray-600 leading-relaxed mb-4">
+                        Parodying the real-life Malayan Racing Association (MRA), MURA emulates a professional racing association by organizing regular races and hosting virtual betting games. The community is active on Discord and maintains a dedicated website that serves as a hub for players to celebrate their shared love for <em>Umamusume</em> and horse racing.
+                    </p>
+
+                    <!-- Quick-fact badges -->
+                    <div class="flex flex-wrap gap-3 mt-6">
+                        <span class="inline-flex items-center gap-1.5 bg-green-100 text-green-800 text-sm font-bold px-3 py-1.5 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+                            Global Community
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1.5 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.829l.645-1.936zM3.794 1.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.544.889 1.062 1.062l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.062 1.062l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 2.345 3.56l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.062-1.062l.387-1.162z"/></svg>
+                            Competitive Racing
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 text-sm font-bold px-3 py-1.5 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/></svg>
+                            Pick'em Predictions
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 bg-yellow-100 text-yellow-800 text-sm font-bold px-3 py-1.5 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1.161 8a6.84 6.84 0 1 0 6.842-6.84.581.581 0 1 1 0-1.16 8 8 0 1 1-6.556 3.412l-.663-.577a.581.581 0 0 1 .227-.997l2.52-.69a.581.581 0 0 1 .796.571l-.162 2.614a.581.581 0 0 1-.978.381l-.66-.577A6.827 6.827 0 0 0 1.16 8z"/></svg>
+                            Founded June 2025
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ HISTORY TIMELINE ============ -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="bg-white p-6 md:p-10 rounded-lg shadow-md border-2 border-gray-300">
+                <h2 class="header-skew header-skew-green mb-8">Our History</h2>
+
+                <div class="timeline">
+                    <!-- Era 1: Foundation -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot timeline-dot-green"></div>
+                        <div class="mb-2">
+                            <span class="inline-block bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">June 2025 - October 2025</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-gray-800 mb-2">Foundation and Early Growth</h3>
+
+                        <!-- PLACEHOLDER: Image for early days -->
+                        <div class="img-placeholder w-full aspect-video mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <p class="mt-1 text-sm">Image Placeholder: Early days of MURA</p>
+                        </div>
+
+                        <p class="text-gray-600 leading-relaxed mb-3">
+                            Following the global release of <em>Umamusume: Pretty Derby</em> in June 2025, players <strong>ewidaria</strong> and <strong>Reed</strong> established both the in-game club and its corresponding Discord server. From the very beginning, the vision was clear: to create a space where fans of the game could come together not just as players, but as members of something that felt like a real racing association.
+                        </p>
+                        <p class="text-gray-600 leading-relaxed">
+                            Over the next few months, the club experienced a surge in activity. The founders organized weekly races, created edited race highlights that drew attention from the broader community, and hosted community events and tournaments that gave members something to look forward to each week. What started as a small group of enthusiasts quickly became one of the most active Umamusume clubs in the region.
+                        </p>
+                    </div>
+
+                    <!-- Era 2: Decline -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot timeline-dot-yellow"></div>
+                        <div class="mb-2">
+                            <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full">October 2025 - May 2026</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-gray-800 mb-2">Leadership Transition and Decline</h3>
+
+                        <!-- PLACEHOLDER: Image for decline era (optional) -->
+                        <div class="img-placeholder w-full aspect-video mb-4" style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border-color: #fbbf24; color: #92400e;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <p class="mt-1 text-sm">Image Placeholder: Transition period (optional)</p>
+                        </div>
+
+                        <p class="text-gray-600 leading-relaxed mb-3">
+                            In October 2025, <strong>ewidaria</strong> stepped down as the active leader of the club to focus on managing another club and a separate annual Grand Prix event, shifting to a supporting role. Leadership was handed over to <strong>Reed</strong>, with the expectation that the club would continue to grow under new direction.
+                        </p>
+                        <p class="text-gray-600 leading-relaxed">
+                            Shortly after, however, <strong>Reed</strong> quietly left the community and the in-game club without notice. With no active leadership, the Discord server and in-game club fell into dormancy. Members gradually drifted away, and the in-game leadership role defaulted to an inactive, unreachable player. For several months, MURA existed in name only — a ghost of the vibrant community it had once been.
+                        </p>
+                    </div>
+
+                    <!-- Era 3: Revival -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot timeline-dot-green"></div>
+                        <div class="mb-2">
+                            <span class="inline-block bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">May 2026 - Present</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-gray-800 mb-2">The Revival</h3>
+
+                        <!-- PLACEHOLDER: Image for revival -->
+                        <div class="img-placeholder w-full aspect-video mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <p class="mt-1 text-sm">Image Placeholder: MURA's revival era</p>
+                        </div>
+
+                        <p class="text-gray-600 leading-relaxed mb-3">
+                            In May 2026, <strong>ewidaria</strong> stepped back into the primary management role to revive MURA. Rather than simply restarting where things had left off, the revival was treated as an opportunity to rebuild the club from the ground up with a stronger foundation and clearer direction.
+                        </p>
+                        <p class="text-gray-600 leading-relaxed">
+                            As part of the revitalization effort, they upgraded the club's website into a fully functioning information and media-sharing hub, established clear membership guidelines, and outlined new action plans, routines, and events. As of June 2026, the club is preparing to launch its first biweekly race, marking the beginning of a new chapter for MURA.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ CLUB FEATURES & SYSTEMS ============ -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="bg-white p-6 md:p-10 rounded-lg shadow-md border-2 border-blue-500">
+                <h2 class="header-skew mb-8">Club Features and Systems</h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Racing System -->
+                    <div class="feature-card bg-gray-50 p-6 rounded-lg border-2 border-green-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-green-700">Competitive Races</h3>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed text-sm">
+                            To emulate the real-life MRA, MURA schedules regular competitive races on a weekly or biweekly basis. Members enter their trained Umamusumes and compete for points and glory across two divisions — <strong>Graded</strong> (open to all ranks) and <strong>Open</strong> (for A+ rank and below). The club also schedules prestigious "Classics" throughout the year — marquee events that carry extra weight and bragging rights.
+                        </p>
+                    </div>
+
+                    <!-- Leaderboard System -->
+                    <div class="feature-card bg-gray-50 p-6 rounded-lg border-2 border-blue-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16"><path d="M.5 1a.5.5 0 0 0-.5.5v13a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-13a.5.5 0 0 0-.5-.5h-1zm4 0a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-1zm4 0a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 0-.5-.5h-1zm4 0a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-1z"/></svg>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-blue-700">Racer Leaderboards</h3>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed text-sm">
+                            Members earn points based on their Umamusumes' race performances across Graded and Open divisions. The scoring system awards <strong>10 pts</strong> for 1st place, <strong>6 pts</strong> for 2nd, <strong>4 pts</strong> for 3rd, <strong>2 pts</strong> for 4th, and <strong>1 pt</strong> for 5th place and beyond. Tiebreakers are decided by most wins, then most 2nd-place finishes, then fewest races run. Leaderboards reset at the end of every calendar year to keep competition fresh and give newcomers a fair shot.
+                        </p>
+                    </div>
+
+                    <!-- Pick'em System -->
+                    <div class="feature-card bg-gray-50 p-6 rounded-lg border-2 border-purple-300">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16"><path d="M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 3.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 3.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="m3.775 7.96 1.393-1.393A2.5 2.5 0 1 1 7.98 4.832l1.393-1.393a4 4 0 1 0-5.597 5.597l5.879 5.879a.5.5 0 0 0 .707 0l2.828-2.828a.5.5 0 0 0 0-.707l-5.879-5.879z"/></svg>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-purple-700">Pick'em Predictions</h3>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed text-sm">
+                            Not racing? You can still get in on the action. MURA's Pick'em system lets members predict the podium finishers before each race kicks off. Score <strong>3 pts</strong> for correctly predicting 1st place, <strong>2 pts</strong> for 2nd, and <strong>1 pt</strong> for 3rd — with a maximum of 6 points per race. It's a fun, low-barrier way for everyone to engage with race day, whether they're competing on the track or calling the shots from the sidelines.
+                        </p>
+                    </div>
+
+                    <!-- Annual Classics -->
+                    <div class="feature-card bg-gray-50 p-6 rounded-lg border-2 border-yellow-400">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16"><path d="M5.5 2A3.5 3.5 0 0 0 2 5.5a3.5 3.5 0 0 0 3.08 3.477l-.463 2.286A1.5 1.5 0 0 0 6.1 13.1l2.286-.463A3.5 3.5 0 0 0 11.5 16a3.5 3.5 0 0 0 3.5-3.5 3.5 3.5 0 0 0-3.08-3.477l.463-2.286A1.5 1.5 0 0 0 10.9 2.9L8.614 3.363A3.5 3.5 0 0 0 5.5 2zm1.29 5.477A1.5 1.5 0 0 1 5.5 6a1.5 1.5 0 0 1 1.5-1.5 1.5 1.5 0 0 1 1.5 1.5 1.5 1.5 0 0 1-1.71 1.477zm4 5A1.5 1.5 0 0 1 9.5 11a1.5 1.5 0 0 1 1.5-1.5 1.5 1.5 0 0 1 1.5 1.5 1.5 1.5 0 0 1-1.71 1.477z"/></svg>
+                            </div>
+                            <h3 class="text-lg font-extrabold text-yellow-700">Classic Events</h3>
+                        </div>
+                        <p class="text-gray-600 leading-relaxed text-sm">
+                            Beyond the regular weekly schedule, MURA hosts prestigious "Classic" events throughout the year — higher-stakes races inspired by real-world horse racing's most celebrated fixtures. These Classics carry extra prestige, larger audiences, and serve as the highlight of the MURA racing calendar. They're the races everyone trains for.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CTA link to races -->
+                <div class="text-center mt-8">
+                    <a href="weekly-race.html" class="inline-block bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">View All Races</a>
+                    <a href="race-leaderboard.html" class="inline-block bg-green-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors ml-2">Leaderboard</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ OFFLINE & COMMUNITY ============ -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="bg-white p-6 md:p-10 rounded-lg shadow-md border-2 border-orange-500">
+                <h2 class="header-skew header-skew-orange mb-8">Offline &amp; Community Events</h2>
+                <p class="text-gray-600 leading-relaxed mb-6">
+                    Beyond the digital turf, MURA fosters an active real-world community. We believe that the bond over Umamusume extends beyond the screen — it's about coming together, sharing experiences, and bridging the gap between the game and the sport that inspired it.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Live Watch Parties -->
+                    <div class="text-center">
+                        <!-- PLACEHOLDER: Watch party image -->
+                        <div class="img-placeholder aspect-video mb-4" style="background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); border-color: #fb923c; color: #9a3412;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <p class="mt-1 text-sm">Image Placeholder</p>
+                            <p class="text-xs font-normal opacity-70">Watch party photo</p>
+                        </div>
+                        <h3 class="font-extrabold text-orange-700 text-lg mb-2">Live Watch Parties</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Gathering at local turf clubs to watch real-life horse racing — experiencing the sport that inspired Umamusume first-hand, together as a community.
+                        </p>
+                    </div>
+
+                    <!-- ACG Meetups -->
+                    <div class="text-center">
+                        <!-- PLACEHOLDER: ACG meetup image -->
+                        <div class="img-placeholder aspect-video mb-4" style="background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%); border-color: #a855f7; color: #6b21a8;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <p class="mt-1 text-sm">Image Placeholder</p>
+                            <p class="text-xs font-normal opacity-70">ACG convention meetup</p>
+                        </div>
+                        <h3 class="font-extrabold text-purple-700 text-lg mb-2">ACG Meetups</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Organizing social gatherings at Anime, Comic, and Games (ACG) conventions — meeting fellow Torena-san in person and celebrating the fandom.
+                        </p>
+                    </div>
+
+                    <!-- Community Support -->
+                    <div class="text-center">
+                        <!-- PLACEHOLDER: Community support image -->
+                        <div class="img-placeholder aspect-video mb-4" style="background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); border-color: #4ade80; color: #166534;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <p class="mt-1 text-sm">Image Placeholder</p>
+                            <p class="text-xs font-normal opacity-70">Community event photo</p>
+                        </div>
+                        <h3 class="font-extrabold text-green-700 text-lg mb-2">Community Support</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed">
+                            Participating in real-life events to support the broader ACG and horse-racing communities, bridging the gap between the game and the sport that inspired it.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CTA: join -->
+                <div class="text-center mt-8">
+                    <a href="register.html" class="inline-block bg-orange-500 text-white font-bold px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors">Join MURA</a>
+                    <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="inline-block bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors ml-2">Discord</a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025&ndash;2026 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Overlay menu toggle
+        const navBurgerBtn = document.getElementById('nav-burger-btn');
+        const navOverlay = document.getElementById('nav-overlay');
+        const navOverlayClose = document.getElementById('nav-overlay-close');
+
+        function openOverlay() {
+            if (navOverlay) navOverlay.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeOverlay() {
+            if (navOverlay) navOverlay.classList.remove('is-open');
+            document.body.style.overflow = '';
+        }
+
+        if (navBurgerBtn) navBurgerBtn.addEventListener('click', openOverlay);
+        if (navOverlayClose) navOverlayClose.addEventListener('click', closeOverlay);
+        if (navOverlay) navOverlay.addEventListener('click', (e) => {
+            if (e.target === navOverlay) closeOverlay();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navOverlay && navOverlay.classList.contains('is-open')) closeOverlay();
+        });
+    </script>
+    <script src="/js/auth.js"></script>
+<script src="/js/particles.js"></script>
+</body>
+</html>
