@@ -59,41 +59,7 @@
     </style>
 </head>
 <body class="has-pill-nav">
-<canvas id="particle-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block;border:none;margin:0;padding:0"></canvas>
-
-    <!-- Pill Navigation Bar -->
-    <div class="nav-pill">
-        <div class="nav-pill-inner">
-            <a href="index.html" class="nav-pill-logo">
-                <span class="logo-title">MALAYAN UMAMUSUME</span>
-                <span class="logo-sub">RACING ASSOCIATION</span>
-            </a>
-            <nav id="main-nav" class="nav-pill-links">
-                <a href="news-detail.html" class="nav-pill-link">News</a>
-                <a href="about.html" class="nav-pill-link">About</a>
-                <a href="event-detail.html" class="nav-pill-link">Events</a>
-                <a href="index.html#community" class="nav-pill-link">Community</a>
-                <a href="weekly-race.html" class="nav-pill-link">Races</a>
-            </nav>
-            <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Full-Page Overlay Menu -->
-    <div id="nav-overlay" class="nav-overlay">
-        <button id="nav-overlay-close" class="nav-overlay-close" aria-label="Close menu">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-        <ul class="nav-overlay-menu">
-            <li class="nav-overlay-item"><a href="news-detail.html" class="nav-overlay-link">News</a></li>
-            <li class="nav-overlay-item"><a href="about.html" class="nav-overlay-link">About</a></li>
-            <li class="nav-overlay-item"><a href="event-detail.html" class="nav-overlay-link">Events</a></li>
-            <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
-            <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
-        </ul>
-    </div>
+    <div id="site-nav"></div>
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
@@ -127,26 +93,9 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-12">
-        <div class="container mx-auto px-4 py-6 text-center">
-            <p>&copy; 2025–2026 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
-            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
-        </div>
-    </footer>
+    <div id="site-footer"></div>
 
     <script>
-        // Nav overlay
-        const navBurgerBtn = document.getElementById('nav-burger-btn');
-        const navOverlay = document.getElementById('nav-overlay');
-        const navOverlayClose = document.getElementById('nav-overlay-close');
-        function openOverlay() { if (navOverlay) navOverlay.classList.add('is-open'); document.body.style.overflow = 'hidden'; }
-        function closeOverlay() { if (navOverlay) navOverlay.classList.remove('is-open'); document.body.style.overflow = ''; }
-        if (navBurgerBtn) navBurgerBtn.addEventListener('click', openOverlay);
-        if (navOverlayClose) navOverlayClose.addEventListener('click', closeOverlay);
-        if (navOverlay) navOverlay.addEventListener('click', (e) => { if (e.target === navOverlay) closeOverlay(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && navOverlay && navOverlay.classList.contains('is-open')) closeOverlay(); });
-
         // Load leaderboard
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -185,6 +134,9 @@
             }
         });
     </script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/nav-overlay.js"></script>
+    <script src="/js/auth.js"></script>
 <script src="/js/particles.js"></script>
 </body>
 </html>

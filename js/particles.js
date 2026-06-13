@@ -6,8 +6,14 @@
 (function () {
   'use strict';
 
-  const canvas = document.getElementById('particle-bg');
-  if (!canvas) return;
+  // Create the canvas element if it doesn't exist (injected instead of inline HTML)
+  let canvas = document.getElementById('particle-bg');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'particle-bg';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.prepend(canvas);
+  }
 
   const ctx = canvas.getContext('2d');
 
