@@ -64,8 +64,8 @@ export async function onRequestPost(context) {
     }
 
     if (data.mediaType !== undefined) {
-      if (!['youtube', 'image'].includes(data.mediaType)) {
-        return errorResponse('Media type must be youtube or image.');
+      if (!['youtube', 'image', 'video'].includes(data.mediaType)) {
+        return errorResponse('Media type must be youtube, image, or video.');
       }
       updates.push('media_type = ?');
       values.push(data.mediaType);
@@ -79,10 +79,16 @@ export async function onRequestPost(context) {
       let mediaUrlValue = result.value || '';
       // Determine the media type for this update (could be new or existing)
       const effectiveMediaType = data.mediaType !== undefined
-        ? (['youtube', 'image'].includes(data.mediaType) ? data.mediaType : 'youtube')
+        ? (['youtube', 'image', 'video'].includes(data.mediaType) ? data.mediaType : 'youtube')
         : 'youtube'; // default assumption when only URL changes
       if (effectiveMediaType === 'youtube' && mediaUrlValue) {
         mediaUrlValue = normalizeYouTubeUrl(mediaUrlValue);
+      }
+      if (effectiveMediaType === 'video' && mediaUrlValue) {
+        const videoExt = /\.(mp4|webm|ogg|mov)(\?|$)/i.test(mediaUrlValue);
+        if (!videoExt) {
+          return errorResponse('Video URL must be a direct link to a video file (mp4, webm, ogg, mov).');
+        }
       }
 
       updates.push('media_url = ?');

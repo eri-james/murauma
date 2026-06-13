@@ -75,12 +75,19 @@ export async function onRequestPost(context) {
     const mediaUrlResult = validateOptionalField(data.mediaUrl, 2000, 'Media URL');
     if (!mediaUrlResult.valid) return errorResponse(mediaUrlResult.error);
 
-    const mediaType = ['youtube', 'image'].includes(data.mediaType) ? data.mediaType : 'youtube';
+    const mediaType = ['youtube', 'image', 'video'].includes(data.mediaType) ? data.mediaType : 'youtube';
 
     // Normalize YouTube URLs to embed format (handles youtu.be, watch?v=, etc.)
     let mediaUrlValue = mediaUrlResult.value || '';
     if (mediaType === 'youtube' && mediaUrlValue) {
       mediaUrlValue = normalizeYouTubeUrl(mediaUrlValue);
+    }
+    // For 'video' type, validate it looks like a direct video file URL
+    if (mediaType === 'video' && mediaUrlValue) {
+      const videoExt = /\.(mp4|webm|ogg|mov)(\?|$)/i.test(mediaUrlValue);
+      if (!videoExt) {
+        return errorResponse('Video URL must be a direct link to a video file (mp4, webm, ogg, mov).');
+      }
     }
 
     const isActive = data.isActive === true || data.isActive === 1 ? 1 : 0;

@@ -2393,7 +2393,7 @@
                 <tr>
                     <td>${b.id}</td>
                     <td class="font-bold">${esc(b.title)}</td>
-                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : 'badge-community'}">${esc(b.mediaType)}</span></td>
+                    <td><span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : b.mediaType === 'video' ? 'badge-guide' : 'badge-community'}">${esc(b.mediaType)}</span></td>
                     <td class="text-gray-500 text-xs" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(b.linkUrl || '—')}</td>
                     <td><span class="badge ${b.isActive ? 'badge-published' : 'badge-draft'}">${b.isActive ? 'Active' : 'Inactive'}</span></td>
                     <td class="space-x-1">
@@ -2404,7 +2404,7 @@
                 </tr>
             `).join('');
             mobileCards.innerHTML = data.items.map(b => buildMobileCard(b.id, esc(b.title), [
-                { label: 'Media', value: `<span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : 'badge-community'}">${esc(b.mediaType)}</span>` },
+                { label: 'Media', value: `<span class="badge ${b.mediaType === 'youtube' ? 'badge-event' : b.mediaType === 'video' ? 'badge-guide' : 'badge-community'}">${esc(b.mediaType)}</span>` },
                 { label: 'Link', value: esc(b.linkUrl || '—') },
                 { label: 'Active', value: `<span class="badge ${b.isActive ? 'badge-published' : 'badge-draft'}">${b.isActive ? 'Active' : 'Inactive'}</span>` },
             ], `
@@ -2438,6 +2438,7 @@
                         <label class="block text-sm font-bold text-gray-700">Media Type *</label>
                         <select id="bn-media-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                             <option value="youtube">YouTube Video</option>
+                            <option value="video">Video File</option>
                             <option value="image">Image</option>
                         </select>
                     </div>
@@ -2461,14 +2462,20 @@
         // Toggle media URL label/hint based on media type
         const mediaTypeSelect = document.getElementById('bn-media-type');
         function updateMediaLabels() {
-            const isYoutube = mediaTypeSelect.value === 'youtube';
-            document.getElementById('bn-media-url-label').textContent = isYoutube ? 'YouTube Embed URL' : 'Image URL';
-            document.getElementById('bn-media-url').placeholder = isYoutube
-                ? 'https://www.youtube.com/embed/VIDEO_ID'
-                : 'https://example.com/banner.jpg';
-            document.getElementById('bn-media-hint').textContent = isYoutube
-                ? 'Supported formats: youtube.com/embed/ID, youtu.be/ID, or youtube.com/watch?v=ID'
-                : 'Direct link to an image file (jpg, png, webp)';
+            const type = mediaTypeSelect.value;
+            if (type === 'youtube') {
+                document.getElementById('bn-media-url-label').textContent = 'YouTube Embed URL';
+                document.getElementById('bn-media-url').placeholder = 'https://www.youtube.com/embed/VIDEO_ID';
+                document.getElementById('bn-media-hint').textContent = 'Supported formats: youtube.com/embed/ID, youtu.be/ID, or youtube.com/watch?v=ID';
+            } else if (type === 'video') {
+                document.getElementById('bn-media-url-label').textContent = 'Video File URL';
+                document.getElementById('bn-media-url').placeholder = 'https://files.catbox.moe/xxxxx.mp4';
+                document.getElementById('bn-media-hint').textContent = 'Direct link to a video file (mp4, webm, ogg). E.g. catbox.moe, imgur .mp4 links';
+            } else {
+                document.getElementById('bn-media-url-label').textContent = 'Image URL';
+                document.getElementById('bn-media-url').placeholder = 'https://example.com/banner.jpg';
+                document.getElementById('bn-media-hint').textContent = 'Direct link to an image file (jpg, png, webp)';
+            }
         }
         mediaTypeSelect.addEventListener('change', updateMediaLabels);
 
