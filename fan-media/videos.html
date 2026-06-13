@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="../css/tailwind.min.css">
     <!-- DOMPurify for XSS prevention on user-submitted content -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
+    <script src="/js/dompurify-fallback.js"></script>
     <!-- Google Fonts (Noto Sans JP only — Inter is self-hosted) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,14 +144,20 @@
                             `;
                         } else {
                             // Link card for non-YouTube videos
+                            // Sanitize URL — only allow http(s) and relative paths
+                            var safeUrl = '#';
+                            try {
+                                var rawUrl = DOMPurify.sanitize(item.url || '');
+                                if (/^(https?:|\/)/.test(rawUrl)) safeUrl = rawUrl;
+                            } catch(e) {}
                             card.innerHTML = `
-                                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block">
+                                <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="block">
                                     <div class="relative aspect-video bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                     </div>
                                 </a>
                                 <div class="p-4 bg-gray-50">
-                                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="font-bold text-lg text-gray-800 hover:text-red-600 truncate block">${safeTitle}</a>
+                                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="font-bold text-lg text-gray-800 hover:text-red-600 truncate block">${safeTitle}</a>
                                     <p class="text-sm text-gray-500">by ${safeAuthor}</p>
                                     ${safeDesc ? `<p class="text-xs text-gray-400 mt-1 line-clamp-2">${safeDesc}</p>` : ''}
                                 </div>

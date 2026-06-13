@@ -12,7 +12,13 @@
     canvas = document.createElement('canvas');
     canvas.id = 'particle-bg';
     canvas.setAttribute('aria-hidden', 'true');
-    document.body.prepend(canvas);
+    // Insert as first child of body so CSS z-index:-1 places it behind all content.
+    // Using insertBefore is more reliable than prepend for <body>.
+    if (document.body.firstChild) {
+      document.body.insertBefore(canvas, document.body.firstChild);
+    } else {
+      document.body.appendChild(canvas);
+    }
   }
 
   const ctx = canvas.getContext('2d');

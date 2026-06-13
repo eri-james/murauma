@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './*.html',
+    './includes/*.html',
     './admin/*.html',
     './fan-media/*.html',
     './functions/**/*.js',

@@ -40,6 +40,7 @@
     <link rel="stylesheet" href="/css/fonts.css">
     <!-- DOMPurify for XSS prevention on user-submitted content -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
+    <script src="/js/dompurify-fallback.js"></script>
     <!-- Shared site-wide styles -->
     <link rel="stylesheet" href="/css/common.css">
 </head>
@@ -986,25 +987,6 @@
     })();
     </script>
     <script>
-    // DOMPurify fallback — if CDN fails, provide a minimal sanitizer so the page still works
-    if (typeof DOMPurify === 'undefined') {
-        window.DOMPurify = {
-            sanitize: function (str) {
-                if (typeof str !== 'string') return '';
-                var d = document.createElement('div');
-                d.textContent = str;
-                return d.innerHTML;
-            },
-            sanitize: function (str, opts) {
-                if (typeof str !== 'string') return '';
-                var d = document.createElement('div');
-                d.textContent = str;
-                return d.innerHTML;
-            }
-        };
-        console.warn('DOMPurify CDN failed to load — using text-only fallback sanitizer');
-    }
-
     // Decode HTML entities from server-side sanitizeText() for existing data
     function decodeHTMLEntities(text) {
         if (!text || typeof text !== 'string') return text;

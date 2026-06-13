@@ -1,7 +1,7 @@
 /**
  * MURA — Nav Overlay Toggle
- * Shared across all pages. Works with both inline nav (DOMContentLoaded)
- * and layout.js-injected nav (mura:layout-ready).
+ * Shared across all pages. Binds after layout.js injects the nav HTML
+ * (signalled by the mura:layout-ready custom event).
  *
  * Exposes window.muraCloseOverlay() so page-specific code (e.g. homepage
  * page-switching) can programmatically close the overlay.
@@ -10,7 +10,6 @@
     'use strict';
     let initialized = false;
 
-    // Close function is defined at module scope so it can be exposed globally
     function closeOverlay() {
         const overlay = document.getElementById('nav-overlay');
         if (overlay) overlay.classList.remove('is-open');
@@ -33,10 +32,10 @@
         initialized = true;
 
         const closeBtn = document.getElementById('nav-overlay-close');
+        const overlay = document.getElementById('nav-overlay');
 
         btn.addEventListener('click', openOverlay);
         if (closeBtn) closeBtn.addEventListener('click', closeOverlay);
-        const overlay = document.getElementById('nav-overlay');
         if (overlay) overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closeOverlay();
         });
@@ -45,29 +44,14 @@
         });
     }
 
-    // Try on DOMContentLoaded (for pages with inline nav)
+    // Listen for both DOMContentLoaded (inline nav pages) and mura:layout-ready (layout.js pages).
+    // Both are safe because init() is idempotent — it returns immediately if already called.
     document.addEventListener('DOMContentLoaded', init);
-
-    // Try after layout.js injects nav (for pages using <div id="site-nav">)
     document.addEventListener('mura:layout-ready', init);
 
-    // Safety net: if both events already fired (race condition on some browsers),
-    // use a MutationObserver to watch for the burger button appearing.
-    if (!initialized && document.readyState !== 'loading') {
-        const navContainer = document.getElementById('site-nav');
-        if (navContainer && !document.getElementById('nav-burger-btn')) {
-            const observer = new MutationObserver(() => {
-                if (document.getElementById('nav-burger-btn')) {
-                    observer.disconnect();
-                    init();
-                }
-            });
-            observer.observe(navContainer, { childList: true, subtree: true });
-            // Stop observing after 10 seconds to avoid lingering observers
-            setTimeout(() => observer.disconnect(), 10000);
-        } else {
-            // Burger might already be in the DOM — try once more
-            init();
-        }
+    // Direct check: if scripts loaded after DOMContentLoaded already fired,
+    // and the nav is already in the DOM (e.g. pages with inline nav), init now.
+    if (document.readyState !== 'loading' && document.getElementById('nav-burger-btn')) {
+        init();
     }
 })();
