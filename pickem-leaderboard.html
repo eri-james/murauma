@@ -73,6 +73,7 @@
                 <a href="index.html#about" class="nav-pill-link">About</a>
                 <a href="index.html#events" class="nav-pill-link">Events</a>
                 <a href="index.html#community" class="nav-pill-link">Community</a>
+                <a href="weekly-race.html" class="nav-pill-link">Races</a>
             </nav>
             <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -90,6 +91,7 @@
             <li class="nav-overlay-item"><a href="index.html#about" class="nav-overlay-link">About</a></li>
             <li class="nav-overlay-item"><a href="index.html#events" class="nav-overlay-link">Events</a></li>
             <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
+            <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
         </ul>
     </div>
 
@@ -105,11 +107,11 @@
                 <p class="text-sm text-purple-700">Predict the podium for each race! <b>3 pts</b> for correct 1st place, <b>2 pts</b> for 2nd, <b>1 pt</b> for 3rd. Maximum 6 points per race.</p>
             </div>
 
-            <div class="mb-6 text-center">
-                <a href="race-leaderboard.html" class="inline-flex items-center gap-1 text-sm font-bold text-green-600 hover:text-green-800 underline">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM5 12V2h6v10H5z"/><path d="M8 6a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
-                    View Racer Leaderboard
-                </a>
+            <!-- Cross-link bar: Race hub navigation -->
+            <div class="flex justify-center gap-2 mb-6">
+                <a href="race-leaderboard.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-green-100 text-green-700 hover:bg-green-200 transition-colors">Racer Standings</a>
+                <a href="pickem-leaderboard.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-purple-700 text-white" aria-current="page">Pick'em Standings</a>
+                <a href="weekly-race.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Current Race</a>
             </div>
 
             <div id="leaderboard-loading" class="text-center py-12">
