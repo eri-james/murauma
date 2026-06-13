@@ -1,15 +1,16 @@
-<!-- Pill Navigation Bar (loaded via JS) -->
+<!-- Pill Navigation Bar — Homepage variant (loaded via JS) -->
+<!-- Uses #anchor links for same-page scrolling + data-nav-link / data-overlay-link for page-switching JS -->
 <div class="nav-pill">
     <div class="nav-pill-inner">
-        <a href="index.html" class="nav-pill-logo">
+        <a href="#" id="logo-link" class="nav-pill-logo">
             <span class="logo-title">MALAYAN UMAMUSUME</span>
             <span class="logo-sub">RACING ASSOCIATION</span>
         </a>
-        <nav class="nav-pill-links">
-            <a href="news-detail.html" class="nav-pill-link">News</a>
+        <nav id="main-nav" class="nav-pill-links">
+            <a href="#news" class="nav-pill-link" data-nav-link>News</a>
             <a href="about.html" class="nav-pill-link">About</a>
-            <a href="event-detail.html" class="nav-pill-link">Events</a>
-            <a href="index.html#community" class="nav-pill-link">Community</a>
+            <a href="#events" class="nav-pill-link" data-nav-link>Events</a>
+            <a href="#community" class="nav-pill-link" data-nav-link>Community</a>
             <a href="weekly-race.html" class="nav-pill-link">Races</a>
             <!-- Auth buttons (desktop) -->
             <a href="register.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-join">Join</a>
@@ -30,10 +31,10 @@
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
     <ul class="nav-overlay-menu">
-        <li class="nav-overlay-item"><a href="news-detail.html" class="nav-overlay-link">News</a></li>
+        <li class="nav-overlay-item"><a href="#news" class="nav-overlay-link" data-overlay-link>News</a></li>
         <li class="nav-overlay-item"><a href="about.html" class="nav-overlay-link">About</a></li>
-        <li class="nav-overlay-item"><a href="event-detail.html" class="nav-overlay-link">Events</a></li>
-        <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
+        <li class="nav-overlay-item"><a href="#events" class="nav-overlay-link" data-overlay-link>Events</a></li>
+        <li class="nav-overlay-item"><a href="#community" class="nav-overlay-link" data-overlay-link>Community</a></li>
         <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
     </ul>
     <div class="nav-overlay-auth">

@@ -139,4 +139,14 @@
     } else {
         checkAuth();
     }
+
+    // Re-apply auth state after layout.js injects nav/footer HTML
+    // (the /api/me fetch may resolve before layout.js injects the auth elements)
+    document.addEventListener('mura:layout-ready', () => {
+        if (window.muraCurrentUser) {
+            updateNav(window.muraCurrentUser);
+        } else {
+            updateNav(null);
+        }
+    });
 })();

@@ -12,6 +12,12 @@
             <a href="../event-detail.html" class="nav-pill-link">Events</a>
             <a href="../index.html#community" class="nav-pill-link">Community</a>
             <a href="../weekly-race.html" class="nav-pill-link">Races</a>
+            <!-- Auth buttons (desktop) -->
+            <a href="../register.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-join">Join</a>
+            <a href="../login.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-login">Log In</a>
+            <a href="../edit-profile.html" data-auth="logged-in" class="nav-pill-auth nav-pill-auth-profile"><span data-auth="display-name"></span></a>
+            <a href="/admin/" data-auth="admin" class="nav-pill-auth nav-pill-auth-admin">Admin</a>
+            <button data-auth="logout" class="nav-pill-auth nav-pill-auth-logout">Log Out</button>
         </nav>
         <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
