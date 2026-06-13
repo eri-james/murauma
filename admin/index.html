@@ -618,6 +618,12 @@
                         </button>
                     </div>
                 </div>
+                <div class="admin-card border-2 border-blue-500 mt-6">
+                    <h3 class="header-skew header-skew-blue" style="margin-bottom:1.25rem;">Database Migrations</h3>
+                    <p class="text-gray-500 text-sm mb-3">Apply pending schema changes to the database. Only needed after feature updates.</p>
+                    <div id="migration-status" class="mb-4 text-sm text-gray-400">Checking...</div>
+                    <button onclick="runMigrations()" id="btn-run-migrations" class="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-blue-700 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Run Pending Migrations</button>
+                </div>
             </div>
 
             <!-- ========== MEMBERS ========== -->
@@ -1108,6 +1114,7 @@
         } catch (err) {
             console.error('Overview load error:', err);
         }
+        checkMigrations();
     }
 
     // ============================================================
@@ -2532,6 +2539,55 @@
         if (!confirm('Delete this hero banner permanently?')) return;
         try { await api('DELETE', '/api/admin/hero-banner', { id }); loadHeroBanners(); }
         catch (err) { alert('Error: ' + err.message); }
+    }
+
+    // ============================================================
+    // DATABASE MIGRATIONS
+    // ============================================================
+    async function checkMigrations() {
+        const statusEl = document.getElementById('migration-status');
+        const btnEl = document.getElementById('btn-run-migrations');
+        if (!statusEl) return;
+        try {
+            const data = await api('GET', '/api/admin/migrate');
+            if (data.pending && data.pending.length > 0) {
+                statusEl.innerHTML = `<span class="text-amber-600 font-bold">${data.pending.length} pending migration(s):</span> ` +
+                    data.pending.map(m => `<span class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded-full mr-1">${m.id}: ${esc(m.name)}</span>`).join('');
+                btnEl.disabled = false;
+            } else {
+                statusEl.innerHTML = '<span class="text-green-600 font-bold">All migrations applied. Database is up to date.</span>';
+                btnEl.disabled = true;
+            }
+        } catch (err) {
+            statusEl.innerHTML = `<span class="text-red-500">Error checking migrations: ${esc(err.message)}</span>`;
+        }
+    }
+
+    async function runMigrations() {
+        const statusEl = document.getElementById('migration-status');
+        const btnEl = document.getElementById('btn-run-migrations');
+        if (!confirm('Run all pending database migrations? This will modify the database schema.')) return;
+        btnEl.disabled = true;
+        statusEl.innerHTML = '<span class="text-blue-500">Running migrations...</span>';
+        try {
+            const data = await api('POST', '/api/admin/migrate');
+            const results = data.results || [];
+            const hasFailure = results.some(r => r.status === 'failed');
+            if (hasFailure) {
+                statusEl.innerHTML = results.map(r =>
+                    r.status === 'success'
+                        ? `<div class="text-green-600">✓ ${r.id}: ${esc(r.name)}</div>`
+                        : `<div class="text-red-500">✗ ${r.id}: ${esc(r.name)} — ${esc(r.error)}</div>`
+                ).join('');
+            } else {
+                statusEl.innerHTML = `<span class="text-green-600 font-bold">All ${results.length} migration(s) applied successfully!</span> ` +
+                    results.map(r => `<span class="inline-block bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded-full mr-1">${r.id}: ${esc(r.name)}</span>`).join('');
+            }
+            btnEl.disabled = true;
+        } catch (err) {
+            statusEl.innerHTML = `<span class="text-red-500">Migration failed: ${esc(err.message)}</span>`;
+            btnEl.disabled = false;
+        }
     }
 
     // ============================================================
