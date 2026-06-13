@@ -1,11 +1,13 @@
 /**
- * GET /api/weekly-races — List Published Active Weekly Races (Public)
+ * GET /api/weekly-races — List Published Weekly Races (Public)
  *
  * Query parameters:
  *   ?slug=merdeka-cup-2025  — Return a single published weekly race by slug
  *   ?id=N                   — Return a single published weekly race by ID (fallback)
+ *   ?scope=all              — Return all published races (active + past)
  *
- * Without ?slug or ?id, returns all published active weekly races.
+ * Without ?scope=all, returns only active published races (for homepage etc.).
+ * With ?scope=all, returns active races first, then past races (for race listing page).
  */
 import { errorResponse, getOptionalAuth } from '../_shared/utils.js';
 
@@ -107,15 +109,22 @@ export async function onRequestGet(context) {
       });
     }
 
-    // --- List all published active races (summary only, no content) ---
-    const { results } = await db
-      .prepare(
-        `SELECT id, title, slug, track, deadline, description, image_url, is_active, created_at, updated_at
+    // --- List published races ---
+    // Default: active only (for homepage). ?scope=all: active + past (for race listing page).
+    const scope = url.searchParams.get('scope');
+    const activeOnly = scope !== 'all';
+
+    const query = activeOnly
+      ? `SELECT id, title, slug, track, deadline, description, image_url, is_active, created_at, updated_at
          FROM weekly_races
          WHERE status = 'published' AND is_active = 1
          ORDER BY created_at DESC`
-      )
-      .all();
+      : `SELECT id, title, slug, track, deadline, description, image_url, is_active, created_at, updated_at
+         FROM weekly_races
+         WHERE status = 'published'
+         ORDER BY is_active DESC, created_at DESC`;
+
+    const { results } = await db.prepare(query).all();
 
     const races = results.map(row => ({
       id: row.id,
