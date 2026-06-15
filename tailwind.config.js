@@ -5,6 +5,7 @@ module.exports = {
     './includes/*.html',
     './admin/*.html',
     './fan-media/*.html',
+    './includes/*.html',
     './functions/**/*.js',
   ],
   theme: {

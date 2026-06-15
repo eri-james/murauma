@@ -1,46 +1,24 @@
-<!-- Pill Navigation Bar (loaded via JS) -->
-<div class="nav-pill">
-    <div class="nav-pill-inner">
-        <a href="index.html" class="nav-pill-logo">
-            <span class="logo-title">MALAYAN UMAMUSUME</span>
-            <span class="logo-sub">RACING ASSOCIATION</span>
-        </a>
-        <nav class="nav-pill-links">
-            <a href="news-detail.html" class="nav-pill-link">News</a>
-            <a href="about.html" class="nav-pill-link">About</a>
-            <a href="event-detail.html" class="nav-pill-link">Events</a>
-            <a href="index.html#community" class="nav-pill-link">Community</a>
-            <a href="weekly-race.html" class="nav-pill-link">Races</a>
-            <!-- Auth buttons (desktop) -->
-            <a href="register.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-join">Join</a>
-            <a href="login.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-login">Log In</a>
-            <a href="edit-profile.html" data-auth="logged-in" class="nav-pill-auth nav-pill-auth-profile"><span data-auth="display-name"></span></a>
-            <a href="/admin/" data-auth="admin" class="nav-pill-auth nav-pill-auth-admin">Admin</a>
-            <button data-auth="logout" class="nav-pill-auth nav-pill-auth-logout">Log Out</button>
-        </nav>
-        <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-        </button>
-    </div>
-</div>
+    <!-- Pill Navigation Bar -->
+    <div class="nav-pill">
+        <div class="nav-pill-inner">
+            <!-- Logo -->
+            <a href="{{LOGO_HREF}}"{{LOGO_ID_ATTR}} class="nav-pill-logo">
+                <span class="logo-title">MALAYAN UMAMUSUME</span>
+                <span class="logo-sub">RACING ASSOCIATION</span>
+            </a>
 
-<!-- Full-Page Overlay Menu -->
-<div id="nav-overlay" class="nav-overlay">
-    <button id="nav-overlay-close" class="nav-overlay-close" aria-label="Close menu">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-    </button>
-    <ul class="nav-overlay-menu">
-        <li class="nav-overlay-item"><a href="news-detail.html" class="nav-overlay-link">News</a></li>
-        <li class="nav-overlay-item"><a href="about.html" class="nav-overlay-link">About</a></li>
-        <li class="nav-overlay-item"><a href="event-detail.html" class="nav-overlay-link">Events</a></li>
-        <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
-        <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
-    </ul>
-    <div class="nav-overlay-auth">
-        <a href="register.html" data-auth="logged-out" class="btn-join">Join Us</a>
-        <a href="login.html" data-auth="logged-out" class="btn-login">Log In</a>
-        <a href="edit-profile.html" data-auth="logged-in" class="btn-profile"><span data-auth="username"></span></a>
-        <a href="/admin/" data-auth="admin" class="btn-admin">Admin</a>
-        <button data-auth="logout" class="btn-logout">Log Out</button>
+            <!-- Desktop links (visible on md+) -->
+            <nav id="main-nav" class="nav-pill-links">
+                <a href="{{NAVLINK_PREFIX}}#news" class="nav-pill-link"{{DATA_NAV_LINK}}>News</a>
+                <a href="{{NAVLINK_PREFIX}}#about" class="nav-pill-link"{{DATA_NAV_LINK}}>About</a>
+                <a href="{{NAVLINK_PREFIX}}#events" class="nav-pill-link"{{DATA_NAV_LINK}}>Events</a>
+                <a href="{{NAVLINK_PREFIX}}#community" class="nav-pill-link"{{DATA_NAV_LINK}}>Community</a>
+                {{DESKTOP_AUTH}}
+            </nav>
+
+            <!-- Burger button -->
+            <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+            </button>
+        </div>
     </div>
-</div>
