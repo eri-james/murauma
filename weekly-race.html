@@ -332,7 +332,8 @@
     </style>
 </head>
 <body class="has-pill-nav">
-<canvas id="particle-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block;border:none;margin:0;padding:0"></canvas>
+
+    <canvas id="particle-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block;border:none;margin:0;padding:0"></canvas>
 
 <!-- MURA:NAV:START -->
     <!-- Pill Navigation Bar -->
@@ -412,13 +413,45 @@
             </div>
         </div>
 
+        <!-- Race Listing (no slug/id — shows all races) -->
+        <div id="race-listing" class="hidden max-w-4xl mx-auto">
+            <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-green-500">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">Weekly Races</h1>
+                <p class="text-base text-gray-500 mb-4">All MURA weekly races — active and past.</p>
+
+                <!-- Cross-link bar -->
+                <div class="flex justify-center gap-2 mb-6">
+                    <a href="race-leaderboard.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-green-100 text-green-700 hover:bg-green-200 transition-colors">Racer Standings</a>
+                    <a href="pickem-leaderboard.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors">Pick'em Standings</a>
+                    <a href="weekly-race.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-gray-700 text-white" aria-current="page">All Races</a>
+                </div>
+
+                <div id="race-listing-active" class="hidden mb-8">
+                    <h2 class="text-xl font-bold text-green-700 mb-4 flex items-center gap-2">
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        Active Races
+                    </h2>
+                    <div id="race-listing-active-grid" class="grid md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div id="race-listing-past" class="hidden">
+                    <h2 class="text-xl font-bold text-gray-600 mb-4">Past Races</h2>
+                    <div id="race-listing-past-grid" class="grid md:grid-cols-2 gap-4"></div>
+                </div>
+
+                <div id="race-listing-empty" class="hidden text-center py-12">
+                    <p class="text-gray-400 text-lg">No races yet. Check back soon!</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Error State -->
         <div id="race-error" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
             <div class="text-center py-8">
                 <p class="text-red-600 font-bold text-lg mb-4">Could not load race information.</p>
-                <a href="index.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
+                <a href="weekly-race.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                    <span>Back to Main Site</span>
+                    <span>Back to All Races</span>
                 </a>
             </div>
         </div>
@@ -427,15 +460,22 @@
         <div id="race-content" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-green-500">
 
             <!-- Page Header -->
-            <div class="flex justify-between items-start mb-6">
+            <div class="flex justify-between items-start mb-4">
                 <div>
                     <h1 id="race-title" class="text-3xl md:text-4xl font-extrabold text-gray-800"></h1>
                     <p id="race-subtitle" class="text-base text-gray-500 mt-2"></p>
                 </div>
-                <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
+                <a href="weekly-race.html" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                    <span class="hidden md:inline">Back</span>
-                </button>
+                    <span class="hidden md:inline">All Races</span>
+                </a>
+            </div>
+
+            <!-- Cross-link bar: Race hub navigation -->
+            <div class="flex justify-center gap-2 mb-6">
+                <a href="race-leaderboard.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-green-100 text-green-700 hover:bg-green-200 transition-colors">Racer Standings</a>
+                <a href="pickem-leaderboard.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors">Pick'em Standings</a>
+                <a href="weekly-race.html" class="px-4 py-2 rounded-lg text-sm font-bold bg-gray-700 text-white" aria-current="page">This Race</a>
             </div>
 
             <!-- Race Banner Image -->
@@ -543,7 +583,7 @@
 
     </main>
 
-<!-- MURA:FOOTER:START -->
+    <!-- MURA:FOOTER:START -->
     <!-- Footer Section -->
     <footer class="bg-gray-800 text-white mt-12">
         <div class="container mx-auto px-4 py-6 text-center">
@@ -559,7 +599,8 @@
 
     <!-- MURA:FOOTER:END -->
 
-    <script src="/js/auth.js"></script>
+    <script src="/js/nav-overlay.js"></script>
+<script src="/js/auth.js"></script>
     <script>
         // Decode HTML entities from server-side sanitizeText() for existing data
         function decodeHTMLEntities(text) {
@@ -567,8 +608,721 @@
             const el = document.createElement('textarea');
             el.innerHTML = text;
             return el.value;
-        }</script>
-    <script src="/js/nav-overlay.js"></script>
+        }
+
+        // Render a race card for the listing view
+        function renderRaceCard(race, isActive) {
+            const img = race.imageUrl
+                ? `<img src="${DOMPurify.sanitize(race.imageUrl)}" alt="${DOMPurify.sanitize(decodeHTMLEntities(race.title))}" class="w-full rounded-lg mb-3 object-cover aspect-video" loading="lazy" onerror="this.style.display='none'">`
+                : '';
+            const statusBadge = isActive
+                ? '<span class="inline-flex items-center bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded-full mb-2"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>Active</span>'
+                : '<span class="inline-flex items-center bg-gray-100 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full mb-2">Completed</span>';
+            const borderColor = isActive ? 'border-green-300 hover:border-green-500' : 'border-gray-200 hover:border-gray-400';
+            const track = race.track ? `<p class="text-gray-600 text-sm"><strong>Track:</strong> ${DOMPurify.sanitize(decodeHTMLEntities(race.track))}</p>` : '';
+            const deadline = race.deadline ? `<p class="text-gray-600 text-sm"><strong>Deadline:</strong> ${DOMPurify.sanitize(decodeHTMLEntities(race.deadline))}</p>` : '';
+            const desc = race.description ? `<p class="text-gray-500 text-sm mt-2 line-clamp-2">${DOMPurify.sanitize(decodeHTMLEntities(race.description))}</p>` : '';
+
+            return `<a href="weekly-race.html?slug=${encodeURIComponent(race.slug || race.id)}" class="block bg-gray-50 p-4 rounded-lg border-2 ${borderColor} transition-colors">
+                ${img}
+                ${statusBadge}
+                <h3 class="font-bold text-lg text-gray-800">${DOMPurify.sanitize(decodeHTMLEntities(race.title))}</h3>
+                ${track}
+                ${deadline}
+                ${desc}
+            </a>`;
+        }
+
+        // Dynamic race loading
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
+            const raceId = params.get('id');
+
+            const loadingEl = document.getElementById('race-loading');
+            const errorEl = document.getElementById('race-error');
+            const contentEl = document.getElementById('race-content');
+            const listingEl = document.getElementById('race-listing');
+
+            // No slug or id — show the race listing page
+            if (!slug && !raceId) {
+                try {
+                    const resp = await fetch('/api/weekly-races?scope=all');
+                    const data = await resp.json();
+
+                    loadingEl.classList.add('hidden');
+
+                    if (data.result !== 'success' || !data.races || data.races.length === 0) {
+                        document.getElementById('race-listing-empty').classList.remove('hidden');
+                        listingEl.classList.remove('hidden');
+                        return;
+                    }
+
+                    const activeRaces = data.races.filter(r => r.isActive);
+                    const pastRaces = data.races.filter(r => !r.isActive);
+
+                    // Render active races
+                    if (activeRaces.length > 0) {
+                        const activeGrid = document.getElementById('race-listing-active-grid');
+                        activeGrid.innerHTML = activeRaces.map(r => renderRaceCard(r, true)).join('');
+                        document.getElementById('race-listing-active').classList.remove('hidden');
+                    }
+
+                    // Render past races
+                    if (pastRaces.length > 0) {
+                        const pastGrid = document.getElementById('race-listing-past-grid');
+                        pastGrid.innerHTML = pastRaces.map(r => renderRaceCard(r, false)).join('');
+                        document.getElementById('race-listing-past').classList.remove('hidden');
+                    }
+
+                    listingEl.classList.remove('hidden');
+                } catch (err) {
+                    console.error('Failed to load race listing:', err);
+                    loadingEl.classList.add('hidden');
+                    errorEl.classList.remove('hidden');
+                }
+                return;
+            }
+
+            // Single race view (slug or id provided)
+            try {
+                let apiUrl = '/api/weekly-races';
+                if (slug) {
+                    apiUrl += '?slug=' + encodeURIComponent(slug);
+                } else if (raceId) {
+                    apiUrl += '?id=' + encodeURIComponent(raceId);
+                }
+
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.result !== 'success') {
+                    throw new Error(data.message || 'Failed to load race');
+                }
+
+                const race = data.race;
+
+                if (!race) {
+                    throw new Error('No race found');
+                }
+
+                // Update page title
+                document.title = `${race.title || 'Weekly Race'} - MURA`;
+
+                // Fill header
+                document.getElementById('race-title').textContent = decodeHTMLEntities(race.title) || 'Weekly Race';
+                document.getElementById('race-subtitle').textContent = race.track ? `Track: ${decodeHTMLEntities(race.track)}` : 'Get ready for the race!';
+
+                // Banner image
+                if (race.imageUrl) {
+                    const imgEl = document.getElementById('race-image');
+                    imgEl.src = race.imageUrl;
+                    imgEl.alt = race.title || 'Race Banner';
+                    document.getElementById('race-image-container').classList.remove('hidden');
+                    imgEl.onerror = function() { document.getElementById('race-image-container').classList.add('hidden'); };
+                }
+
+                // Detail badges
+                const detailsList = document.getElementById('race-details-list');
+                if (race.track) {
+                    detailsList.innerHTML += `<span class="inline-flex items-center bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Track: ${DOMPurify.sanitize(decodeHTMLEntities(race.track))}</span>`;
+                }
+                if (race.deadline) {
+                    detailsList.innerHTML += `<span class="inline-flex items-center bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="mr-1"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>Deadline: ${DOMPurify.sanitize(decodeHTMLEntities(race.deadline))}</span>`;
+                }
+
+                // Description (short summary)
+                const descEl = document.getElementById('race-description');
+                if (race.description) {
+                    descEl.textContent = decodeHTMLEntities(race.description);
+                    descEl.classList.remove('hidden');
+                }
+
+                // Rich content body
+                const bodyEl = document.getElementById('race-body');
+                const hasContent = race.content && race.content.trim().length > 0 && race.content.trim() !== '<p><br></p>';
+                if (hasContent) {
+                    // Sanitize then decode apostrophe entities that DOMPurify may encode
+                    bodyEl.innerHTML = DOMPurify.sanitize(race.content).replace(/&#x27;|&#39;/g, "'");
+                }
+
+                // Show "How to Participate" only if there's no rich content
+                // (if the admin wrote detailed participation instructions in content, this would be redundant)
+                if (!hasContent) {
+                    document.getElementById('race-how-to-participate').classList.remove('hidden');
+                }
+
+                // Show content, hide loading
+                loadingEl.classList.add('hidden');
+                contentEl.classList.remove('hidden');
+
+                // Load Self-Join section
+                loadJoinSection(race.id);
+
+                // Load Pick'em data
+                loadPickemData(race.id);
+
+            } catch (error) {
+                console.error('Failed to load race:', error);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+            }
+        });
+
+        // ============================================================
+        // Self-Join Logic (Category-Aware: Open + Graded)
+        // ============================================================
+        let joinRaceId = null;
+        let joinMyCategories = []; // ['graded'], ['open'], ['open','graded'], or []
+        let joinHasResults = false;
+        let joinGradedRoster = [];
+        let joinOpenRoster = [];
+
+        async function loadJoinSection(raceId) {
+            joinRaceId = raceId;
+            const section = document.getElementById('join-section');
+
+            try {
+                // Fetch current user info
+                let currentUser = null;
+                try {
+                    const meResp = await fetch('/api/me');
+                    const meData = await meResp.json();
+                    if (meData.result === 'success' && meData.user) {
+                        currentUser = meData.user;
+                    }
+                } catch (e) { /* not logged in */ }
+
+                // Fetch pickem data to check roster + results + categories
+                const pickemResp = await fetch(`/api/race-predictions?raceId=${raceId}`);
+                const pickemData = await pickemResp.json();
+
+                joinGradedRoster = [];
+                joinOpenRoster = [];
+                joinMyCategories = [];
+                joinHasResults = false;
+
+                if (pickemData.result === 'success') {
+                    joinGradedRoster = pickemData.roster || [];
+                    joinOpenRoster = pickemData.openRoster || [];
+                    joinHasResults = pickemData.hasResults || false;
+                    joinMyCategories = pickemData.myCategories || [];
+                }
+
+                // Render Open Division roster
+                renderOpenRoster();
+
+                // Not logged in
+                if (!currentUser) {
+                    section.innerHTML = `
+                        <div class="join-locked">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            <a href="login.html" class="underline text-green-700">Log in</a> to join this race
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Not approved
+                if (currentUser.status !== 'approved') {
+                    section.innerHTML = `
+                        <div class="join-locked">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            Your account needs to be approved before joining races
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // No Trainer ID
+                if (!currentUser.trainerId) {
+                    section.innerHTML = `
+                        <div class="join-locked">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                            <a href="edit-profile.html" class="underline text-green-700">Add your Trainer ID</a> to your profile to join races
+                        </div>`;
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Results already in
+                if (joinHasResults) {
+                    const inOpen = joinMyCategories.includes('open');
+                    const inGraded = joinMyCategories.includes('graded');
+
+                    if (inOpen || inGraded) {
+                        let catLabels = [];
+                        if (inGraded) {
+                            const gEntry = joinGradedRoster.find(p => p.memberId === currentUser.userId);
+                            const pos = gEntry?.position;
+                            let posText = pos ? formatPosition(pos) : '';
+                            catLabels.push(`Graded${posText ? ' — ' + posText : ''}`);
+                        }
+                        if (inOpen) {
+                            const oEntry = joinOpenRoster.find(p => p.memberId === currentUser.userId);
+                            const pos = oEntry?.position;
+                            let posText = pos ? formatPosition(pos) : '';
+                            catLabels.push(`Open${posText ? ' — ' + posText : ''}`);
+                        }
+                        section.innerHTML = `
+                            <div class="join-status">
+                                <svg class="check" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                                You raced in this event (${catLabels.join(' & ')})!
+                            </div>`;
+                    } else {
+                        section.innerHTML = `
+                            <div class="join-locked">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                                Race has ended — results are in
+                            </div>`;
+                    }
+                    section.classList.remove('hidden');
+                    return;
+                }
+
+                // Build category buttons
+                const inOpen = joinMyCategories.includes('open');
+                const inGraded = joinMyCategories.includes('graded');
+
+                let html = '<div class="join-category-group">';
+
+                // Graded Division button
+                html += buildCategoryButton('graded', inGraded);
+
+                // Open Division button
+                html += buildCategoryButton('open', inOpen);
+
+                html += '</div>';
+                section.innerHTML = html;
+                section.classList.remove('hidden');
+
+            } catch (err) {
+                console.error('Join section error:', err);
+            }
+        }
+
+        function formatPosition(pos) {
+            if (pos === 1) return '1st place!';
+            if (pos === 2) return '2nd place!';
+            if (pos === 3) return '3rd place!';
+            if (pos) return `${pos}th place`;
+            return '';
+        }
+
+        function buildCategoryButton(category, isJoined) {
+            const isGraded = category === 'graded';
+            const title = isGraded ? 'Graded Division' : 'Open Division';
+            const desc = isGraded ? 'No rank limit' : 'A+ rank and below';
+
+            if (isJoined) {
+                return `<div class="join-category-btn joined">
+                    <div class="cat-check">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>
+                        Joined ${title}
+                    </div>
+                    <div class="cat-desc">${desc}</div>
+                    <button class="btn-leave-cat" onclick="leaveRace('${category}')">Leave</button>
+                </div>`;
+            }
+
+            return `<div class="join-category-btn" onclick="joinRace('${category}')">
+                <div class="cat-title">${title}</div>
+                <div class="cat-desc">${desc}</div>
+            </div>`;
+        }
+
+        async function joinRace(category) {
+            const section = document.getElementById('join-section');
+
+            try {
+                const resp = await fetch('/api/race-participants/join', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raceId: joinRaceId, category }),
+                });
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    // Reload the join section + pickem data
+                    await loadJoinSection(joinRaceId);
+                    await loadPickemData(joinRaceId);
+                } else {
+                    // Show error inline, then refresh
+                    const label = category === 'open' ? 'Open Division' : 'Graded Division';
+                    section.innerHTML = `
+                        <div class="join-status">${DOMPurify.sanitize(data.message || 'Failed to join ' + label + '.')}</div>
+                        <div class="join-actions">
+                            <button class="btn-join-race" onclick="loadJoinSection(joinRaceId)">Try Again</button>
+                        </div>`;
+                }
+            } catch (err) {
+                section.innerHTML = `
+                    <div class="join-status">Network error. Please try again.</div>
+                    <div class="join-actions">
+                        <button class="btn-join-race" onclick="loadJoinSection(joinRaceId)">Try Again</button>
+                    </div>`;
+            }
+        }
+
+        async function leaveRace(category) {
+            const section = document.getElementById('join-section');
+            const label = category === 'open' ? 'Open Division' : 'Graded Division';
+
+            try {
+                const resp = await fetch('/api/race-participants/leave', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raceId: joinRaceId, category }),
+                });
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    // Reload the join section + pickem data
+                    await loadJoinSection(joinRaceId);
+                    await loadPickemData(joinRaceId);
+                } else {
+                    const statusDiv = section.querySelector('.join-status');
+                    if (statusDiv) {
+                        statusDiv.innerHTML = `<span class="join-message error">${DOMPurify.sanitize(data.message || 'Failed to leave ' + label + '.')}</span>`;
+                    }
+                }
+            } catch (err) {
+                const statusDiv = section.querySelector('.join-status');
+                if (statusDiv) {
+                    statusDiv.innerHTML = `<span class="join-message error">Network error. Please try again.</span>`;
+                }
+            }
+        }
+
+        function renderOpenRoster() {
+            const section = document.getElementById('open-roster-section');
+            const grid = document.getElementById('open-roster-grid');
+
+            if (!joinOpenRoster || joinOpenRoster.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            const sorted = [...joinOpenRoster].sort((a, b) => (a.position || 999) - (b.position || 999));
+            grid.innerHTML = sorted.map(p => {
+                const hasPos = p.position !== null && p.position !== undefined;
+                let posLabel = '';
+                let posClass = '';
+                if (hasPos) {
+                    if (p.position === 1) { posLabel = '1st'; posClass = 'p1'; }
+                    else if (p.position === 2) { posLabel = '2nd'; posClass = 'p2'; }
+                    else if (p.position === 3) { posLabel = '3rd'; posClass = 'p3'; }
+                    else { posLabel = `${p.position}th`; posClass = ''; }
+                }
+                return `<div class="open-roster-card">
+                    <div class="name">${DOMPurify.sanitize(p.memberName)}</div>
+                    ${hasPos ? `<div class="pos ${posClass}">${posLabel}</div>` : ''}
+                </div>`;
+            }).join('');
+
+            section.classList.remove('hidden');
+        }
+
+        // ============================================================
+        // Pick'em Logic
+        // ============================================================
+        let pickemRaceId = null;
+        let pickemRoster = [];
+        let pickemMyPrediction = null;
+        let pickemHasResults = false;
+
+        async function loadPickemData(raceId) {
+            pickemRaceId = raceId;
+            const section = document.getElementById('pickem-section');
+
+            try {
+                const resp = await fetch(`/api/race-predictions?raceId=${raceId}`);
+                const data = await resp.json();
+
+                if (data.result !== 'success') {
+                    // No pickem data — just don't show the section
+                    return;
+                }
+
+                pickemRoster = data.roster || [];
+                pickemMyPrediction = data.myPrediction || null;
+                pickemHasResults = data.hasResults || false;
+
+                if (pickemRoster.length === 0) {
+                    // No participants added yet — don't show pickem
+                    return;
+                }
+
+                section.classList.remove('hidden');
+
+                // Render roster
+                renderRoster();
+
+                // Render prediction form or login prompt
+                await renderPredictionForm();
+
+                // Render popular picks
+                if (data.totalPredictions > 0) {
+                    renderPopularPicks(data.popularPicks, data.totalPredictions);
+                }
+
+                // Render results if available
+                if (pickemHasResults) {
+                    renderResults();
+                    renderMyScore();
+                }
+            } catch (err) {
+                console.error('Pickem load error:', err);
+            }
+        }
+
+        function renderRoster() {
+            const container = document.getElementById('pickem-roster');
+            const sorted = [...pickemRoster].sort((a, b) => (a.position || 999) - (b.position || 999));
+
+            container.innerHTML = sorted.map(p => {
+                const hasPos = p.position !== null && p.position !== undefined;
+                let posLabel = '';
+                let posClass = '';
+                if (hasPos) {
+                    if (p.position === 1) { posLabel = '1st'; posClass = 'p1'; }
+                    else if (p.position === 2) { posLabel = '2nd'; posClass = 'p2'; }
+                    else if (p.position === 3) { posLabel = '3rd'; posClass = 'p3'; }
+                    else { posLabel = `${p.position}th`; posClass = ''; }
+                }
+                return `<div class="pickem-roster-card ${hasPos ? 'has-position' : ''}">
+                    <div class="name">${DOMPurify.sanitize(p.memberName)}</div>
+                    ${hasPos ? `<div class="pos ${posClass}">${posLabel}</div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        async function renderPredictionForm() {
+            const formContainer = document.getElementById('pickem-form-container');
+            const loginPrompt = document.getElementById('pickem-login-prompt');
+            const myPredDiv = document.getElementById('pickem-my-prediction');
+
+            // Check if logged in
+            let isLoggedIn = false;
+            try {
+                const meResp = await fetch('/api/me');
+                const meData = await meResp.json();
+                isLoggedIn = meData.result === 'success' && meData.user;
+            } catch (e) { isLoggedIn = false; }
+
+            if (!isLoggedIn) {
+                loginPrompt.classList.remove('hidden');
+                return;
+            }
+
+            // If results are in, no more editing
+            if (pickemHasResults) {
+                if (pickemMyPrediction) {
+                    myPredDiv.classList.remove('hidden');
+                    document.getElementById('pickem-my-picks').innerHTML = renderPicks(pickemMyPrediction);
+                }
+                return;
+            }
+
+            if (pickemMyPrediction && pickemMyPrediction.score === null) {
+                // Show existing prediction with edit option
+                myPredDiv.classList.remove('hidden');
+                document.getElementById('pickem-my-picks').innerHTML = renderPicks(pickemMyPrediction);
+            }
+
+            // Show form
+            formContainer.classList.remove('hidden');
+            const form = document.getElementById('pickem-form');
+
+            const memberOptions = pickemRoster.map(p =>
+                `<option value="${p.memberId}">${DOMPurify.sanitize(p.memberName)}</option>`
+            ).join('');
+
+            form.innerHTML = `
+                <label class="block text-xs font-bold text-purple-700 mb-1">1st Place <span class="text-yellow-500">(3 pts)</span></label>
+                <select id="pick-1st">
+                    <option value="">Select...</option>
+                    ${memberOptions}
+                    ${pickemMyPrediction?.pick1st ? '' : ''}
+                </select>
+                <label class="block text-xs font-bold text-purple-700 mb-1">2nd Place <span class="text-gray-400">(2 pts)</span></label>
+                <select id="pick-2nd">
+                    <option value="">Select...</option>
+                    ${memberOptions}
+                </select>
+                <label class="block text-xs font-bold text-purple-700 mb-1">3rd Place <span class="text-amber-600">(1 pt)</span></label>
+                <select id="pick-3rd">
+                    <option value="">Select...</option>
+                    ${memberOptions}
+                </select>
+                <button id="pickem-submit-btn" class="mt-2 w-full bg-purple-600 text-white font-bold py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                    ${pickemMyPrediction ? 'Update Prediction' : 'Submit Prediction'}
+                </button>
+            `;
+
+            // Pre-fill if existing prediction
+            if (pickemMyPrediction) {
+                document.getElementById('pick-1st').value = pickemMyPrediction.pick1st;
+                document.getElementById('pick-2nd').value = pickemMyPrediction.pick2nd;
+                document.getElementById('pick-3rd').value = pickemMyPrediction.pick3rd;
+            }
+
+            document.getElementById('pickem-submit-btn').addEventListener('click', submitPrediction);
+        }
+
+        function renderPicks(pred) {
+            const findName = (id) => {
+                const m = pickemRoster.find(p => p.memberId === id);
+                return m ? DOMPurify.sanitize(m.memberName) : 'Unknown';
+            };
+            return `<div class="flex gap-3 text-sm">
+                <span class="font-bold text-yellow-600">1st: ${findName(pred.pick1st)}</span>
+                <span class="font-bold text-gray-500">2nd: ${findName(pred.pick2nd)}</span>
+                <span class="font-bold text-amber-600">3rd: ${findName(pred.pick3rd)}</span>
+            </div>`;
+        }
+
+        async function submitPrediction() {
+            const pick1st = parseInt(document.getElementById('pick-1st').value, 10);
+            const pick2nd = parseInt(document.getElementById('pick-2nd').value, 10);
+            const pick3rd = parseInt(document.getElementById('pick-3rd').value, 10);
+            const msgEl = document.getElementById('pickem-form-message');
+
+            if (!pick1st || !pick2nd || !pick3rd) {
+                msgEl.textContent = 'Please pick all 3 positions!';
+                msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+            if (pick1st === pick2nd || pick1st === pick3rd || pick2nd === pick3rd) {
+                msgEl.textContent = 'You must pick 3 different racers!';
+                msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/race-predictions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        raceId: pickemRaceId,
+                        pick1st, pick2nd, pick3rd,
+                    }),
+                });
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    msgEl.textContent = data.updated ? 'Prediction updated!' : 'Prediction submitted!';
+                    msgEl.className = 'text-sm font-bold mt-2 text-green-600';
+                    msgEl.classList.remove('hidden');
+
+                    // Update my prediction
+                    pickemMyPrediction = { pick1st, pick2nd, pick3rd, score: null };
+
+                    // Show my picks
+                    const myPredDiv = document.getElementById('pickem-my-prediction');
+                    myPredDiv.classList.remove('hidden');
+                    document.getElementById('pickem-my-picks').innerHTML = renderPicks(pickemMyPrediction);
+
+                    // Reload popular picks
+                    const pickemResp = await fetch(`/api/race-predictions?raceId=${pickemRaceId}`);
+                    const pickemData = await pickemResp.json();
+                    if (pickemData.totalPredictions > 0) {
+                        renderPopularPicks(pickemData.popularPicks, pickemData.totalPredictions);
+                    }
+                } else {
+                    msgEl.textContent = data.message || 'Failed to submit.';
+                    msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                    msgEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                msgEl.textContent = 'Error submitting prediction.';
+                msgEl.className = 'text-sm font-bold mt-2 text-red-500';
+                msgEl.classList.remove('hidden');
+            }
+        }
+
+        function renderPopularPicks(popularPicks, total) {
+            const container = document.getElementById('pickem-popular');
+            const content = document.getElementById('pickem-popular-content');
+            container.classList.remove('hidden');
+
+            let html = `<p class="text-xs text-purple-500 mb-3">${total} prediction(s) submitted</p>`;
+            html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-3">';
+
+            ['first', 'second', 'third'].forEach((pos, idx) => {
+                const label = ['1st Place', '2nd Place', '3rd Place'][idx];
+                const color = ['text-yellow-600', 'text-gray-500', 'text-amber-600'][idx];
+                const picks = popularPicks[pos] || [];
+                html += `<div>
+                    <h4 class="text-xs font-bold ${color} mb-1">${label}</h4>`;
+                if (picks.length === 0) {
+                    html += '<p class="text-xs text-gray-300">No picks yet</p>';
+                } else {
+                    const maxCount = picks[0].count;
+                    picks.slice(0, 5).forEach(p => {
+                        const pct = total > 0 ? Math.round((p.count / total) * 100) : 0;
+                        html += `<div class="mb-1.5">
+                            <div class="flex justify-between text-xs"><span class="font-bold">${DOMPurify.sanitize(p.name)}</span><span class="text-gray-400">${pct}%</span></div>
+                            <div class="pickem-bar-bg"><div class="pickem-bar-fill" style="width:${pct}%"></div></div>
+                        </div>`;
+                    });
+                }
+                html += '</div>';
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        function renderResults() {
+            const resultsDiv = document.getElementById('pickem-results');
+            const content = document.getElementById('pickem-results-content');
+            resultsDiv.classList.remove('hidden');
+
+            const sorted = [...pickemRoster].filter(p => p.position !== null).sort((a, b) => a.position - b.position);
+
+            if (sorted.length === 0) return;
+
+            content.innerHTML = sorted.map(p => {
+                let badge = '';
+                let nameClass = 'text-gray-700';
+                if (p.position === 1) { badge = '<span class="text-yellow-500 font-extrabold">1st</span>'; nameClass = 'text-yellow-700 font-bold'; }
+                else if (p.position === 2) { badge = '<span class="text-gray-400 font-extrabold">2nd</span>'; nameClass = 'text-gray-600 font-bold'; }
+                else if (p.position === 3) { badge = '<span class="text-amber-600 font-extrabold">3rd</span>'; nameClass = 'text-amber-700 font-bold'; }
+                else { badge = `<span class="text-gray-400">${p.position}th</span>`; }
+
+                return `<div class="flex items-center gap-2 py-1">
+                    ${badge}
+                    <span class="${nameClass} text-sm">${DOMPurify.sanitize(p.memberName)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderMyScore() {
+            if (!pickemMyPrediction || pickemMyPrediction.score === null || pickemMyPrediction.score === undefined) return;
+
+            const scoreDiv = document.getElementById('pickem-score');
+            const content = document.getElementById('pickem-score-content');
+            scoreDiv.classList.remove('hidden');
+
+            const score = pickemMyPrediction.score;
+            const maxScore = 6;
+            let message = '';
+            if (score === 6) message = 'Perfect prediction!';
+            else if (score >= 4) message = 'Great prediction!';
+            else if (score >= 2) message = 'Not bad!';
+            else if (score >= 1) message = 'Got one right!';
+            else message = 'Better luck next time!';
+
+            content.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-purple-800">${message}</span>
+                    <span class="text-lg font-extrabold text-purple-600">${score}/${maxScore} pts</span>
+                </div>
+            `;
+        }
+    </script>
 <script src="/js/particles.js"></script>
 </body>
 </html>
