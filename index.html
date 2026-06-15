@@ -60,10 +60,11 @@
             <!-- Desktop links (visible on md+) -->
             <nav id="main-nav" class="nav-pill-links">
                 <a href="#news" class="nav-pill-link" data-nav-link>News</a>
-                <a href="#about" class="nav-pill-link" data-nav-link>About</a>
+                <a href="about.html" class="nav-pill-link">About</a>
                 <a href="#events" class="nav-pill-link" data-nav-link>Events</a>
                 <a href="#community" class="nav-pill-link" data-nav-link>Community</a>
-                                <!-- Auth buttons (desktop) -->
+                <a href="weekly-race.html" class="nav-pill-link">Races</a>
+                <!-- Auth buttons (desktop) -->
                 <a href="register.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-join">Join</a>
                 <a href="login.html" data-auth="logged-out" class="nav-pill-auth nav-pill-auth-login">Log In</a>
                 <a href="edit-profile.html" data-auth="logged-in" class="nav-pill-auth nav-pill-auth-profile"><span data-auth="display-name"></span></a>
@@ -88,9 +89,10 @@
         </button>
         <ul class="nav-overlay-menu">
             <li class="nav-overlay-item"><a href="#news" class="nav-overlay-link" data-overlay-link>News</a></li>
-            <li class="nav-overlay-item"><a href="#about" class="nav-overlay-link" data-overlay-link>About</a></li>
+            <li class="nav-overlay-item"><a href="about.html" class="nav-overlay-link">About</a></li>
             <li class="nav-overlay-item"><a href="#events" class="nav-overlay-link" data-overlay-link>Events</a></li>
             <li class="nav-overlay-item"><a href="#community" class="nav-overlay-link" data-overlay-link>Community</a></li>
+            <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
         </ul>
         <div class="nav-overlay-auth">
             <!-- Logged-out state -->
@@ -162,7 +164,7 @@
                             <p class="text-gray-400 text-center py-4">Loading news...</p>
                         </div>
                         <div class="text-center mt-6">
-                            <button id="view-more-news-btn" class="inline-block bg-pink-500 text-white font-bold px-6 py-2 rounded-full hover:bg-pink-600 transition-colors">View more >></button>
+                            <a href="news-detail.html" id="view-more-news-btn" class="inline-block bg-pink-500 text-white font-bold px-6 py-2 rounded-full hover:bg-pink-600 transition-colors">View more >></a>
                         </div>
                     </section>
                      <!-- Weekly Race Events Section -->
@@ -205,14 +207,19 @@
                     <section id="about" class="bg-white rounded-lg shadow-md overflow-hidden fade-in-section border-2 border-green-500">
                         <div class="p-6"><h2 class="header-skew header-skew-green mb-4">About MURA</h2></div>
                         <img src="https://i.ibb.co/G3th0mkr/MURA.webp" alt="MURA Community Photo" class="w-full h-auto" loading="lazy">
-                        <div class="p-6"><p class="text-gray-700 text-justify"><strong>MURA (Malayan Umamusume Racing Association)</strong> is a club and a community for Umamusume: Pretty Derby players from Malaysia and Singapore. We get together to share our love for the game through weekly race events, sharing game info, and simply celebrating Umamusume with camaraderie.</p></div>
+                        <div class="p-6">
+                            <p class="text-gray-700 text-justify"><strong>MURA (Malayan Umamusume Racing Association)</strong> is a club and a community for Umamusume: Pretty Derby players. While originally founded by members from Malaysia and Singapore, it has since grown into a global community united by competitive racing and camaraderie.</p>
+                            <div class="text-center mt-4">
+                                <a href="about.html" class="inline-block bg-green-500 text-white font-bold px-5 py-2 rounded-full hover:bg-green-600 transition-colors text-sm">Learn More</a>
+                            </div>
+                        </div>
                     </section>
                     <!-- Explore Section -->
                     <section id="community" class="bg-white p-6 rounded-lg shadow-md fade-in-section border-2 border-orange-500">
                         <h2 class="header-skew header-skew-orange mb-6">Explore</h2>
                         <div class="grid grid-cols-2 gap-4">
                             <button id="view-guides-btn" class="content-card block bg-blue-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-blue-500">Game Guides</button>
-                            <button id="view-events-btn" class="content-card block bg-red-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-red-500">Events</button>
+                            <a href="event-detail.html" id="view-events-btn" class="content-card block bg-red-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-red-500">Events</a>
                             <button id="view-fan-media-btn" class="content-card block bg-yellow-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-yellow-500">Fan Media</button>
                             <a href="race-leaderboard.html" class="content-card block bg-green-500 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-green-600 transition-colors">Leaderboard</a>
                             <button id="view-members-btn" class="content-card block bg-purple-400 text-white p-4 rounded-lg text-center font-bold text-lg hover:bg-purple-500">Members</button>
@@ -417,10 +424,9 @@
                 });
             }
 
-            if(viewMoreNewsBtn) viewMoreNewsBtn.addEventListener('click', () => switchPage(pageHome, pageNews));
+            // News & Events now navigate to dedicated listing pages (see <a> href)
             if(viewGuidesBtn) viewGuidesBtn.addEventListener('click', () => switchPage(pageHome, pageGuides));
             if(viewFanMediaBtn) viewFanMediaBtn.addEventListener('click', () => switchPage(pageHome, pageFanMedia));
-            if(viewEventsBtn) viewEventsBtn.addEventListener('click', () => switchPage(pageHome, pageEvents));
             if(viewMembersBtn) viewMembersBtn.addEventListener('click', () => switchPage(pageHome, pageMembers));
             
             backToHomeBtns.forEach(btn => {
@@ -1086,6 +1092,11 @@
                             // If no valid video ID found, leave static fallback content intact
                         } else if (b.mediaType === 'image' && b.mediaUrl) {
                             mediaEl.innerHTML = `<img class="absolute w-full h-full object-cover" style="top:0;left:0;" src="${DOMPurify.sanitize(b.mediaUrl)}" alt="${DOMPurify.sanitize(b.title)}" loading="eager">`;
+                        } else if (b.mediaType === 'video' && b.mediaUrl) {
+                            // HTML5 video (e.g. catbox.moe direct link) — cleaner than YouTube, no iframe needed
+                            const videoUrl = DOMPurify.sanitize(b.mediaUrl);
+                            const posterImg = b.posterUrl ? DOMPurify.sanitize(b.posterUrl) : 'https://i.ibb.co/G3th0mkr/MURA.webp';
+                            mediaEl.innerHTML = `<video class="absolute pointer-events-none" style="width:100%;height:100%;top:50%;left:50%;transform:translate(-50%,-50%);object-fit:cover;" autoplay muted loop playsinline poster="${posterImg}"><source src="${videoUrl}" type="video/mp4"></video>`;
                         }
                     }
                 }
