@@ -127,42 +127,61 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500 max-w-4xl mx-auto">
-            <!-- Loading -->
-            <div id="loading" class="text-center py-12 text-gray-500">Loading event...</div>
+        <!-- Loading -->
+        <div id="loading" class="max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
+            <div class="text-center py-12 text-gray-500">Loading event...</div>
+        </div>
 
-            <!-- Event content (hidden until loaded) -->
-            <div id="event-content" class="hidden">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h1 id="event-title" class="text-3xl font-extrabold text-gray-800"></h1>
-                        <p class="text-sm text-gray-500 mt-2">
-                            <span id="event-start-date"></span>
-                            <span id="event-end-date-wrap" class="hidden"> - <span id="event-end-date"></span></span>
-                        </p>
-                    </div>
-                    <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                        <span class="hidden md:inline">Back</span>
-                    </button>
+        <!-- Event Listing (no slug — shows all events) -->
+        <div id="event-listing" class="hidden max-w-4xl mx-auto">
+            <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">Events</h1>
+                <p class="text-base text-gray-500 mb-6">All MURA events — upcoming and past.</p>
+
+                <div id="event-listing-grid" class="grid md:grid-cols-2 gap-4"></div>
+
+                <div id="event-listing-empty" class="hidden text-center py-12">
+                    <p class="text-gray-400 text-lg">No events yet. Check back soon!</p>
                 </div>
+            </div>
+        </div>
 
-                <!-- Hero image -->
-                <div id="event-image-container" class="hidden mb-6">
-                    <img id="event-image" class="w-full rounded-lg shadow-md" alt="">
+        <!-- Event content (single event — hidden until loaded) -->
+        <div id="event-content" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 id="event-title" class="text-3xl font-extrabold text-gray-800"></h1>
+                    <p class="text-sm text-gray-500 mt-2">
+                        <span id="event-start-date"></span>
+                        <span id="event-end-date-wrap" class="hidden"> - <span id="event-end-date"></span></span>
+                    </p>
                 </div>
-
-                <!-- Description -->
-                <p id="event-description" class="text-lg text-gray-600 font-medium mb-6 leading-relaxed"></p>
-
-                <!-- Event body -->
-                <div id="event-body" class="event-content"></div>
+                <a href="event-detail.html" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span class="hidden md:inline">All Events</span>
+                </a>
             </div>
 
-            <!-- Error state -->
-            <div id="error-state" class="hidden text-center py-12">
-                <p class="text-red-600 font-bold text-lg">Event not found.</p>
-                <a href="index.html" class="mt-4 inline-block text-red-600 font-bold hover:underline">Back to Home</a>
+            <!-- Hero image -->
+            <div id="event-image-container" class="hidden mb-6">
+                <img id="event-image" class="w-full rounded-lg shadow-md" alt="">
+            </div>
+
+            <!-- Description -->
+            <p id="event-description" class="text-lg text-gray-600 font-medium mb-6 leading-relaxed"></p>
+
+            <!-- Event body -->
+            <div id="event-body" class="event-content"></div>
+        </div>
+
+        <!-- Error state (only shown when slug was provided but event not found) -->
+        <div id="error-state" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
+            <div class="text-center py-12">
+                <p class="text-red-600 font-bold text-lg mb-4">Event not found.</p>
+                <a href="event-detail.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span>View All Events</span>
+                </a>
             </div>
         </div>
     </main>
@@ -192,16 +211,82 @@
             return el.value;
         }
 
+        // Format date range for listing card
+        function formatDateRange(startDate, endDate) {
+            if (!startDate) return '';
+            const start = new Date(startDate);
+            const startStr = start.toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: 'numeric' });
+            if (!endDate) return startStr;
+            const end = new Date(endDate);
+            const endStr = end.toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: 'numeric' });
+            return `${startStr} - ${endStr}`;
+        }
+
+        // Render an event card for the listing view
+        function renderEventCard(event) {
+            const dateStr = formatDateRange(event.startDate, event.endDate);
+            const imgHtml = event.imageUrl
+                ? `<img src="${event.imageUrl}" alt="" class="w-full h-32 object-cover rounded-t-lg" onerror="this.parentElement.querySelector('.event-card-img-fallback').classList.remove('hidden'); this.style.display='none';">
+                   <div class="event-card-img-fallback hidden h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-t-lg flex items-center justify-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="text-red-300" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 14a1 1 0 0 1-1-1V5h14v8a1 1 0 0 1-1 1z"/><path d="M2.5 5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg>
+                   </div>`
+                : `<div class="h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-t-lg flex items-center justify-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="text-red-300" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M2 14a1 1 0 0 1-1-1V5h14v8a1 1 0 0 1-1 1z"/><path d="M2.5 5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/></svg>
+                   </div>`;
+            return `<a href="event-detail.html?slug=${encodeURIComponent(event.slug)}" class="block bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-red-400 hover:shadow-md transition-all overflow-hidden">
+                ${imgHtml}
+                <div class="p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="inline-block bg-red-100 text-red-700 text-2xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">Event</span>
+                        <span class="text-xs text-gray-400">${dateStr}</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-base mb-1 line-clamp-2">${decodeHTMLEntities(event.title)}</h3>
+                    <p class="text-sm text-gray-500 line-clamp-2">${decodeHTMLEntities(event.description) || 'Read more...'}</p>
+                </div>
+            </a>`;
+        }
+
+        // Load and render the event listing
+        async function loadEventListing() {
+            const listingEl = document.getElementById('event-listing');
+            const gridEl = document.getElementById('event-listing-grid');
+            const emptyEl = document.getElementById('event-listing-empty');
+
+            try {
+                const response = await fetch('/api/events');
+                if (!response.ok) throw new Error('Failed to load events');
+                const data = await response.json();
+                if (data.result !== 'success' || !Array.isArray(data.events)) throw new Error('Invalid response');
+
+                const events = data.events;
+                if (events.length === 0) {
+                    gridEl.innerHTML = '';
+                    emptyEl.classList.remove('hidden');
+                } else {
+                    emptyEl.classList.add('hidden');
+                    gridEl.innerHTML = events.map(renderEventCard).join('');
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+                listingEl.classList.remove('hidden');
+            } catch (err) {
+                console.error('Failed to load event listing:', err);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const slug = urlParams.get('slug');
 
+            // No slug — show the event listing page
             if (!slug) {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error-state').classList.remove('hidden');
+                await loadEventListing();
                 return;
             }
 
+            // Single event view
             try {
                 const response = await fetch(`/api/events?slug=${encodeURIComponent(slug)}`);
                 if (!response.ok) throw new Error('Failed to load event.');

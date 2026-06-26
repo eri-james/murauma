@@ -127,40 +127,67 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-pink-500 max-w-4xl mx-auto">
-            <!-- Loading -->
-            <div id="loading" class="text-center py-12 text-gray-500">Loading news...</div>
+        <!-- Loading -->
+        <div id="loading" class="max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-pink-500">
+            <div class="text-center py-12 text-gray-500">Loading news...</div>
+        </div>
 
-            <!-- News content (hidden until loaded) -->
-            <div id="news-content" class="hidden">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <span id="news-category" class="inline-block bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide"></span>
-                        <h1 id="news-title" class="text-3xl font-extrabold text-gray-800"></h1>
-                        <p class="text-sm text-gray-500 mt-2"><span id="news-date"></span></p>
-                    </div>
-                    <button onclick="history.back()" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
-                        <span class="hidden md:inline">Back</span>
-                    </button>
+        <!-- News Listing (no slug — shows all news posts) -->
+        <div id="news-listing" class="hidden max-w-4xl mx-auto">
+            <div class="bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-pink-500">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">News</h1>
+                <p class="text-base text-gray-500 mb-6">All MURA news posts — latest first.</p>
+
+                <!-- Category filter -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button data-category="all" class="news-filter-btn px-4 py-2 rounded-lg text-sm font-bold bg-pink-500 text-white">All</button>
+                    <button data-category="event" class="news-filter-btn px-4 py-2 rounded-lg text-sm font-bold bg-pink-100 text-pink-700 hover:bg-pink-200 transition-colors">Events</button>
+                    <button data-category="community" class="news-filter-btn px-4 py-2 rounded-lg text-sm font-bold bg-pink-100 text-pink-700 hover:bg-pink-200 transition-colors">Community</button>
+                    <button data-category="update" class="news-filter-btn px-4 py-2 rounded-lg text-sm font-bold bg-pink-100 text-pink-700 hover:bg-pink-200 transition-colors">Updates</button>
                 </div>
 
-                <!-- Hero image -->
-                <div id="news-image-container" class="hidden mb-6">
-                    <img id="news-image" class="w-full rounded-lg shadow-md" alt="">
+                <div id="news-listing-grid" class="grid md:grid-cols-2 gap-4"></div>
+
+                <div id="news-listing-empty" class="hidden text-center py-12">
+                    <p class="text-gray-400 text-lg">No news posts yet. Check back soon!</p>
                 </div>
+            </div>
+        </div>
 
-                <!-- Description (subtitle) -->
-                <p id="news-description" class="text-lg text-gray-600 font-medium mb-6 leading-relaxed"></p>
-
-                <!-- News body -->
-                <div id="news-body" class="news-content"></div>
+        <!-- News content (single post — hidden until loaded) -->
+        <div id="news-content" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-pink-500">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <span id="news-category" class="inline-block bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide"></span>
+                    <h1 id="news-title" class="text-3xl font-extrabold text-gray-800"></h1>
+                    <p class="text-sm text-gray-500 mt-2"><span id="news-date"></span></p>
+                </div>
+                <a href="news-detail.html" class="bg-blue-700 text-white font-bold p-2 md:px-4 md:py-2 rounded-lg hover:bg-blue-800 transition-colors flex items-center md:space-x-2 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span class="hidden md:inline">All News</span>
+                </a>
             </div>
 
-            <!-- Error state -->
-            <div id="error-state" class="hidden text-center py-12">
-                <p class="text-red-600 font-bold text-lg">News post not found.</p>
-                <a href="index.html" class="mt-4 inline-block text-pink-600 font-bold hover:underline">Back to Home</a>
+            <!-- Hero image -->
+            <div id="news-image-container" class="hidden mb-6">
+                <img id="news-image" class="w-full rounded-lg shadow-md" alt="">
+            </div>
+
+            <!-- Description (subtitle) -->
+            <p id="news-description" class="text-lg text-gray-600 font-medium mb-6 leading-relaxed"></p>
+
+            <!-- News body -->
+            <div id="news-body" class="news-content"></div>
+        </div>
+
+        <!-- Error state (only shown when slug was provided but post not found) -->
+        <div id="error-state" class="hidden max-w-4xl mx-auto bg-white p-6 md:p-12 rounded-lg shadow-md border-2 border-red-500">
+            <div class="text-center py-12">
+                <p class="text-red-600 font-bold text-lg mb-4">News post not found.</p>
+                <a href="news-detail.html" class="bg-blue-700 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-800 transition-colors inline-flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/></svg>
+                    <span>View All News</span>
+                </a>
             </div>
         </div>
     </main>
@@ -190,16 +217,105 @@
             return el.value;
         }
 
+        // Category badge colors for listing cards
+        const CATEGORY_COLORS = {
+            event:    { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Event' },
+            community:{ bg: 'bg-green-100', text: 'text-green-700', label: 'Community' },
+            update:   { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Update' },
+        };
+
+        // Render a news card for the listing view
+        function renderNewsCard(news) {
+            const cat = CATEGORY_COLORS[news.category] || CATEGORY_COLORS.update;
+            const dateStr = news.createdAt
+                ? new Date(news.createdAt).toLocaleDateString('en-MY', { year: 'numeric', month: 'short', day: 'numeric' })
+                : '';
+            const imgHtml = news.imageUrl
+                ? `<img src="${news.imageUrl}" alt="" class="w-full h-32 object-cover rounded-t-lg" onerror="this.parentElement.querySelector('.news-card-img-fallback').classList.remove('hidden'); this.style.display='none';">
+                   <div class="news-card-img-fallback hidden h-32 bg-gradient-to-br from-pink-100 to-purple-100 rounded-t-lg flex items-center justify-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="text-pink-300" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/></svg>
+                   </div>`
+                : `<div class="h-32 bg-gradient-to-br from-pink-100 to-purple-100 rounded-t-lg flex items-center justify-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="text-pink-300" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/></svg>
+                   </div>`;
+            return `<a href="news-detail.html?slug=${encodeURIComponent(news.slug)}" class="block bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-pink-400 hover:shadow-md transition-all overflow-hidden">
+                ${imgHtml}
+                <div class="p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="inline-block ${cat.bg} ${cat.text} text-2xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">${cat.label}</span>
+                        <span class="text-xs text-gray-400">${dateStr}</span>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-base mb-1 line-clamp-2">${decodeHTMLEntities(news.title)}</h3>
+                    <p class="text-sm text-gray-500 line-clamp-2">${decodeHTMLEntities(news.description) || 'Read more...'}</p>
+                </div>
+            </a>`;
+        }
+
+        // Load and render the news listing
+        async function loadNewsListing(filterCategory) {
+            const listingEl = document.getElementById('news-listing');
+            const gridEl = document.getElementById('news-listing-grid');
+            const emptyEl = document.getElementById('news-listing-empty');
+
+            try {
+                const response = await fetch('/api/news');
+                if (!response.ok) throw new Error('Failed to load news');
+                const data = await response.json();
+                if (data.result !== 'success' || !Array.isArray(data.news)) throw new Error('Invalid response');
+
+                let news = data.news;
+                if (filterCategory && filterCategory !== 'all') {
+                    news = news.filter(n => n.category === filterCategory);
+                }
+
+                if (news.length === 0) {
+                    gridEl.innerHTML = '';
+                    emptyEl.classList.remove('hidden');
+                } else {
+                    emptyEl.classList.add('hidden');
+                    gridEl.innerHTML = news.map(renderNewsCard).join('');
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+                listingEl.classList.remove('hidden');
+            } catch (err) {
+                console.error('Failed to load news listing:', err);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error-state').classList.remove('hidden');
+            }
+        }
+
+        // Wire up category filter buttons
+        function setupCategoryFilters() {
+            document.querySelectorAll('.news-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active button styling
+                    document.querySelectorAll('.news-filter-btn').forEach(b => {
+                        b.classList.remove('bg-pink-500', 'text-white');
+                        b.classList.add('bg-pink-100', 'text-pink-700', 'hover:bg-pink-200', 'transition-colors');
+                    });
+                    btn.classList.add('bg-pink-500', 'text-white');
+                    btn.classList.remove('bg-pink-100', 'text-pink-700', 'hover:bg-pink-200', 'transition-colors');
+
+                    // Reload listing with filter
+                    const cat = btn.getAttribute('data-category');
+                    loadNewsListing(cat);
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const slug = urlParams.get('slug');
 
+            // No slug — show the news listing page
             if (!slug) {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error-state').classList.remove('hidden');
+                setupCategoryFilters();
+                await loadNewsListing('all');
                 return;
             }
 
+            // Single news post view
             try {
                 const response = await fetch(`/api/news?slug=${encodeURIComponent(slug)}`);
                 if (!response.ok) throw new Error('Failed to load news.');
