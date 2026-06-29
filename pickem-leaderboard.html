@@ -181,6 +181,55 @@
     <!-- MURA:FOOTER:END -->
 
     <script src="/js/nav-overlay.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Load Pick'em leaderboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingEl = document.getElementById('leaderboard-loading');
+            const contentEl = document.getElementById('leaderboard-content');
+            const emptyEl = document.getElementById('leaderboard-empty');
+
+            try {
+                const resp = await fetch('/api/race-predictions/leaderboard');
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+
+                loadingEl.classList.add('hidden');
+
+                if (data.result !== 'success' || !Array.isArray(data.leaderboard) || data.leaderboard.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                    return;
+                }
+
+                contentEl.classList.remove('hidden');
+                contentEl.innerHTML = data.leaderboard.map(entry => {
+                    const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : 'rank-other';
+                    const rankIcon = entry.rank === 1 ? '1st' : entry.rank === 2 ? '2nd' : entry.rank === 3 ? '3rd' : `${entry.rank}`;
+                    const safeName = DOMPurify.sanitize(entry.memberName || 'Unknown');
+                    const avatarHtml = entry.avatarUrl
+                        ? `<img src="${entry.avatarUrl}" alt="" class="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-gray-100" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                           <div class="hidden w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-xs font-bold text-purple-700 flex-shrink-0">${(safeName || '?').charAt(0).toUpperCase()}</div>`
+                        : `<div class="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-xs font-bold text-purple-700 flex-shrink-0">${(safeName || '?').charAt(0).toUpperCase()}</div>`;
+
+                    return `<div class="leaderboard-row ${rankClass}">
+                        <div class="rank-badge">${rankIcon}</div>
+                        ${avatarHtml}
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-sm truncate">${safeName}</div>
+                            <div class="text-xs text-gray-400">${entry.racesPredicted} race(s) predicted</div>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <div class="text-lg font-extrabold text-purple-600">${entry.totalScore}</div>
+                            <div class="text-xs text-gray-400">pts</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('Pick\'em leaderboard load error:', err);
+                loadingEl.innerHTML = '<p class="text-red-500 font-bold">Failed to load leaderboard.</p><p class="text-xs text-gray-400 mt-2">Please try refreshing the page.</p>';
+            }
+        });
+    </script>
 <script src="/js/particles.js"></script>
 </body>
 </html>
