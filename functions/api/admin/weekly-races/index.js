@@ -119,10 +119,38 @@ export async function onRequestPost(context) {
     const isActive = data.isActive === false ? 0 : 1;
     const status = data.status === 'draft' ? 'draft' : 'published';
 
+    // Resolve season_id: explicit override > active main season > null
+    let seasonId = null;
+    if (data.seasonId !== undefined && data.seasonId !== null && data.seasonId !== '') {
+      // Explicit season assignment — validate it exists and isn't archived
+      if (typeof data.seasonId !== 'string' || data.seasonId.length > 50) {
+        return errorResponse('seasonId must be a string of 50 chars or less.');
+      }
+      const seasonCheck = await db
+        .prepare(`SELECT id, status FROM seasons WHERE id = ?`)
+        .bind(data.seasonId)
+        .first();
+      if (!seasonCheck) {
+        return errorResponse(`Season "${data.seasonId}" not found.`);
+      }
+      if (seasonCheck.status === 'archived') {
+        return errorResponse(`Season "${data.seasonId}" is archived — cannot add new races to an archived season.`);
+      }
+      seasonId = data.seasonId;
+    } else {
+      // Auto-resolve: use the active main season, if any
+      const activeMain = await db
+        .prepare(`SELECT id FROM seasons WHERE kind = 'main' AND status = 'active' LIMIT 1`)
+        .first();
+      if (activeMain) {
+        seasonId = activeMain.id;
+      }
+    }
+
     await db
       .prepare(
-        `INSERT INTO weekly_races (title, slug, track, deadline, description, content, image_url, is_active, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO weekly_races (title, slug, track, deadline, description, content, image_url, is_active, status, season_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         titleResult.value,
@@ -133,11 +161,64 @@ export async function onRequestPost(context) {
         sanitizedContent,
         imageUrlResult.value || null,
         isActive,
-        status
+        status,
+        seasonId
       )
       .run();
 
-    return successResponse('Weekly race created successfully.', { slug });
+    // Fetch the new race ID (needed for binding creation)
+    const newRace = await db
+      .prepare('SELECT id FROM weekly_races WHERE slug = ?')
+      .bind(slug)
+      .first();
+
+    // Auto-bind to leaderboards if we resolved a season_id
+    // - Always bind to open + graded leaderboards of that season
+    // - Bind to pickem leaderboard only if the season has is_pickem_active=1
+    // - Note: Pick'em is graded-only, so pickem binding is added regardless of
+    //   which division the race uses. The race-predictions endpoint validates
+    //   that predictions only work for races with graded participants.
+    let boundLeaderboards = [];
+    if (newRace && seasonId) {
+      // Fetch season's pickem-active flag
+      const seasonInfo = await db
+        .prepare('SELECT is_pickem_active FROM seasons WHERE id = ?')
+        .bind(seasonId)
+        .first();
+      const pickemActive = seasonInfo?.is_pickem_active === 1;
+
+      // Determine which divisions to bind
+      const divisionsToBind = pickemActive
+        ? ['open', 'graded', 'pickem']
+        : ['open', 'graded'];
+
+      // Fetch the leaderboard IDs for those divisions in this season
+      const placeholders = divisionsToBind.map(() => '?').join(',');
+      const { results: seasonLbs } = await db
+        .prepare(
+          `SELECT id, division FROM leaderboards
+           WHERE season_id = ? AND is_active = 1 AND division IN (${placeholders})`
+        )
+        .bind(seasonId, ...divisionsToBind)
+        .all();
+
+      for (const lb of seasonLbs) {
+        await db
+          .prepare(
+            `INSERT OR IGNORE INTO race_leaderboard_bindings (race_id, leaderboard_id) VALUES (?, ?)`
+          )
+          .bind(newRace.id, lb.id)
+          .run();
+        boundLeaderboards.push({ leaderboardId: lb.id, division: lb.division });
+      }
+    }
+
+    return successResponse('Weekly race created successfully.', {
+      slug,
+      raceId: newRace?.id || null,
+      seasonId,
+      boundLeaderboards,
+    });
   } catch (error) {
     console.error('Admin create weekly race error:', error.message);
     return errorResponse('Failed to create weekly race.', 500);
