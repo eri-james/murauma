@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="YyHtpyC4Qyd60TqjjYi8FO5eyCKZ4stbpYFTrDBIKeQ" />
+    <title>Leaderboard Archive — MURA</title>
+    <meta name="description" content="Past MURA racing season standings — permanently archived, immutable snapshots of race results and Pick'em predictions.">
+    <link rel="canonical" href="https://murauma.pages.dev/archive.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MURA Leaderboard Archive">
+    <meta property="og:description" content="Permanent snapshots of past MURA racing seasons.">
+    <meta property="og:image" content="https://i.ibb.co/G3th0mkr/MURA.webp">
+    <meta property="og:url" content="https://murauma.pages.dev/archive.html">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/favicon.png" sizes="180x180">
+    <link rel="stylesheet" href="/css/tailwind.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.5/purify.min.js"></script>
+    <script src="/js/dompurify-fallback.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <style>
+        body { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); min-height: 100vh; }
+
+        .archive-card {
+            background: white;
+            border-radius: 1rem;
+            border: 2px solid #cbd5e1;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+        .archive-card:hover { border-color: #64748b; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        .archive-card.event { border-color: #a5b4fc; }
+        .archive-card.event:hover { border-color: #6366f1; }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .division-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 2px solid;
+        }
+        .division-btn.graded { background: #f0fdf4; color: #166534; border-color: #16a34a; }
+        .division-btn.graded:hover { background: #16a34a; color: white; }
+        .division-btn.open { background: #f0f9ff; color: #0369a1; border-color: #0284c7; }
+        .division-btn.open:hover { background: #0284c7; color: white; }
+        .division-btn.pickem { background: #fdf2f8; color: #9d174d; border-color: #db2777; }
+        .division-btn.pickem:hover { background: #db2777; color: white; }
+
+        /* Standings table (detail view) */
+        .lb-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.35rem;
+        }
+        .lb-table th {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .lb-table td {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            vertical-align: middle;
+            background: white;
+        }
+        .lb-row { transition: background 0.15s; }
+        .lb-row:hover { background: #f8fafc; }
+        .lb-row td:first-child { border-radius: 0.5rem 0 0 0.5rem; }
+        .lb-row td:last-child { border-radius: 0 0.5rem 0.5rem 0; }
+        .lb-row.rank-1 { border-left: 4px solid #eab308; }
+        .lb-row.rank-2 { border-left: 4px solid #94a3b8; }
+        .lb-row.rank-3 { border-left: 4px solid #d97706; }
+        .lb-rank { font-weight: 800; text-align: center; width: 2.5rem; }
+        .lb-name { font-weight: 700; color: #1e293b; }
+        .lb-points { font-weight: 900; color: #475569; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body class="has-pill-nav">
+<canvas id="particle-bg" aria-hidden="true" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block;border:none;margin:0;padding:0"></canvas>
+
+<!-- MURA:NAV:START -->
+    <!-- Pill Navigation Bar -->
+    <div class="nav-pill">
+        <div class="nav-pill-inner">
+            <a href="index.html" class="nav-pill-logo">
+                <span class="logo-title">MALAYAN UMAMUSUME</span>
+                <span class="logo-sub">RACING ASSOCIATION</span>
+            </a>
+            <nav id="main-nav" class="nav-pill-links">
+                <a href="index.html#news" class="nav-pill-link">News</a>
+                <a href="about.html" class="nav-pill-link">About</a>
+                <a href="index.html#events" class="nav-pill-link">Events</a>
+                <a href="index.html#community" class="nav-pill-link">Community</a>
+                <a href="weekly-race.html" class="nav-pill-link">Races</a>
+            </nav>
+            <button id="nav-burger-btn" class="nav-pill-burger" aria-label="Open menu">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+            </button>
+        </div>
+    </div>
+    <!-- MURA:NAV:END -->
+
+<!-- MURA:OVERLAY:START -->
+    <!-- Full-Page Overlay Menu -->
+    <div id="nav-overlay" class="nav-overlay">
+        <button id="nav-overlay-close" class="nav-overlay-close" aria-label="Close menu">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <ul class="nav-overlay-menu">
+            <li class="nav-overlay-item"><a href="index.html#news" class="nav-overlay-link">News</a></li>
+            <li class="nav-overlay-item"><a href="about.html" class="nav-overlay-link">About</a></li>
+            <li class="nav-overlay-item"><a href="index.html#events" class="nav-overlay-link">Events</a></li>
+            <li class="nav-overlay-item"><a href="index.html#community" class="nav-overlay-link">Community</a></li>
+            <li class="nav-overlay-item"><a href="weekly-race.html" class="nav-overlay-link">Races</a></li>
+        </ul>
+        <div class="nav-overlay-auth">
+            <a href="register.html" data-auth="logged-out" class="btn-join">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                Join Us
+            </a>
+            <a href="login.html" data-auth="logged-out" class="btn-login">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0v-2zm-2 4a.5.5 0 0 1 .5-.5H11a.5.5 0 0 1 0 1H4.5a.5.5 0 0 1-.5-.5z"/><path fill-rule="evenodd" d="M4.146 5.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L3.707 5l1.147 1.146a.5.5 0 0 1-.708.708l-2-2z"/></svg>
+                Log In
+            </a>
+            <a href="edit-profile.html" data-auth="logged-in" class="btn-profile">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+                <span data-auth="username"></span>
+            </a>
+            <a href="/admin/" data-auth="admin" class="btn-admin">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-4.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/></svg>
+                Admin
+            </a>
+            <button data-auth="logout" class="btn-logout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
+                Log Out
+            </button>
+        </div>
+    </div>
+    <!-- MURA:OVERLAY:END -->
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h1 class="text-3xl font-extrabold text-slate-700">Leaderboard Archive</h1>
+                <a href="race-leaderboard.html" class="text-sm font-bold text-green-600 hover:text-green-800 underline">← Current Leaderboard</a>
+            </div>
+
+            <div class="bg-slate-50 border-2 border-slate-300 rounded-xl p-4 mb-6 text-sm text-slate-700">
+                <p><strong>Permanent records.</strong> These are immutable snapshots of past season standings. Once a season is archived, its results cannot be modified — even by an admin.</p>
+            </div>
+
+            <!-- Loading state -->
+            <div id="archive-loading" class="text-center py-12">
+                <p class="text-gray-400">Loading archive...</p>
+            </div>
+
+            <!-- List view: shows all archived seasons as cards -->
+            <div id="archive-list" class="hidden space-y-4"></div>
+
+            <!-- Detail view: shows one season+division snapshot -->
+            <div id="archive-detail" class="hidden"></div>
+
+            <!-- Empty state -->
+            <div id="archive-empty" class="hidden empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="mx-auto mb-3 opacity-30" viewBox="0 0 16 16"><path d="M14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM2 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7.5 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/><path d="M2 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7.5 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" opacity="0"/></svg>
+                <p class="font-bold text-gray-500">No archived seasons yet</p>
+                <p class="text-sm mt-1">When a season ends and is archived, its final standings will appear here as permanent records.</p>
+                <a href="race-leaderboard.html" class="inline-block mt-4 bg-slate-500 text-white font-bold px-6 py-2 rounded-lg hover:bg-slate-600 text-sm">View Current Leaderboard</a>
+            </div>
+        </div>
+    </main>
+
+<!-- MURA:FOOTER:START -->
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2025–2026 Malayan Umamusume Racing Association (MURA). All Rights Reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">This is a fan-made website and is not affiliated with Cygames, Inc.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="https://discord.gg/QXSWZSv9z8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">Discord</a>
+                <a href="https://www.youtube.com/@MURAuma" target="_blank" class="text-gray-400 hover:text-white">YouTube</a>
+                <a href="https://x.com/MURA_umamusu" target="_blank" class="text-gray-400 hover:text-white">Twitter</a>
+            </div>
+        </div>
+    </footer>
+    <!-- MURA:FOOTER:END -->
+
+    <script src="/js/nav-overlay.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
+
+        // ============================================================
+        // ROUTER — list view vs detail view based on URL query params
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const seasonId = params.get('season');
+            const division = params.get('division');
+            if (seasonId && division) {
+                loadDetailView(seasonId, division);
+            } else {
+                loadListView();
+            }
+        });
+
+        // ============================================================
+        // LIST VIEW — show all archived seasons
+        // ============================================================
+        async function loadListView() {
+            const loadingEl = document.getElementById('archive-loading');
+            const listEl = document.getElementById('archive-list');
+            const emptyEl = document.getElementById('archive-empty');
+
+            try {
+                const resp = await fetch('/api/archive');
+                const data = await resp.json();
+                loadingEl.classList.add('hidden');
+
+                if (data.result !== 'success' || !data.archives || data.archives.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                    return;
+                }
+
+                listEl.classList.remove('hidden');
+                listEl.innerHTML = data.archives.map(a => {
+                    const divisionButtons = (a.divisions || []).map(d => {
+                        const label = d === 'pickem' ? "Pick'em" : (d.charAt(0).toUpperCase() + d.slice(1));
+                        return `<a href="archive.html?season=${encodeURIComponent(a.seasonId)}&division=${d}" class="division-btn ${d}">${label}</a>`;
+                    }).join(' ');
+
+                    return `<div class="archive-card">
+                        <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-gray-800">${escapeHtml(a.label)}</h2>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <span class="font-mono">${escapeHtml(a.seasonId)}</span>
+                                    • ${escapeHtml(a.startDate)} → ${escapeHtml(a.endDate || '?')}
+                                </p>
+                            </div>
+                            <span class="archive-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                                Archived ${escapeHtml((a.archivedAt || '').split('T')[0])}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">View standings:</p>
+                        <div class="flex flex-wrap gap-2">${divisionButtons}</div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('Archive list error:', err);
+                loadingEl.innerHTML = `<p class="text-red-500 font-bold">Failed to load archive: ${escapeHtml(err.message)}</p>`;
+            }
+        }
+
+        // ============================================================
+        // DETAIL VIEW — show one snapshot
+        // ============================================================
+        async function loadDetailView(seasonId, division) {
+            const loadingEl = document.getElementById('archive-loading');
+            const detailEl = document.getElementById('archive-detail');
+
+            try {
+                const resp = await fetch(`/api/archive/${encodeURIComponent(seasonId)}?division=${encodeURIComponent(division)}`);
+                const data = await resp.json();
+                loadingEl.classList.add('hidden');
+
+                if (data.result !== 'success') {
+                    detailEl.classList.remove('hidden');
+                    detailEl.innerHTML = `<div class="bg-red-50 border-2 border-red-300 rounded-xl p-6 text-center">
+                        <p class="text-red-700 font-bold">Snapshot not found</p>
+                        <p class="text-sm text-red-600 mt-2">${escapeHtml(data.message || '')}</p>
+                        <a href="archive.html" class="inline-block mt-4 bg-slate-500 text-white font-bold px-4 py-2 rounded-lg text-sm">← Back to Archive</a>
+                    </div>`;
+                    return;
+                }
+
+                // Fetch all divisions for this season (for the tab switcher)
+                const archiveResp = await fetch('/api/archive');
+                const archiveData = await archiveResp.json();
+                const archiveEntry = (archiveData.archives || []).find(a => a.seasonId === seasonId);
+                const availableDivisions = archiveEntry ? archiveEntry.divisions : [division];
+
+                const divisionButtons = availableDivisions.map(d => {
+                    const label = d === 'pickem' ? "Pick'em" : (d.charAt(0).toUpperCase() + d.slice(1));
+                    const isCurrent = d === division;
+                    const activeClass = isCurrent ? 'opacity-100' : 'opacity-50 hover:opacity-80';
+                    return `<a href="archive.html?season=${encodeURIComponent(seasonId)}&division=${d}" class="division-btn ${d} ${activeClass}">${label}</a>`;
+                }).join(' ');
+
+                const leaderboard = data.leaderboard || [];
+                let tableHtml;
+                if (leaderboard.length === 0) {
+                    tableHtml = `<div class="empty-state">
+                        <p class="font-bold text-gray-500">No standings recorded</p>
+                        <p class="text-sm mt-1">This division has no race results in its snapshot.</p>
+                    </div>`;
+                } else if (division === 'pickem') {
+                    tableHtml = `
+                        <p class="text-xs text-gray-500 mb-3">${data.raceCount} race(s) scored • Top ${leaderboard.length} predictors • Scoring: 3 pts for correct 1st, 2 for 2nd, 1 for 3rd</p>
+                        <table class="lb-table">
+                            <thead><tr><th>Rank</th><th>Predictor</th><th>Races</th><th>Score</th></tr></thead>
+                            <tbody>
+                                ${leaderboard.map(e => `
+                                    <tr class="lb-row rank-${e.rank <= 3 ? e.rank : 'other'}">
+                                        <td class="lb-rank">${e.rank}</td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <img src="${escapeHtml(e.avatarUrl)}" alt="" class="w-7 h-7 rounded-full object-cover bg-gray-100" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                                                <div class="hidden w-7 h-7 rounded-full bg-pink-200 flex items-center justify-center text-xs font-bold text-pink-700">${escapeHtml((e.memberName || '?').charAt(0).toUpperCase())}</div>
+                                                <span class="lb-name">${escapeHtml(e.memberName)}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">${e.racesPredicted}</td>
+                                        <td class="lb-points text-pink-600">${e.totalScore}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    tableHtml = `
+                        <p class="text-xs text-gray-500 mb-3">${data.raceCount} race(s) • Top ${leaderboard.length} racers • Scoring: 1st=10, 2nd=6, 3rd=4, 4th=2, 5th+=1</p>
+                        <table class="lb-table">
+                            <thead><tr><th>Rank</th><th>Racer</th><th>Races</th><th>Wins</th><th>Podiums</th><th>Points</th><th>Avg Pos</th></tr></thead>
+                            <tbody>
+                                ${leaderboard.map(e => `
+                                    <tr class="lb-row rank-${e.rank <= 3 ? e.rank : 'other'}">
+                                        <td class="lb-rank">${e.rank}</td>
+                                        <td>
+                                            <div class="flex items-center gap-2">
+                                                <img src="${escapeHtml(e.avatarUrl)}" alt="" class="w-7 h-7 rounded-full object-cover bg-gray-100" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                                                <div class="hidden w-7 h-7 rounded-full ${division === 'graded' ? 'bg-green-200 text-green-700' : 'bg-sky-200 text-sky-700'} flex items-center justify-center text-xs font-bold">${escapeHtml((e.memberName || '?').charAt(0).toUpperCase())}</div>
+                                                <span class="lb-name">${escapeHtml(e.memberName)}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">${e.totalRaces}</td>
+                                        <td class="text-center">${e.wins}</td>
+                                        <td class="text-center">${e.podiums}</td>
+                                        <td class="lb-points ${division === 'graded' ? 'text-green-600' : 'text-sky-600'}">${e.totalPoints}</td>
+                                        <td class="text-center text-gray-500">${e.avgPosition}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+
+                detailEl.classList.remove('hidden');
+                detailEl.innerHTML = `
+                    <div class="mb-4">
+                        <a href="archive.html" class="text-sm font-bold text-slate-500 hover:text-slate-700 underline">← All Archived Seasons</a>
+                    </div>
+                    <div class="archive-card">
+                        <div class="flex justify-between items-start mb-4 flex-wrap gap-2">
+                            <div>
+                                <h2 class="text-2xl font-extrabold text-gray-800">${escapeHtml(data.season.label)}</h2>
+                                <p class="text-xs text-gray-500 mt-1">${escapeHtml(division)} Division • Snapshot taken ${escapeHtml((data.snapshotTakenAt || '').split('T')[0])}</p>
+                            </div>
+                            <span class="archive-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                                Immutable
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">${divisionButtons}</div>
+                        ${tableHtml}
+                    </div>
+                `;
+            } catch (err) {
+                console.error('Archive detail error:', err);
+                loadingEl.innerHTML = `<p class="text-red-500 font-bold">Failed to load snapshot: ${escapeHtml(err.message)}</p>`;
+            }
+        }
+    </script>
+<script src="/js/particles.js"></script>
+</body>
+</html>

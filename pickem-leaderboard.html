@@ -151,6 +151,17 @@
                 </a>
             </div>
 
+            <!-- Season Selector (Phase 4 — Pick'em is main-season-only) -->
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <label for="season-select" class="text-xs font-bold text-gray-500 uppercase tracking-wide">Season:</label>
+                    <select id="season-select" class="px-3 py-1.5 text-xs font-bold rounded-full border-2 border-purple-500 bg-white text-purple-700 cursor-pointer focus:outline-none focus:border-purple-700" onchange="loadLeaderboard()">
+                        <option value="active">Loading seasons...</option>
+                    </select>
+                </div>
+                <a href="archive.html" class="text-xs font-bold text-gray-500 underline hover:text-gray-700">View Archived Seasons →</a>
+            </div>
+
             <div id="leaderboard-loading" class="text-center py-12">
                 <p class="text-gray-400">Loading leaderboard...</p>
             </div>
@@ -183,20 +194,83 @@
     <script src="/js/nav-overlay.js"></script>
     <script src="/js/auth.js"></script>
     <script>
-        // Load Pick'em leaderboard
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Pick'em leaderboard — main seasons only (Pick'em is restricted to weekly/biweekly)
+        let currentSeasonMode = 'active'; // 'active' | 'alltime' | '<seasonId>'
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
+
+        // Populate the season dropdown — only main seasons (Pick'em is main-only)
+        async function loadSeasons() {
+            try {
+                const resp = await fetch('/api/seasons?kind=main');
+                const data = await resp.json();
+                if (data.result !== 'success' || !data.seasons) return;
+                const select = document.getElementById('season-select');
+                if (!select) return;
+
+                const activeMain = data.seasons.find(s => s.status === 'active');
+                const opts = [];
+                if (activeMain) {
+                    opts.push(`<option value="active">${escapeHtml(activeMain.label)} (active)</option>`);
+                } else {
+                    opts.push(`<option value="active">No active season</option>`);
+                }
+
+                // Other main seasons (upcoming + ended — archived excluded, they're on archive page)
+                const otherMain = data.seasons.filter(s => s.status !== 'active' && s.status !== 'archived');
+                if (otherMain.length > 0) {
+                    opts.push('<optgroup label="Other Main Seasons">');
+                    for (const s of otherMain) {
+                        const statusTag = s.status === 'upcoming' ? ' (upcoming)' : (s.status === 'ended' ? ' (ended)' : '');
+                        opts.push(`<option value="${escapeHtml(s.id)}">${escapeHtml(s.label)}${statusTag}</option>`);
+                    }
+                    opts.push('</optgroup>');
+                }
+
+                opts.push('<optgroup label="Other">');
+                opts.push('<option value="alltime">All-Time (all seasons)</option>');
+                opts.push('</optgroup>');
+
+                select.innerHTML = opts.join('');
+            } catch (err) {
+                console.error('loadSeasons error:', err);
+            }
+        }
+
+        // Load Pick'em leaderboard based on currentSeasonMode
+        async function loadLeaderboard() {
             const loadingEl = document.getElementById('leaderboard-loading');
             const contentEl = document.getElementById('leaderboard-content');
             const emptyEl = document.getElementById('leaderboard-empty');
 
+            loadingEl.classList.remove('hidden');
+            contentEl.classList.add('hidden');
+            emptyEl.classList.add('hidden');
+
             try {
-                const resp = await fetch('/api/race-predictions/leaderboard');
+                let url = '/api/race-predictions/leaderboard';
+                if (currentSeasonMode === 'alltime') {
+                    url += '?allTime=true';
+                } else if (currentSeasonMode && currentSeasonMode !== 'active') {
+                    url += `?season=${encodeURIComponent(currentSeasonMode)}`;
+                }
+                const resp = await fetch(url);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
 
                 loadingEl.classList.add('hidden');
 
-                if (data.result !== 'success' || !Array.isArray(data.leaderboard) || data.leaderboard.length === 0) {
+                // Handle empty/error states
+                if (data.result !== 'success') {
+                    loadingEl.innerHTML = `<p class="text-red-500 font-bold">${escapeHtml(data.message || 'Failed to load leaderboard.')}</p>`;
+                    return;
+                }
+                if (!Array.isArray(data.leaderboard) || data.leaderboard.length === 0) {
+                    // For event seasons (which shouldn't appear here, but defensive), the API returns
+                    // a friendly message. For empty main seasons, show the empty state.
                     emptyEl.classList.remove('hidden');
                     return;
                 }
@@ -228,6 +302,19 @@
                 console.error('Pick\'em leaderboard load error:', err);
                 loadingEl.innerHTML = '<p class="text-red-500 font-bold">Failed to load leaderboard.</p><p class="text-xs text-gray-400 mt-2">Please try refreshing the page.</p>';
             }
+        }
+
+        // Wire up season-select change → update currentSeasonMode + reload
+        document.addEventListener('DOMContentLoaded', () => {
+            const select = document.getElementById('season-select');
+            if (select) {
+                select.addEventListener('change', () => {
+                    currentSeasonMode = select.value;
+                    loadLeaderboard();
+                });
+            }
+            loadSeasons();
+            loadLeaderboard();
         });
     </script>
 <script src="/js/particles.js"></script>

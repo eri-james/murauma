@@ -89,6 +89,52 @@
         }
         .season-btn:hover:not(.active) { background: #f9fafb; color: #374151; }
 
+        /* Season Selector (Phase 4 — DB-driven dropdown) */
+        .season-select-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .season-select {
+            padding: 0.4rem 2rem 0.4rem 0.875rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 999px;
+            border: 2px solid #16a34a;
+            background: white;
+            color: #166534;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2316a34a' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1rem;
+            transition: all 0.2s;
+        }
+        .season-select:hover { background-color: #f0fdf4; }
+        .season-select:focus { outline: none; border-color: #15803d; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+        .season-select-archived-link {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6b7280;
+            text-decoration: underline;
+        }
+        .season-select-archived-link:hover { color: #374151; }
+        .season-badge-archived {
+            display: inline-block;
+            background: #f3f4f6;
+            color: #6b7280;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            margin-left: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         /* Top 3 Podium (Graded only) */
         .podium-section {
             display: grid;
@@ -392,10 +438,13 @@
                 </a>
             </div>
 
-            <!-- Season Toggle -->
-            <div class="season-toggle">
-                <button id="btn-season-current" class="season-btn active" onclick="switchSeason('current')">Season 1 2026</button>
-                <button id="btn-season-alltime" class="season-btn" onclick="switchSeason('alltime')">All-Time</button>
+            <!-- Season Selector (DB-driven) -->
+            <div class="season-select-wrap">
+                <label for="season-select" class="text-xs font-bold text-gray-500 uppercase tracking-wide">Season:</label>
+                <select id="season-select" class="season-select" onchange="switchSeason(this.value)">
+                    <option value="active">Loading seasons...</option>
+                </select>
+                <a href="archive.html" class="season-select-archived-link">View Archived Seasons →</a>
             </div>
 
             <!-- Division Tabs -->
@@ -462,9 +511,76 @@
     <script>
         // State
         let currentCategory = 'graded';
-        let currentSeason = 'current'; // 'current' or 'alltime'
+        let currentSeasonMode = 'active'; // 'active' (default main) | 'alltime' | '<seasonId>' | '<leaderboardId>'
         let leaderboardData = [];
         let expandedMemberId = null;
+        let seasonsCache = null; // populated by loadSeasons()
+
+        // ============================================================
+        // SEASON DROPDOWN POPULATION (Phase 4)
+        // ============================================================
+        async function loadSeasons() {
+            try {
+                const resp = await fetch('/api/seasons');
+                const data = await resp.json();
+                if (data.result !== 'success' || !data.seasons) {
+                    console.error('Failed to load seasons:', data.message);
+                    return;
+                }
+                seasonsCache = data.seasons;
+                const select = document.getElementById('season-select');
+                if (!select) return;
+
+                // Build options grouped by kind
+                const mainSeasons = data.seasons.filter(s => s.kind === 'main');
+                const eventSeasons = data.seasons.filter(s => s.kind === 'event');
+
+                const opts = [];
+                // Default: active main season
+                const activeMain = mainSeasons.find(s => s.status === 'active');
+                if (activeMain) {
+                    opts.push(`<option value="active">${escapeHtml(activeMain.label)} (active)</option>`);
+                } else {
+                    opts.push(`<option value="active">No active season</option>`);
+                }
+
+                // Other main seasons (upcoming + ended — archived excluded, they're on the archive page)
+                const otherMain = mainSeasons.filter(s => s.status !== 'active' && s.status !== 'archived');
+                if (otherMain.length > 0) {
+                    opts.push('<optgroup label="Other Main Seasons">');
+                    for (const s of otherMain) {
+                        const statusTag = s.status === 'upcoming' ? ' (upcoming)' : (s.status === 'ended' ? ' (ended)' : '');
+                        opts.push(`<option value="${escapeHtml(s.id)}">${escapeHtml(s.label)}${statusTag}</option>`);
+                    }
+                    opts.push('</optgroup>');
+                }
+
+                // Event seasons
+                if (eventSeasons.length > 0) {
+                    opts.push('<optgroup label="Event Leaderboards">');
+                    for (const s of eventSeasons) {
+                        if (s.status === 'archived') continue;
+                        const statusTag = s.status === 'upcoming' ? ' (upcoming)' : (s.status === 'ended' ? ' (ended)' : '');
+                        opts.push(`<option value="${escapeHtml(s.id)}">${escapeHtml(s.label)}${statusTag}</option>`);
+                    }
+                    opts.push('</optgroup>');
+                }
+
+                // All-Time
+                opts.push('<optgroup label="Other">');
+                opts.push('<option value="alltime">All-Time (all seasons)</option>');
+                opts.push('</optgroup>');
+
+                select.innerHTML = opts.join('');
+            } catch (err) {
+                console.error('loadSeasons error:', err);
+            }
+        }
+
+        function escapeHtml(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
 
         // Category tab switching
         function switchCategory(cat) {
@@ -478,11 +594,9 @@
             loadLeaderboard();
         }
 
-        // Season toggle
-        function switchSeason(season) {
-            currentSeason = season;
-            document.getElementById('btn-season-current').classList.toggle('active', season === 'current');
-            document.getElementById('btn-season-alltime').classList.toggle('active', season === 'alltime');
+        // Season change handler — receives the <select> value
+        function switchSeason(value) {
+            currentSeasonMode = value;
             expandedMemberId = null;
             loadLeaderboard();
         }
@@ -500,23 +614,36 @@
             emptyEl.classList.add('hidden');
 
             try {
-                const allTime = currentSeason === 'alltime';
-                const resp = await fetch(`/api/race-leaderboard?category=${currentCategory}${allTime ? '&allTime=true' : ''}`);
+                // Build URL based on currentSeasonMode:
+                //   'active'   → no params (defaults to active main season in API)
+                //   'alltime'  → allTime=true
+                //   '<seasonId>' → season=<id>
+                let url = `/api/race-leaderboard?category=${currentCategory}`;
+                if (currentSeasonMode === 'alltime') {
+                    url += '&allTime=true';
+                } else if (currentSeasonMode && currentSeasonMode !== 'active') {
+                    url += `&season=${encodeURIComponent(currentSeasonMode)}`;
+                }
+                const resp = await fetch(url);
                 const data = await resp.json();
 
                 loadingEl.classList.add('hidden');
 
                 if (data.result !== 'success') {
                     errorEl.classList.remove('hidden');
+                    errorEl.querySelector('p').textContent = data.message || 'Failed to load leaderboard.';
                     return;
                 }
 
                 // Update season label
                 const seasonLabel = document.getElementById('season-label');
-                if (allTime) {
+                if (currentSeasonMode === 'alltime') {
                     seasonLabel.textContent = 'All-time rankings across all seasons';
+                } else if (data.season) {
+                    const archivedTag = data.season.status === 'archived' ? ' (Archived)' : '';
+                    seasonLabel.textContent = `${data.season.label}${archivedTag} — ${data.season.raceCount} race(s) completed`;
                 } else {
-                    seasonLabel.textContent = `${data.season.label} — ${data.season.raceCount} race(s) completed`;
+                    seasonLabel.textContent = '';
                 }
 
                 // Update tab counts (we only have the current category's count from the API)
@@ -639,8 +766,11 @@
             el.innerHTML = '<p class="text-gray-400 text-xs py-2">Loading race history...</p>';
 
             try {
-                const allTime = currentSeason === 'alltime';
-                const resp = await fetch(`/api/race-leaderboard/member?memberId=${memberId}&category=${currentCategory}${allTime ? '&allTime=true' : ''}`);
+                const allTime = currentSeasonMode === 'alltime';
+                let memberUrl = `/api/race-leaderboard/member?memberId=${memberId}&category=${currentCategory}`;
+                if (allTime) memberUrl += '&allTime=true';
+                else if (currentSeasonMode && currentSeasonMode !== 'active') memberUrl += `&season=${encodeURIComponent(currentSeasonMode)}`;
+                const resp = await fetch(memberUrl);
                 const data = await resp.json();
 
                 if (data.result !== 'success') {
@@ -694,13 +824,17 @@
 
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
+            loadSeasons();  // populate dropdown (async, non-blocking)
             loadLeaderboard();
             // Also preload the other category's count
             setTimeout(async () => {
                 try {
                     const otherCat = currentCategory === 'graded' ? 'open' : 'graded';
-                    const allTime = currentSeason === 'alltime';
-                    const resp = await fetch(`/api/race-leaderboard?category=${otherCat}${allTime ? '&allTime=true' : ''}`);
+                    const allTime = currentSeasonMode === 'alltime';
+                    let url = `/api/race-leaderboard?category=${otherCat}`;
+                    if (allTime) url += '&allTime=true';
+                    else if (currentSeasonMode && currentSeasonMode !== 'active') url += `&season=${encodeURIComponent(currentSeasonMode)}`;
+                    const resp = await fetch(url);
                     const data = await resp.json();
                     if (data.result === 'success') {
                         document.getElementById(`tab-${otherCat}-count`).textContent = (data.leaderboard || []).length;
