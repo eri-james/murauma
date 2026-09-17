@@ -18,7 +18,10 @@ import {
 
 const VALID_CATEGORIES = ['open', 'graded'];
 
-const CURRENT_SEASON_START = '2026-06-01';
+// Fallback start date — used only if no season can be resolved from the DB
+// (e.g., before migration 014 was applied). Once 014 is applied, the active
+// main season's start_date is used instead.
+const FALLBACK_SEASON_START = '2026-06-01';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -29,6 +32,7 @@ export async function onRequestGet(context) {
     const memberId = parseInt(url.searchParams.get('memberId'), 10);
     const category = (url.searchParams.get('category') || 'graded').toLowerCase();
     const allTime = url.searchParams.get('allTime') === 'true';
+    const seasonIdParam = url.searchParams.get('season');
 
     if (!memberId || isNaN(memberId)) {
       return errorResponse('Valid memberId is required.');
@@ -37,7 +41,29 @@ export async function onRequestGet(context) {
       return errorResponse('Category must be "open" or "graded".');
     }
 
-    const seasonStart = allTime ? '1970-01-01' : CURRENT_SEASON_START;
+    let seasonStart;
+    let seasonInfo = null;
+    if (allTime) {
+      seasonStart = '1970-01-01';
+    } else {
+      // Resolve season: explicit ?season= param > active main season > fallback
+      let resolvedSeasonId = seasonIdParam;
+      if (!resolvedSeasonId) {
+        const activeMain = await db
+          .prepare(`SELECT id FROM seasons WHERE kind = 'main' AND status = 'active' LIMIT 1`)
+          .first();
+        if (activeMain) {
+          resolvedSeasonId = activeMain.id;
+        }
+      }
+      if (resolvedSeasonId) {
+        seasonInfo = await db
+          .prepare(`SELECT id, label, start_date, end_date, status FROM seasons WHERE id = ?`)
+          .bind(resolvedSeasonId)
+          .first();
+      }
+      seasonStart = seasonInfo?.start_date || FALLBACK_SEASON_START;
+    }
 
     // Fetch member info
     const member = await db
