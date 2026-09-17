@@ -23,7 +23,7 @@
 import {
   errorResponse,
   successResponse,
-} from '../_shared/utils.js';
+} from '../../_shared/utils.js';
 
 const VALID_CATEGORIES = ['open', 'graded'];
 
