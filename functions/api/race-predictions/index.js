@@ -175,6 +175,27 @@ export async function onRequestPost(context) {
     const race = await db.prepare('SELECT id FROM weekly_races WHERE id = ?').bind(data.raceId).first();
     if (!race) return errorResponse('Race not found.');
 
+    // Verify the race is bound to a pickem leaderboard (Pick'em restriction).
+    // Pick'em only runs for main weekly/biweekly seasons — event leaderboards don't have pickem.
+    // Also: pickem leaderboard must belong to a season that's currently active or upcoming.
+    const pickemBinding = await db
+      .prepare(
+        `SELECT lb.id AS leaderboard_id, s.status AS season_status
+         FROM race_leaderboard_bindings rlb
+         JOIN leaderboards lb ON lb.id = rlb.leaderboard_id
+         JOIN seasons s ON s.id = lb.season_id
+         WHERE rlb.race_id = ? AND lb.division = 'pickem' AND lb.is_active = 1
+         LIMIT 1`
+      )
+      .bind(data.raceId)
+      .first();
+    if (!pickemBinding) {
+      return errorResponse('Pick\'em is not enabled for this race. Pick\'m runs only for races in active main seasons with Pick\'em enabled.', 403);
+    }
+    if (!['upcoming', 'active'].includes(pickemBinding.season_status)) {
+      return errorResponse(`This race's season is currently '${pickemBinding.season_status}'. Predictions are only accepted while the season is upcoming or active.`, 403);
+    }
+
     // Verify all picked members are graded participants (Pick'em is graded-only)
     for (const pickId of [data.pick1st, data.pick2nd, data.pick3rd]) {
       const participant = await db
