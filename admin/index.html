@@ -529,6 +529,9 @@
                 <a class="admin-pill-link" data-section="weekly-races">Races</a>
                 <a class="admin-pill-link" data-section="events">Events</a>
                 <a class="admin-pill-link" data-section="news">News</a>
+                <a class="admin-pill-link" data-section="seasons">Seasons</a>
+                <a class="admin-pill-link" data-section="leaderboards">Boards</a>
+                <a class="admin-pill-link" data-section="archive">Archive</a>
                 <a class="admin-pill-link" data-section="hero-banner">Banner</a>
                 <a href="/" class="admin-pill-back-link">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -557,6 +560,9 @@
             <li><a class="admin-overlay-link" data-section="weekly-races">Races</a></li>
             <li><a class="admin-overlay-link" data-section="events">Events</a></li>
             <li><a class="admin-overlay-link" data-section="news">News</a></li>
+            <li><a class="admin-overlay-link" data-section="seasons">Seasons</a></li>
+            <li><a class="admin-overlay-link" data-section="leaderboards">Boards</a></li>
+            <li><a class="admin-overlay-link" data-section="archive">Archive</a></li>
             <li><a class="admin-overlay-link" data-section="hero-banner">Banner</a></li>
         </ul>
         <a href="/" class="admin-overlay-back">
@@ -751,6 +757,54 @@
                         </table>
                     </div>
                     <div id="events-mobile-cards" class="mobile-cards"></div>
+                </div>
+            </div>
+
+            <!-- ========== SEASONS ========== -->
+            <div id="section-seasons" class="admin-section">
+                <div class="flex justify-between items-center mb-6 section-header">
+                    <h2 class="header-skew" style="background-color:#8B5CF6;">Seasons</h2>
+                    <div class="flex gap-2">
+                        <button onclick="openSeasonForm(null, 'main')" class="bg-purple-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-purple-600 text-sm transition-colors">+ New Main Season</button>
+                        <button onclick="openSeasonForm(null, 'event')" class="bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-indigo-600 text-sm transition-colors">+ New Event Leaderboard</button>
+                    </div>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-300 rounded-lg p-4 mb-4 text-sm text-amber-800" id="seasons-migration-banner" style="display:none;">
+                    <strong>Migration 014 applied:</strong> Existing races have been backfilled to <em>Season 1 2026</em>. Past Merdeka/Freedom Cup races remain in the main seasonal standings — only new event leaderboards created from here on will be separate.
+                    <button onclick="localStorage.setItem('seasonsMigrationDismissed','1'); document.getElementById('seasons-migration-banner').style.display='none';" class="ml-2 underline text-amber-900 hover:text-amber-700">Dismiss</button>
+                </div>
+                <div class="admin-card border-2 border-purple-400">
+                    <div class="admin-table-wrap overflow-x-auto">
+                        <table class="admin-table" style="min-width:900px;">
+                            <thead><tr><th>ID</th><th>Label</th><th>Kind</th><th>Status</th><th>Start</th><th>End</th><th>Races</th><th>Pick'em</th><th>Actions</th></tr></thead>
+                            <tbody id="seasons-table-body"><tr><td colspan="9" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div id="seasons-mobile-cards" class="mobile-cards"></div>
+                </div>
+            </div>
+
+            <!-- ========== LEADERBOARDS (read-only preview) ========== -->
+            <div id="section-leaderboards" class="admin-section">
+                <div class="flex justify-between items-center mb-6 section-header">
+                    <h2 class="header-skew" style="background-color:#0EA5E9;">Leaderboards</h2>
+                    <button onclick="loadLeaderboards()" class="bg-sky-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-sky-600 text-sm transition-colors">Refresh</button>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">Read-only preview. Standings are computed live from race results — they are not stored as rows in the database. Click a leaderboard to preview its top entries.</p>
+                <div id="leaderboards-container" class="space-y-6">
+                    <p class="text-center py-8 text-gray-400">Loading...</p>
+                </div>
+            </div>
+
+            <!-- ========== ARCHIVE (read-only snapshots) ========== -->
+            <div id="section-archive" class="admin-section">
+                <div class="flex justify-between items-center mb-6 section-header">
+                    <h2 class="header-skew" style="background-color:#64748B;">Archive</h2>
+                    <button onclick="loadArchive()" class="bg-slate-500 text-white font-bold px-6 py-2.5 rounded-lg hover:bg-slate-600 text-sm transition-colors">Refresh</button>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">Immutable snapshots of past seasons. Once a season is archived, its standings cannot be modified — even by an admin.</p>
+                <div id="archive-container" class="space-y-6">
+                    <p class="text-center py-8 text-gray-400">Loading...</p>
                 </div>
             </div>
 
@@ -1131,6 +1185,9 @@
             case 'weekly-races': loadWeeklyRaces(); break;
             case 'events': loadEvents(); break;
             case 'news': loadNews(); break;
+            case 'seasons': loadSeasons(); break;
+            case 'leaderboards': loadLeaderboards(); break;
+            case 'archive': loadArchive(); break;
             case 'hero-banner': loadHeroBanners(); break;
         }
     }
@@ -1706,6 +1763,14 @@
                     <label class="flex items-center"><input type="checkbox" id="wr-active" checked class="mr-2"> Active</label>
                     <label class="flex items-center"><input type="checkbox" id="wr-published" checked class="mr-2"> Published</label>
                 </div>
+                <div class="border-t pt-4">
+                    <label class="block text-sm font-bold text-gray-700">Leaderboards this race feeds</label>
+                    <p class="text-xs text-gray-400 mt-1 mb-2">Auto-bound to the active main season. Check "Override" to manually select which leaderboards this race contributes to.</p>
+                    <label class="flex items-center mb-2"><input type="checkbox" id="wr-override-bindings" class="mr-2"> Override default bindings</label>
+                    <div id="wr-bindings-list" class="space-y-2 pl-6 opacity-50 pointer-events-none">
+                        <p class="text-xs text-gray-400">Loading available leaderboards...</p>
+                    </div>
+                </div>
                 <div class="flex justify-end space-x-2 pt-4">
                     <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
                     <button type="submit" class="px-5 py-2.5 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
@@ -1739,6 +1804,19 @@
         });
         slugInput.addEventListener('input', () => { slugManuallyEdited = true; });
 
+        // Initialize leaderboard bindings UI
+        const overrideCheckbox = document.getElementById('wr-override-bindings');
+        const bindingsList = document.getElementById('wr-bindings-list');
+        overrideCheckbox.addEventListener('change', () => {
+            if (overrideCheckbox.checked) {
+                bindingsList.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                bindingsList.classList.add('opacity-50', 'pointer-events-none');
+            }
+        });
+        // Load available leaderboards + (if editing) current race bindings
+        loadRaceBindingsUI(id);
+
         if (isEdit) {
             loadWeeklyRaceForEdit(id);
         }
@@ -1757,10 +1835,26 @@
                 status: document.getElementById('wr-published').checked ? 'published' : 'draft',
             };
             try {
+                let savedRace;
                 if (isEdit) {
-                    await api('POST', '/api/admin/weekly-races/update', { ...payload, id });
+                    savedRace = await api('POST', '/api/admin/weekly-races/update', { ...payload, id });
                 } else {
-                    await api('POST', '/api/admin/weekly-races', payload);
+                    savedRace = await api('POST', '/api/admin/weekly-races', payload);
+                }
+                // Save leaderboard bindings if override is checked OR if editing existing race
+                // (for new races, the backend auto-binds to active main season; only override if checkbox is checked)
+                const raceIdForBindings = isEdit ? id : savedRace.raceId;
+                if (raceIdForBindings && overrideCheckbox.checked) {
+                    const selectedIds = Array.from(bindingsList.querySelectorAll('input[type="checkbox"]:checked'))
+                        .map(cb => parseInt(cb.value, 10));
+                    try {
+                        await api('POST', '/api/admin/weekly-races/bind-leaderboards', {
+                            raceId: raceIdForBindings,
+                            leaderboardIds: selectedIds,
+                        });
+                    } catch (bindErr) {
+                        alert('Race saved, but failed to update leaderboard bindings: ' + bindErr.message);
+                    }
                 }
                 closeModal();
                 loadWeeklyRaces();
@@ -1796,6 +1890,71 @@
         if (!confirm('Delete this weekly race permanently?')) return;
         try { await api('DELETE', '/api/admin/weekly-races', { id }); loadWeeklyRaces(); }
         catch (err) { alert('Error: ' + err.message); }
+    }
+
+    // Load available leaderboards into the race editor bindings UI.
+    // If raceId is provided (editing existing race), pre-checks the currently-bound leaderboards.
+    async function loadRaceBindingsUI(raceId = null) {
+        const bindingsList = document.getElementById('wr-bindings-list');
+        if (!bindingsList) return;  // form not open
+        try {
+            const url = raceId
+                ? `/api/admin/weekly-races/bind-leaderboards?raceId=${raceId}`
+                : null;
+            let available = [];
+            let boundIds = new Set();
+            if (url) {
+                const data = await api('GET', url);
+                available = data.available || [];
+                boundIds = new Set((data.bindings || []).map(b => b.leaderboardId));
+            } else {
+                // New race — just fetch available leaderboards via admin/seasons
+                const seasonData = await api('GET', '/api/admin/seasons');
+                for (const s of seasonData.seasons || []) {
+                    if (s.status === 'archived') continue;
+                    for (const lb of s.leaderboards || []) {
+                        if (!lb.isActive) continue;
+                        available.push({
+                            leaderboardId: lb.id,
+                            seasonId: s.id,
+                            division: lb.division,
+                            displayName: lb.displayName,
+                            seasonLabel: s.label,
+                            seasonKind: s.kind,
+                            seasonStatus: s.status,
+                        });
+                    }
+                }
+            }
+            if (available.length === 0) {
+                bindingsList.innerHTML = '<p class="text-xs text-gray-400">No active leaderboards available. Create a season first.</p>';
+                return;
+            }
+            // Group by season for readability
+            const grouped = {};
+            for (const lb of available) {
+                if (!grouped[lb.seasonId]) grouped[lb.seasonId] = { label: lb.seasonLabel, kind: lb.seasonKind, status: lb.seasonStatus, lbs: [] };
+                grouped[lb.seasonId].lbs.push(lb);
+            }
+            const html = Object.entries(grouped).map(([sid, grp]) => {
+                const lbItems = grp.lbs.map(lb => {
+                    const divLabel = lb.division === 'pickem' ? "Pick'em" : (lb.division.charAt(0).toUpperCase() + lb.division.slice(1));
+                    const checked = boundIds.has(lb.leaderboardId) ? 'checked' : '';
+                    return `<label class="flex items-center text-sm"><input type="checkbox" value="${lb.leaderboardId}" ${checked} class="mr-2">${divLabel}${lb.displayName ? ` — ${esc(lb.displayName)}` : ''} <span class="text-xs text-gray-400 ml-1">#${lb.leaderboardId}</span></label>`;
+                }).join('');
+                const kindTag = grp.kind === 'event' ? '<span class="text-xs text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">event</span>' : '<span class="text-xs text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded">main</span>';
+                return `
+                    <div class="border-l-2 border-gray-200 pl-3 py-1">
+                        <div class="text-xs font-bold text-gray-700 mb-1">${esc(grp.label)} ${kindTag} <span class="text-gray-400 font-normal">(${grp.status})</span></div>
+                        <div class="space-y-1">${lbItems}</div>
+                    </div>
+                `;
+            }).join('');
+            bindingsList.innerHTML = html;
+        } catch (err) {
+            console.error('Load race bindings UI error:', err);
+            bindingsList.innerHTML = `<p class="text-xs text-red-500">Failed to load: ${esc(err.message)}</p>`;
+        }
     }
 
     // ============================================================
@@ -2596,6 +2755,490 @@
             statusEl.innerHTML = `<span class="text-red-500">Migration failed: ${esc(err.message)}</span>`;
             btnEl.disabled = false;
         }
+    }
+
+    // ============================================================
+    // SEASONS  (Phase 3.1)
+    // ============================================================
+    const SEASON_STATUS_STYLES = {
+        upcoming: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Upcoming' },
+        active:   { bg: 'bg-green-100', text: 'text-green-700', label: 'Active' },
+        ended:    { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Ended' },
+        archived: { bg: 'bg-gray-200', text: 'text-gray-700', label: 'Archived' },
+    };
+
+    async function loadSeasons() {
+        // Show migration banner on first visit (dismissable)
+        if (!localStorage.getItem('seasonsMigrationDismissed')) {
+            document.getElementById('seasons-migration-banner').style.display = '';
+        }
+        try {
+            const data = await api('GET', '/api/admin/seasons');
+            const tbody = document.getElementById('seasons-table-body');
+            const mobileCards = document.getElementById('seasons-mobile-cards');
+            if (!data.seasons || data.seasons.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-gray-400">No seasons yet. Click "New Main Season" to create one.</td></tr>';
+                mobileCards.innerHTML = '<p class="text-gray-400 text-sm py-4 text-center">No seasons yet.</p>';
+                return;
+            }
+            tbody.innerHTML = data.seasons.map(s => {
+                const st = SEASON_STATUS_STYLES[s.status] || SEASON_STATUS_STYLES.upcoming;
+                const kindBadge = s.kind === 'main'
+                    ? '<span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">main</span>'
+                    : '<span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">event</span>';
+                const pickemBadge = s.kind === 'event'
+                    ? '<span class="text-xs text-gray-400">N/A</span>'
+                    : (s.isPickemActive
+                        ? '<span class="text-xs font-bold text-pink-700 bg-pink-100 px-2 py-0.5 rounded">ON</span>'
+                        : '<span class="text-xs text-gray-500">off</span>');
+                const endDateDisplay = s.endDate || (s.status === 'active' ? '<span class="text-gray-400 italic">ongoing</span>' : '—');
+                const actions = buildSeasonActions(s);
+                return `<tr>
+                    <td class="font-mono text-xs">${esc(s.id)}</td>
+                    <td class="font-bold">${esc(s.label)}</td>
+                    <td>${kindBadge}</td>
+                    <td><span class="${st.bg} ${st.text} text-xs font-bold px-2 py-1 rounded">${st.label}</span></td>
+                    <td class="text-xs">${esc(s.startDate)}</td>
+                    <td class="text-xs">${endDateDisplay}</td>
+                    <td class="text-center font-bold">${s.raceCount}</td>
+                    <td class="text-center">${pickemBadge}</td>
+                    <td>${actions}</td>
+                </tr>`;
+            }).join('');
+
+            mobileCards.innerHTML = data.seasons.map(s => {
+                const st = SEASON_STATUS_STYLES[s.status] || SEASON_STATUS_STYLES.upcoming;
+                const kindBadge = s.kind === 'main'
+                    ? '<span class="text-xs font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">main</span>'
+                    : '<span class="text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">event</span>';
+                return buildMobileCard(s.id, s.label, [
+                    { label: 'ID', value: `<span class="font-mono text-xs">${esc(s.id)}</span>` },
+                    { label: 'Kind', value: kindBadge },
+                    { label: 'Status', value: `<span class="${st.bg} ${st.text} text-xs font-bold px-2 py-1 rounded">${st.label}</span>` },
+                    { label: 'Dates', value: `${esc(s.startDate)} → ${s.endDate || 'ongoing'}` },
+                    { label: 'Races', value: `<strong>${s.raceCount}</strong>` },
+                ], buildSeasonActions(s));
+            }).join('');
+        } catch (err) {
+            console.error('Load seasons error:', err);
+            document.getElementById('seasons-table-body').innerHTML = `<tr><td colspan="9" class="text-center py-4 text-red-500">Failed to load: ${esc(err.message)}</td></tr>`;
+        }
+    }
+
+    function buildSeasonActions(s) {
+        const buttons = [];
+        // Edit is always available except for archived
+        if (s.status !== 'archived') {
+            buttons.push(`<button onclick="openSeasonForm('${esc(s.id)}', '${s.kind}')" class="btn-sm bg-blue-500 text-white hover:bg-blue-600">Edit</button>`);
+        } else {
+            buttons.push(`<button onclick="previewArchiveSeason('${esc(s.id)}')" class="btn-sm bg-gray-500 text-white hover:bg-gray-600">View Snapshot</button>`);
+        }
+        // Status-aware action buttons
+        if (s.status === 'upcoming') {
+            buttons.push(`<button onclick="startSeason('${esc(s.id)}')" class="btn-sm bg-green-500 text-white hover:bg-green-600">Start</button>`);
+        } else if (s.status === 'active') {
+            buttons.push(`<button onclick="endSeason('${esc(s.id)}')" class="btn-sm bg-amber-500 text-white hover:bg-amber-600">End</button>`);
+        } else if (s.status === 'ended') {
+            buttons.push(`<button onclick="confirmArchiveSeason('${esc(s.id)}', '${esc(s.label)}')" class="btn-sm bg-red-500 text-white hover:bg-red-600">Archive</button>`);
+            buttons.push(`<button onclick="previewStandings('${esc(s.id)}')" class="btn-sm bg-sky-500 text-white hover:bg-sky-600">Preview</button>`);
+        }
+        return `<div class="flex flex-wrap gap-1">${buttons.join('')}</div>`;
+    }
+
+    function openSeasonForm(seasonId = null, kind = 'main') {
+        const isEdit = !!seasonId;
+        document.getElementById('modal-title').textContent = isEdit
+            ? `Edit Season`
+            : (kind === 'event' ? 'New Event Leaderboard' : 'New Main Season');
+        const pickemVisible = kind !== 'event';  // hide pickem checkbox for events
+        document.getElementById('modal-content').innerHTML = `
+            <form id="season-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Season ID *</label>
+                    <input type="text" id="season-id" required maxlength="30" pattern="[a-z0-9-]+" placeholder="e.g. 2026s2 or merdeka-2027" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono" ${isEdit ? 'readonly' : ''}>
+                    <p class="text-xs text-gray-400 mt-1">3-30 chars, lowercase letters/numbers/hyphens only. Used as URL slug.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Label *</label>
+                    <input type="text" id="season-label" required maxlength="100" placeholder="e.g. Season 2 2026" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Kind *</label>
+                    <select id="season-kind" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" ${isEdit ? 'disabled' : ''}>
+                        <option value="main" ${kind === 'main' ? 'selected' : ''}>Main (weekly/biweekly season)</option>
+                        <option value="event" ${kind === 'event' ? 'selected' : ''}>Event (custom leaderboard, e.g. Merdeka Cup)</option>
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1" id="season-kind-hint"></p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Start Date *</label>
+                        <input type="date" id="season-start-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">End Date</label>
+                        <input type="date" id="season-end-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm">
+                        <p class="text-xs text-gray-400 mt-1">Leave blank = ongoing.</p>
+                    </div>
+                </div>
+                <div id="season-pickem-wrap" style="${pickemVisible ? '' : 'display:none;'}">
+                    <label class="flex items-center"><input type="checkbox" id="season-pickem" ${kind === 'main' ? 'checked' : ''} class="mr-2"> Enable Pick'em (predictions)</label>
+                    <p class="text-xs text-gray-400 ml-6">Pick'em is exclusive to main weekly/biweekly seasons. Predictions are graded-division only.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Description</label>
+                    <textarea id="season-description" maxlength="2000" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" placeholder="Optional. Shown on archive page."></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 text-sm">${isEdit ? 'Update' : 'Create'}</button>
+                </div>
+            </form>
+        `;
+        document.getElementById('modal').classList.add('modal-open');
+
+        // Update hint based on kind
+        const kindSelect = document.getElementById('season-kind');
+        const kindHint = document.getElementById('season-kind-hint');
+        const pickemWrap = document.getElementById('season-pickem-wrap');
+        const updateKindHint = () => {
+            const k = kindSelect.value;
+            if (k === 'event') {
+                kindHint.textContent = 'Event leaderboards do NOT support Pick\'em. Auto-creates Open + Graded divisions only.';
+                pickemWrap.style.display = 'none';
+            } else {
+                kindHint.textContent = 'Main seasons support Pick\'em. Auto-creates Open + Graded (+ Pick\'em if enabled) leaderboards.';
+                pickemWrap.style.display = '';
+            }
+        };
+        updateKindHint();
+        kindSelect.addEventListener('change', updateKindHint);
+
+        // For edit mode, fetch and populate the existing season
+        if (isEdit) {
+            api('GET', '/api/admin/seasons').then(data => {
+                const s = data.seasons.find(x => x.id === seasonId);
+                if (!s) { alert('Season not found'); closeModal(); return; }
+                document.getElementById('season-id').value = s.id;
+                document.getElementById('season-label').value = s.label;
+                document.getElementById('season-kind').value = s.kind;
+                document.getElementById('season-start-date').value = s.startDate;
+                document.getElementById('season-end-date').value = s.endDate || '';
+                document.getElementById('season-pickem').checked = s.isPickemActive;
+                document.getElementById('season-description').value = s.description || '';
+                updateKindHint();
+            }).catch(err => { alert('Error loading season: ' + err.message); closeModal(); });
+        }
+
+        document.getElementById('season-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                id: document.getElementById('season-id').value.trim(),
+                label: document.getElementById('season-label').value.trim(),
+                kind: document.getElementById('season-kind').value,
+                startDate: document.getElementById('season-start-date').value,
+                endDate: document.getElementById('season-end-date').value || null,
+                description: document.getElementById('season-description').value.trim(),
+            };
+            if (payload.kind === 'main') {
+                payload.isPickemActive = document.getElementById('season-pickem').checked;
+            }
+            try {
+                if (isEdit) {
+                    await api('PATCH', '/api/admin/seasons', payload);
+                } else {
+                    await api('POST', '/api/admin/seasons', payload);
+                }
+                closeModal();
+                loadSeasons();
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+    }
+
+    async function startSeason(seasonId) {
+        if (!confirm(`Start season "${seasonId}"? This will set its status to 'active'. If another main season is currently active, it will be auto-ended.`)) return;
+        try {
+            await api('PATCH', '/api/admin/seasons', { id: seasonId, status: 'active' });
+            loadSeasons();
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function endSeason(seasonId) {
+        if (!confirm(`End season "${seasonId}"? This will set its status to 'ended' (end_date will be set to today if not already set). Pick'em predictions will no longer be accepted for this season.`)) return;
+        try {
+            await api('PATCH', '/api/admin/seasons', { id: seasonId, status: 'ended' });
+            loadSeasons();
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    function confirmArchiveSeason(seasonId, label) {
+        // Strong confirmation requiring typed season ID
+        document.getElementById('modal-title').textContent = '⚠ Archive Season — IRREVERSIBLE';
+        document.getElementById('modal-content').innerHTML = `
+            <div class="space-y-4">
+                <div class="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+                    <p class="text-sm text-red-800 font-bold mb-2">⚠ WARNING — This operation is irreversible.</p>
+                    <p class="text-sm text-red-700">You are about to archive season <strong>${esc(label)}</strong> (ID: <code>${esc(seasonId)}</code>).</p>
+                    <ul class="text-xs text-red-700 mt-2 list-disc pl-5 space-y-1">
+                        <li>An immutable snapshot of the current standings will be taken.</li>
+                        <li>The snapshot CANNOT be modified — even by an admin — once archived.</li>
+                        <li>Underlying race data remains, but the public Archive page will only show this frozen snapshot.</li>
+                        <li>There is NO "un-archive" button anywhere in the admin UI.</li>
+                    </ul>
+                </div>
+                <p class="text-sm text-gray-700">To confirm, type the season ID <code class="bg-gray-100 px-1 py-0.5 rounded font-mono">${esc(seasonId)}</code> below:</p>
+                <input type="text" id="archive-confirm-input" required class="block w-full rounded-md border-red-400 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm font-mono" placeholder="Type season ID to confirm">
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                    <button type="button" onclick="doArchiveSeason('${esc(seasonId)}')" class="px-5 py-2.5 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 text-sm">Archive Permanently</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('modal').classList.add('modal-open');
+    }
+
+    async function doArchiveSeason(seasonId) {
+        const typed = document.getElementById('archive-confirm-input').value.trim();
+        if (typed !== seasonId) {
+            alert('Confirmation does not match. Please type the season ID exactly.');
+            return;
+        }
+        try {
+            const result = await api('POST', '/api/admin/seasons/archive', { id: seasonId, confirm: seasonId });
+            alert(result.message || `Season "${seasonId}" archived.`);
+            closeModal();
+            loadSeasons();
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function previewStandings(seasonId) {
+        try {
+            // Fetch season info to know which divisions to show
+            const seasonData = await api('GET', '/api/admin/seasons');
+            const season = seasonData.seasons.find(s => s.id === seasonId);
+            if (!season) { alert('Season not found'); return; }
+
+            const divisions = season.leaderboards.map(lb => lb.division);
+            if (divisions.length === 0) { alert('No leaderboards found for this season.'); return; }
+
+            // Fetch standings for the first division (graded preferred)
+            const firstDivision = divisions.includes('graded') ? 'graded' : divisions[0];
+            const standings = await api('GET', `/api/admin/seasons/standings?id=${encodeURIComponent(seasonId)}&division=${firstDivision}`);
+
+            const divisionButtons = divisions.map(d =>
+                `<button onclick="loadStandingsPreview('${esc(seasonId)}', '${d}')" class="px-3 py-1 text-xs font-bold rounded ${d === firstDivision ? 'bg-purple-500 text-white' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}">${d}</button>`
+            ).join('');
+
+            document.getElementById('modal-title').textContent = `Standings Preview — ${esc(season.label)}`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex justify-center gap-2">${divisionButtons}</div>
+                    <div id="standings-preview-content">${renderStandingsTable(standings, firstDivision)}</div>
+                    <div class="flex justify-end pt-2">
+                        <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Close</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal').classList.add('modal-open');
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    async function loadStandingsPreview(seasonId, division) {
+        try {
+            const standings = await api('GET', `/api/admin/seasons/standings?id=${encodeURIComponent(seasonId)}&division=${division}`);
+            document.getElementById('standings-preview-content').innerHTML = renderStandingsTable(standings, division);
+            // Update button styles
+            document.querySelectorAll('#modal-content button').forEach(b => {
+                if (b.onclick && b.onclick.toString().includes('loadStandingsPreview')) {
+                    const isCurrent = b.textContent === division;
+                    b.className = `px-3 py-1 text-xs font-bold rounded ${isCurrent ? 'bg-purple-500 text-white' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`;
+                }
+            });
+        } catch (err) { alert('Error loading standings: ' + err.message); }
+    }
+
+    function renderStandingsTable(standings, division) {
+        if (!standings.leaderboard || standings.leaderboard.length === 0) {
+            return `<p class="text-center py-8 text-gray-400">No results yet for ${division} division.</p>`;
+        }
+        if (division === 'pickem') {
+            return `
+                <div class="text-xs text-gray-500 mb-2">${standings.raceCount} race(s) scored • Top ${standings.leaderboard.length} predictors</div>
+                <table class="admin-table">
+                    <thead><tr><th>Rank</th><th>Predictor</th><th>Races</th><th>Score</th></tr></thead>
+                    <tbody>
+                        ${standings.leaderboard.map(e => `
+                            <tr><td class="font-bold">${e.rank}</td><td>${esc(e.memberName)}</td><td class="text-center">${e.racesPredicted}</td><td class="font-bold text-pink-600">${e.totalScore}</td></tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        return `
+            <div class="text-xs text-gray-500 mb-2">${standings.raceCount} race(s) • Top ${standings.leaderboard.length} racers • Scoring: 1st=10, 2nd=6, 3rd=4, 4th=2, 5th+=1</div>
+            <table class="admin-table">
+                <thead><tr><th>Rank</th><th>Racer</th><th>Races</th><th>Wins</th><th>Podiums</th><th>Points</th><th>Avg Pos</th></tr></thead>
+                <tbody>
+                    ${standings.leaderboard.map(e => `
+                        <tr>
+                            <td class="font-bold">${e.rank}</td>
+                            <td>${esc(e.memberName)}</td>
+                            <td class="text-center">${e.totalRaces}</td>
+                            <td class="text-center">${e.wins}</td>
+                            <td class="text-center">${e.podiums}</td>
+                            <td class="font-bold text-purple-600">${e.totalPoints}</td>
+                            <td class="text-center">${e.avgPosition}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // ============================================================
+    // LEADERBOARDS (Phase 3.2 — read-only preview)
+    // ============================================================
+    async function loadLeaderboards() {
+        try {
+            const data = await api('GET', '/api/admin/seasons');
+            const container = document.getElementById('leaderboards-container');
+            const seasons = (data.seasons || []).filter(s => s.status !== 'archived');
+            if (seasons.length === 0) {
+                container.innerHTML = '<p class="text-center py-8 text-gray-400">No active or upcoming seasons. Create one in the Seasons section.</p>';
+                return;
+            }
+            container.innerHTML = seasons.map(s => {
+                const lbCards = (s.leaderboards || []).map(lb => {
+                    const divLabel = lb.division === 'pickem' ? "Pick'em" : (lb.division.charAt(0).toUpperCase() + lb.division.slice(1));
+                    const divColor = lb.division === 'open' ? 'bg-sky-100 text-sky-700' : (lb.division === 'graded' ? 'bg-green-100 text-green-700' : 'bg-pink-100 text-pink-700');
+                    return `
+                        <div class="bg-gray-50 rounded-lg border-2 border-gray-200 p-3 flex items-center justify-between">
+                            <div>
+                                <span class="inline-block ${divColor} text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">${divLabel}</span>
+                                ${lb.displayName ? `<span class="ml-2 text-sm text-gray-600">${esc(lb.displayName)}</span>` : ''}
+                                <div class="text-xs text-gray-400 mt-1">Leaderboard #${lb.id} • ${lb.isActive ? 'Active' : 'Inactive'}</div>
+                            </div>
+                            <button onclick="previewLeaderboard(${lb.id}, '${lb.division}', '${esc(s.label)}')" class="btn-sm bg-sky-500 text-white hover:bg-sky-600">Preview</button>
+                        </div>
+                    `;
+                }).join('');
+                const st = SEASON_STATUS_STYLES[s.status] || SEASON_STATUS_STYLES.upcoming;
+                return `
+                    <div class="admin-card border-2 border-sky-300">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800">${esc(s.label)}</h3>
+                                <p class="text-xs text-gray-500">ID: <code class="font-mono">${esc(s.id)}</code> • ${esc(s.startDate)} → ${s.endDate || 'ongoing'} • ${s.raceCount} race(s)</p>
+                            </div>
+                            <span class="${st.bg} ${st.text} text-xs font-bold px-2 py-1 rounded">${st.label}</span>
+                        </div>
+                        <div class="space-y-2">${lbCards || '<p class="text-sm text-gray-400">No leaderboards.</p>'}</div>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            console.error('Load leaderboards error:', err);
+            document.getElementById('leaderboards-container').innerHTML = `<p class="text-center py-8 text-red-500">Failed to load: ${esc(err.message)}</p>`;
+        }
+    }
+
+    async function previewLeaderboard(leaderboardId, division, seasonLabel) {
+        try {
+            // Use the public leaderboard API for preview
+            const url = division === 'pickem'
+                ? `/api/race-predictions/leaderboard?leaderboardId=${leaderboardId}`
+                : `/api/race-leaderboard?leaderboardId=${leaderboardId}&category=${division}`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (data.result !== 'success') throw new Error(data.message || 'API error');
+
+            document.getElementById('modal-title').textContent = `${seasonLabel} — ${division} Division`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div id="leaderboard-preview-content">${renderStandingsTable(data, division)}</div>
+                    <div class="flex justify-end pt-2">
+                        <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Close</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal').classList.add('modal-open');
+        } catch (err) { alert('Error previewing leaderboard: ' + err.message); }
+    }
+
+    // ============================================================
+    // ARCHIVE (Phase 3.3 — read-only snapshots)
+    // ============================================================
+    async function loadArchive() {
+        try {
+            const data = await api('GET', '/api/archive');
+            const container = document.getElementById('archive-container');
+            if (!data.archives || data.archives.length === 0) {
+                container.innerHTML = '<p class="text-center py-8 text-gray-400">No archived seasons yet. End a season, then click "Archive" in the Seasons section to take a permanent snapshot.</p>';
+                return;
+            }
+            container.innerHTML = data.archives.map(a => {
+                const divisionButtons = (a.divisions || []).map(d => {
+                    const label = d === 'pickem' ? "Pick'em" : (d.charAt(0).toUpperCase() + d.slice(1));
+                    return `<button onclick="previewArchiveSnapshot('${esc(a.seasonId)}', '${d}')" class="btn-sm bg-slate-500 text-white hover:bg-slate-600">${label}</button>`;
+                }).join(' ');
+                return `
+                    <div class="admin-card border-2 border-slate-400">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800">${esc(a.label)}</h3>
+                                <p class="text-xs text-gray-500">
+                                    ID: <code class="font-mono">${esc(a.seasonId)}</code>
+                                    • ${esc(a.startDate)} → ${esc(a.endDate || '?')}
+                                    • Archived: ${esc(a.archivedAt || '?')}
+                                </p>
+                            </div>
+                            <span class="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Archived</span>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-xs text-gray-500 mb-2">Available divisions:</p>
+                            <div class="flex flex-wrap gap-2">${divisionButtons || '<p class="text-sm text-gray-400">No snapshots found.</p>'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            console.error('Load archive error:', err);
+            document.getElementById('archive-container').innerHTML = `<p class="text-center py-8 text-red-500">Failed to load: ${esc(err.message)}</p>`;
+        }
+    }
+
+    async function previewArchiveSnapshot(seasonId, division) {
+        try {
+            const resp = await fetch(`/api/archive/${encodeURIComponent(seasonId)}?division=${division}`);
+            const data = await resp.json();
+            if (data.result !== 'success') throw new Error(data.message || 'API error');
+
+            document.getElementById('modal-title').textContent = `${data.season.label} — ${division} Division (Archived)`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-slate-50 border-2 border-slate-300 rounded-lg p-3 text-xs text-slate-700">
+                        <strong>READ-ONLY SNAPSHOT.</strong> Taken on ${esc(data.snapshotTakenAt)}.
+                        ${data.raceCount} race(s) counted. These standings are permanent and cannot be modified.
+                    </div>
+                    <div>${renderStandingsTable(data, division)}</div>
+                    <div class="flex justify-end pt-2">
+                        <button type="button" onclick="closeModal()" class="px-5 py-2.5 border-2 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50">Close</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal').classList.add('modal-open');
+        } catch (err) { alert('Error loading snapshot: ' + err.message); }
+    }
+
+    async function previewArchiveSeason(seasonId) {
+        // For archived seasons — fetch the archive list to find divisions, then show first available
+        try {
+            const data = await api('GET', '/api/archive');
+            const a = data.archives.find(x => x.seasonId === seasonId);
+            if (!a) { alert('Archive not found.'); return; }
+            const firstDiv = a.divisions && a.divisions.length > 0 ? a.divisions[0] : 'graded';
+            previewArchiveSnapshot(seasonId, firstDiv);
+        } catch (err) { alert('Error: ' + err.message); }
     }
 
     // ============================================================
